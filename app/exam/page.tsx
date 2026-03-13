@@ -59,26 +59,35 @@ export default function ExamPage() {
     let cancelled = false;
 
     async function start() {
-      const res = await fetch("/api/session/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
+      // Read pre-created session from localStorage (set by home page form)
+      let sessionData: { sessionId: string; startedAt: number; task: Task } | null = null;
+      try {
+        const pending = localStorage.getItem("pendingSession");
+        if (pending) {
+          sessionData = JSON.parse(pending);
+          localStorage.removeItem("pendingSession"); // consume it
+        }
+      } catch {}
 
-      const data = await res.json();
+      if (!sessionData) {
+        // Fallback: should not happen in normal flow (user came via home page)
+        // Redirect back to home
+        window.location.href = "/";
+        return;
+      }
 
       if (cancelled) return;
 
-      setSessionId(data.sessionId);
-      setStartedAt(data.startedAt);
-      setTask(data.task);
+      setSessionId(sessionData.sessionId);
+      setStartedAt(sessionData.startedAt);
+      setTask(sessionData.task);
 
-      // F: also store taskTitle in localStorage
+      // F: store taskTitle in localStorage
       try {
-        localStorage.setItem("currentTaskTitle", data.task.title || "");
+        localStorage.setItem("currentTaskTitle", sessionData.task.title || "");
       } catch {}
 
-      setLeftSeconds(data.task.timeLimitMinutes * 60);
+      setLeftSeconds(sessionData.task.timeLimitMinutes * 60);
       setMessages([]);
       setAiCount(0);
       setInput("");
@@ -175,13 +184,21 @@ export default function ExamPage() {
         taskId: task.id,
         repoUrl,
         notes,
+        candidateName: (() => { try { return localStorage.getItem("candidateName") || ""; } catch { return ""; } })(),
+        candidateEmail: (() => { try { return localStorage.getItem("candidateEmail") || ""; } catch { return ""; } })(),
       }),
     });
 
     if (!res.ok) {
       setSubmitStatus("error");
       const data = await res.json().catch(() => ({}));
-      alert(`提交失败：${data?.error || res.statusText}`);
+      if (res.status === 409) {
+        alert("该面试已提交，不允许重复提交。");
+      } else if (res.status === 429) {
+        alert("请求过于频繁，请稍后重试。");
+      } else {
+        alert(`提交失败：${data?.error || res.statusText}`);
+      }
       return;
     }
 
