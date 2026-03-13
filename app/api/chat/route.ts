@@ -2,15 +2,30 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const { message, task } = await req.json();
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    // B: Use DEEPSEEK_API_KEY (A fix)
+    const apiKey = process.env.DEEPSEEK_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
         { error: "API key not configured" },
         { status: 500 }
       );
+    }
+
+    // B: Build system prompt that injects task context
+    let systemPrompt = "You are a helpful AI assistant for a technical interview.";
+    if (task) {
+      systemPrompt = `You are a helpful AI assistant supporting a candidate during an interview exam.
+
+Current Interview Task:
+Title: ${task.title || ""}
+Background: ${task.background || ""}
+Requirements:
+${(task.requirements || []).map((r: string, i: number) => `${i + 1}. ${r}`).join("\n")}
+
+Help the candidate think through this task. You can answer questions, help break down requirements, suggest approaches, review code logic, etc. Be concise and helpful.`;
     }
 
     const response = await fetch(
@@ -26,7 +41,7 @@ export async function POST(req: Request) {
           messages: [
             {
               role: "system",
-              content: "You are a helpful AI assistant.",
+              content: systemPrompt,
             },
             {
               role: "user",

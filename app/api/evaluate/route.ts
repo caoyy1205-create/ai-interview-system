@@ -12,7 +12,8 @@ export async function POST(req: Request) {
       conversation,
     } = body;
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    // A: Use DEEPSEEK_API_KEY
+    const apiKey = process.env.DEEPSEEK_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
@@ -20,6 +21,13 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
+    // C: Use real rubric if provided, otherwise use a default rubric
+    const rubricText = Array.isArray(rubric) && rubric.length > 0
+      ? rubric.map((r: { dimension: string; weight: number; whatGoodLooksLike: string }) =>
+          `- ${r.dimension}（权重${r.weight}）：${r.whatGoodLooksLike}`
+        ).join("\n")
+      : "- AI协作成熟度（25）\n- 产品思维与问题理解（25）\n- 工程与结构意识（25）\n- 表达与复盘能力（25）";
 
     const prompt = `
 你是一名资深AI产品负责人，同时负责AI产品经理招聘评估。
@@ -29,26 +37,26 @@ export async function POST(req: Request) {
 请严格遵守以下评估原则：
 
 1. 不凭感觉评分。
-2. 每个维度的评分必须基于“明确行为或文本证据”。
+2. 每个维度的评分必须基于"明确行为或文本证据"。
 3. 过程能力优先于表面表达。
 4. 不因为AI使用次数多或少而自动加减分，而是分析使用模式。
-5. 若信息不足，应说明“不足以判断”，而不是臆测。
+5. 若信息不足，应说明"不足以判断"，而不是臆测。
 
 ——————————————
 【题目】
-{taskTitle}
+${taskTitle}
 
-【评分维度】
-{rubric}
+【评分维度（Rubric）】
+${rubricText}
 
 【候选人提交说明】
-{notes}
+${notes || "（无）"}
 
 【AI使用次数】
-{aiCount}
+${aiCount || 0}
 
 【AI完整对话记录（可能已摘要）】
-{conversation}
+${conversation || "（无对话记录）"}
 ——————————————
 
 请按以下四大维度评分（每个维度0-100）：
@@ -120,11 +128,11 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           model: "deepseek-chat",
           messages: [
-            { role: "system", content: "You are a strict evaluator." },
+            { role: "system", content: "You are a strict evaluator. Output only valid JSON." },
             { role: "user", content: prompt },
           ],
           temperature: 0.3,
-          max_tokens: 1000,
+          max_tokens: 3000, // D: increased from 1000 to 3000
         }),
       }
     );

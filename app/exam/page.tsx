@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Task = {
   id: string;
@@ -45,13 +45,14 @@ export default function ExamPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [aiCount, setAiCount] = useState(0);
+  // G: ref for auto-scroll
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [repoUrl, setRepoUrl] = useState("");
   const [notes, setNotes] = useState("");
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "submitting" | "success" | "error"
   >("idle");
-
 
   // ===== start session on mount =====
   useEffect(() => {
@@ -61,7 +62,6 @@ export default function ExamPage() {
       const res = await fetch("/api/session/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // 可选：传 taskId 指定题目；不传则随机
         body: JSON.stringify({}),
       });
 
@@ -73,10 +73,12 @@ export default function ExamPage() {
       setStartedAt(data.startedAt);
       setTask(data.task);
 
-      // 初始化倒计时
-      setLeftSeconds(data.task.timeLimitMinutes * 60);
+      // F: also store taskTitle in localStorage
+      try {
+        localStorage.setItem("currentTaskTitle", data.task.title || "");
+      } catch {}
 
-      // 清空上一场残留（MVP：每次刷新开始新 session）
+      setLeftSeconds(data.task.timeLimitMinutes * 60);
       setMessages([]);
       setAiCount(0);
       setInput("");
@@ -99,8 +101,21 @@ export default function ExamPage() {
     return () => window.clearInterval(timer);
   }, [task]);
 
+  // G: auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const isReady = !!task && !!sessionId;
+  // E: time up state
+  const isTimeUp = leftSeconds <= 0 && isReady && totalSeconds > 0;
+  // E: chat is locked when time is up
+  const isChatLocked = isTimeUp;
+
   async function sendMessage() {
     if (!input.trim()) return;
+    // E: block sending if time is up
+    if (isChatLocked) return;
 
     const userText = input;
     const userMessage: Message = {
@@ -112,14 +127,21 @@ export default function ExamPage() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
+    // B: pass full task object to chat API
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: userText,
-        // 预留：后续你可以把 sessionId/taskId 一并传给后端做落库
         sessionId,
         taskId: task?.id,
+        task: task
+          ? {
+              title: task.title,
+              background: task.background,
+              requirements: task.requirements,
+            }
+          : undefined,
       }),
     });
 
@@ -132,90 +154,117 @@ export default function ExamPage() {
     };
 
     setMessages((prev) => [...prev, aiMessage]);
-
-    // 统计 AI 使用次数：以“收到 assistant 回复”为一次
     setAiCount((prev) => prev + 1);
   }
 
   async function submitProject() {
-  if (!task || !sessionId) return;
+    if (!task || !sessionId) return;
 
-  if (!repoUrl.trim()) {
-    alert("请填写仓库链接（repoUrl）。");
-    return;
-  }
+    if (!repoUrl.trim()) {
+      alert("请填写仓库链接（repoUrl）。");
+      return;
+    }
 
-  setSubmitStatus("submitting");
+    setSubmitStatus("submitting");
 
-  const res = await fetch("/api/submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      sessionId,
-      taskId: task.id,
-      repoUrl,
-      notes,
-    }),
-  });
-
-  if (!res.ok) {
-    setSubmitStatus("error");
-    const data = await res.json().catch(() => ({}));
-    alert(`提交失败：${data?.error || res.statusText}`);
-    return;
-  }
-
-  setSubmitStatus("success");
-
-  // MVP：同时写入 localStorage，避免 dev server 重启导致内存丢失
-  try {
-    localStorage.setItem(
-      `submission:${sessionId}`,
-      JSON.stringify({
+    const res = await fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         sessionId,
         taskId: task.id,
         repoUrl,
         notes,
-        submittedAt: Date.now(),
-        aiCount,
-        messages,   // ✅ 把完整对话存下来
-      })
-    );
+      }),
+    });
 
-  } catch {}
+    if (!res.ok) {
+      setSubmitStatus("error");
+      const data = await res.json().catch(() => ({}));
+      alert(`提交失败：${data?.error || res.statusText}`);
+      return;
+    }
 
-  // 跳转到报告页（下一步做）
-  window.location.href = `/report?sessionId=${encodeURIComponent(sessionId)}`;
-}
+    setSubmitStatus("success");
 
-  const isReady = !!task && !!sessionId;
-  const isTimeUp = leftSeconds <= 0 && isReady;
+    // F: store taskTitle in localStorage alongside other submission data
+    try {
+      localStorage.setItem(
+        `submission:${sessionId}`,
+        JSON.stringify({
+          sessionId,
+          taskId: task.id,
+          taskTitle: task.title, // F: store taskTitle
+          repoUrl,
+          notes,
+          submittedAt: Date.now(),
+          aiCount,
+          messages,
+          rubric: task.rubric, // C: also store rubric for evaluate page
+        })
+      );
+    } catch {}
+
+    window.location.href = `/report?sessionId=${encodeURIComponent(sessionId)}`;
+  }
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white">
+    // H: light theme redesign - #FAFAFA background, Inter font, Notion/Linear minimal style
+    <main
+      className="min-h-screen"
+      style={{
+        background: "#FAFAFA",
+        color: "#111",
+        fontFamily: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
+      }}
+    >
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+
+        {/* E: Time-up banner */}
+        {isTimeUp && (
+          <div
+            style={{
+              background: "#ef4444",
+              color: "#fff",
+              borderRadius: "12px",
+              padding: "14px 20px",
+              fontWeight: 600,
+              fontSize: "15px",
+              textAlign: "center",
+              letterSpacing: "0.01em",
+            }}
+          >
+            ⏰ 考试时间已结束，请立即提交
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1
+              style={{
+                fontSize: "26px",
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+                color: "#111",
+              }}
+            >
               {task ? task.title : "正在下发题目…"}
             </h1>
 
-            <div className="text-sm text-gray-400 space-y-1">
+            <div style={{ fontSize: "13px", color: "#888", lineHeight: "1.8" }}>
               <div>
-                Session：<span className="text-gray-200">{sessionId || "—"}</span>
+                Session：<span style={{ color: "#444" }}>{sessionId || "—"}</span>
               </div>
               <div>
-                AI 已使用次数：<span className="text-gray-200">{aiCount}</span> 次
+                AI 已使用次数：<span style={{ color: "#444" }}>{aiCount}</span> 次
               </div>
               <div>
                 {task ? (
                   <>
-                    难度：<span className="text-gray-200">{task.difficulty}</span>{" "}
+                    难度：<span style={{ color: "#444" }}>{task.difficulty}</span>{" "}
                     · 标签：{" "}
-                    <span className="text-gray-200">
-                      {task.tags.join(", ")}
-                    </span>
+                    <span style={{ color: "#444" }}>{task.tags.join(", ")}</span>
                   </>
                 ) : (
                   "题目加载中…"
@@ -224,7 +273,7 @@ export default function ExamPage() {
               {startedAt ? (
                 <div>
                   开始时间：{" "}
-                  <span className="text-gray-200">
+                  <span style={{ color: "#444" }}>
                     {new Date(startedAt).toLocaleString()}
                   </span>
                 </div>
@@ -233,123 +282,213 @@ export default function ExamPage() {
           </div>
 
           {/* Timer */}
-          <div className="shrink-0 rounded-xl border border-gray-800 bg-gray-900/40 px-5 py-4">
-            <div className="text-sm text-gray-400">剩余时间</div>
+          <div
+            style={{
+              flexShrink: 0,
+              borderRadius: "16px",
+              border: "1px solid #E8E4F0",
+              background: "#fff",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              padding: "16px 24px",
+            }}
+          >
+            <div style={{ fontSize: "12px", color: "#888" }}>剩余时间</div>
             <div
-              className={[
-                "mt-1 text-3xl font-mono font-semibold",
-                isTimeUp ? "text-red-400" : "text-white",
-              ].join(" ")}
+              style={{
+                marginTop: "4px",
+                fontSize: "32px",
+                fontWeight: 600,
+                fontFamily: "monospace",
+                color: isTimeUp ? "#ef4444" : "#111",
+              }}
             >
               {isReady ? formatTime(leftSeconds) : "--:--"}
             </div>
-            <div className="mt-2 text-xs text-gray-500">
+            <div style={{ marginTop: "6px", fontSize: "11px", color: "#aaa" }}>
               {task ? `限时：${task.timeLimitMinutes} 分钟` : "—"}
             </div>
           </div>
         </div>
 
         {/* Task */}
-        <section className="rounded-2xl border border-gray-800 bg-gray-900/30 p-6 space-y-5">
+        <section
+          style={{
+            borderRadius: "16px",
+            border: "1px solid #E8E4F0",
+            background: "#fff",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+            padding: "24px",
+          }}
+        >
           {!task ? (
-            <div className="text-gray-400">题目正在加载中，请稍等…</div>
+            <div style={{ color: "#aaa" }}>题目正在加载中，请稍等…</div>
           ) : (
-            <>
+            <div className="space-y-5">
               <div>
-                <h2 className="text-lg font-semibold">背景</h2>
-                <p className="mt-2 text-gray-300 leading-relaxed">
+                <h2 style={{ fontSize: "15px", fontWeight: 600, color: "#111" }}>背景</h2>
+                <p style={{ marginTop: "8px", color: "#555", lineHeight: "1.7", fontSize: "14px" }}>
                   {task.background}
                 </p>
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold">需求</h2>
-                <ul className="mt-2 list-disc list-inside text-gray-300 space-y-1">
+                <h2 style={{ fontSize: "15px", fontWeight: 600, color: "#111" }}>需求</h2>
+                <ul style={{ marginTop: "8px", paddingLeft: "16px", color: "#555", fontSize: "14px" }}>
                   {task.requirements.map((x) => (
-                    <li key={x}>{x}</li>
+                    <li key={x} style={{ marginBottom: "4px", lineHeight: "1.6" }}>{x}</li>
                   ))}
                 </ul>
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold">交付物</h2>
-                <ul className="mt-2 list-disc list-inside text-gray-300 space-y-1">
+                <h2 style={{ fontSize: "15px", fontWeight: 600, color: "#111" }}>交付物</h2>
+                <ul style={{ marginTop: "8px", paddingLeft: "16px", color: "#555", fontSize: "14px" }}>
                   {task.deliverables.map((x) => (
-                    <li key={x}>{x}</li>
+                    <li key={x} style={{ marginBottom: "4px", lineHeight: "1.6" }}>{x}</li>
                   ))}
                 </ul>
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold">评分维度（Rubric）</h2>
-                <div className="mt-3 space-y-3">
+                <h2 style={{ fontSize: "15px", fontWeight: 600, color: "#111" }}>评分维度（Rubric）</h2>
+                <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px" }}>
                   {task.rubric.map((r) => (
                     <div
                       key={r.dimension}
-                      className="rounded-xl border border-gray-800 bg-gray-950/20 p-4"
+                      style={{
+                        borderRadius: "12px",
+                        border: "1px solid #F5E4E4",
+                        background: "#FAFAFA",
+                        padding: "14px 16px",
+                      }}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="font-medium">{r.dimension}</div>
-                        <div className="text-sm text-gray-400">
-                          权重 {r.weight}
-                        </div>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ fontWeight: 500, fontSize: "14px", color: "#111" }}>{r.dimension}</div>
+                        <div style={{ fontSize: "12px", color: "#aaa" }}>权重 {r.weight}</div>
                       </div>
-                      <div className="mt-2 text-sm text-gray-300 leading-relaxed">
+                      <div style={{ marginTop: "6px", fontSize: "13px", color: "#666", lineHeight: "1.6" }}>
                         {r.whatGoodLooksLike}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            </>
+            </div>
           )}
         </section>
 
         {/* Workspace */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
           {/* Chat */}
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/30 p-6">
-            <h3 className="text-lg font-semibold">AI 对话区</h3>
-            <p className="mt-2 text-gray-400 text-sm leading-relaxed">
+          <div
+            style={{
+              borderRadius: "16px",
+              border: "1px solid #E8E4F0",
+              background: "#fff",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+              padding: "24px",
+            }}
+          >
+            <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#111" }}>AI 对话区</h3>
+            <p style={{ marginTop: "6px", color: "#888", fontSize: "13px", lineHeight: "1.6" }}>
               系统会记录对话内容与时间戳，用于评估 AI 协作能力。
             </p>
 
-            <div className="mt-4 space-y-4">
-              <div className="h-64 overflow-y-auto bg-gray-900 rounded-xl p-4 space-y-3">
+            <div style={{ marginTop: "16px" }}>
+              {/* G: message area with auto-scroll */}
+              <div
+                style={{
+                  height: "256px",
+                  overflowY: "auto",
+                  background: "#FAFAFA",
+                  borderRadius: "12px",
+                  border: "1px solid #F0EDF8",
+                  padding: "14px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
                 {messages.length === 0 ? (
-                  <div className="text-sm text-gray-500">
-                    暂无对话。你可以从“需求拆解、技术方案、评估维度、边界情况”开始提问。
+                  <div style={{ fontSize: "13px", color: "#bbb" }}>
+                    暂无对话。你可以从"需求拆解、技术方案、评估维度、边界情况"开始提问。
                   </div>
                 ) : (
                   messages.map((msg, idx) => (
-                    <div key={idx} className="text-sm">
-                      <div className="text-xs text-gray-500">
+                    <div key={idx} style={{ fontSize: "13px" }}>
+                      <div style={{ fontSize: "11px", color: "#bbb" }}>
                         {new Date(msg.time).toLocaleTimeString()}
                       </div>
-                      <div className="mt-1">
-                        <strong>{msg.role === "user" ? "你" : "AI"}：</strong>{" "}
+                      <div style={{ marginTop: "3px", color: msg.role === "user" ? "#333" : "#555" }}>
+                        <strong style={{ color: msg.role === "user" ? "#111" : "#7C5CBF" }}>
+                          {msg.role === "user" ? "你" : "AI"}：
+                        </strong>{" "}
                         {msg.content}
                       </div>
                     </div>
                   ))
                 )}
+                {/* G: scroll target */}
+                <div ref={messagesEndRef} />
               </div>
 
-              <div className="flex gap-2">
+              {/* E: Time-up lock indicator */}
+              {isChatLocked && (
+                <div
+                  style={{
+                    marginTop: "8px",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    background: "#fef2f2",
+                    border: "1px solid #fecaca",
+                    color: "#ef4444",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                  }}
+                >
+                  ⏰ 时间已结束，聊天已锁定，请提交项目
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  className="flex-1 bg-gray-800 rounded-lg px-3 py-2 text-sm"
-                  placeholder={isReady ? "输入你的问题…" : "等待题目下发…"}
-                  disabled={!isReady}
+                  style={{
+                    flex: 1,
+                    background: isChatLocked ? "#f5f5f5" : "#F9F8FF",
+                    border: "1px solid #E8E4F0",
+                    borderRadius: "10px",
+                    padding: "8px 12px",
+                    fontSize: "13px",
+                    color: "#111",
+                    outline: "none",
+                    cursor: isChatLocked ? "not-allowed" : "text",
+                  }}
+                  placeholder={
+                    !isReady ? "等待题目下发…" : isChatLocked ? "时间已结束" : "输入你的问题…"
+                  }
+                  // E: disable input when time is up
+                  disabled={!isReady || isChatLocked}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") sendMessage();
+                    if (e.key === "Enter" && !isChatLocked) sendMessage();
                   }}
                 />
                 <button
                   onClick={sendMessage}
-                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm disabled:opacity-50"
-                  disabled={!isReady}
+                  style={{
+                    background: isChatLocked ? "#ccc" : "#111",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "10px",
+                    padding: "8px 16px",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    cursor: (!isReady || isChatLocked) ? "not-allowed" : "pointer",
+                    opacity: (!isReady || isChatLocked) ? 0.5 : 1,
+                  }}
+                  // E: disable button when time is up
+                  disabled={!isReady || isChatLocked}
                 >
                   发送
                 </button>
@@ -357,38 +496,84 @@ export default function ExamPage() {
             </div>
           </div>
 
-          {/* Submit placeholder */}
-         <div className="rounded-2xl border border-gray-800 bg-gray-900/30 p-6">
-            <h3 className="text-lg font-semibold">项目提交</h3>
-            <p className="mt-2 text-gray-400 text-sm leading-relaxed">
+          {/* Submit */}
+          <div
+            style={{
+              borderRadius: "16px",
+              border: "1px solid #E8E4F0",
+              background: "#fff",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+              padding: "24px",
+            }}
+          >
+            <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#111" }}>项目提交</h3>
+            <p style={{ marginTop: "6px", color: "#888", fontSize: "13px", lineHeight: "1.6" }}>
               请提交仓库链接（建议包含 README），并补充说明你如何使用 AI、关键取舍与未完成项。
             </p>
 
-            <div className="mt-4 space-y-3">
+            <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
               <div>
-                <div className="text-sm text-gray-300 mb-1">仓库链接（repoUrl）</div>
+                <div style={{ fontSize: "13px", color: "#555", marginBottom: "4px", fontWeight: 500 }}>
+                  仓库链接（repoUrl）
+                </div>
                 <input
                   value={repoUrl}
                   onChange={(e) => setRepoUrl(e.target.value)}
-                  className="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm"
+                  style={{
+                    width: "100%",
+                    background: "#F9F8FF",
+                    border: "1px solid #E8E4F0",
+                    borderRadius: "10px",
+                    padding: "8px 12px",
+                    fontSize: "13px",
+                    color: "#111",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
                   placeholder="https://github.com/xxx/yyy"
                   disabled={!isReady || submitStatus === "submitting"}
                 />
               </div>
 
               <div>
-                <div className="text-sm text-gray-300 mb-1">提交说明（notes）</div>
+                <div style={{ fontSize: "13px", color: "#555", marginBottom: "4px", fontWeight: 500 }}>
+                  提交说明（notes）
+                </div>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm min-h-[120px]"
+                  style={{
+                    width: "100%",
+                    background: "#F9F8FF",
+                    border: "1px solid #E8E4F0",
+                    borderRadius: "10px",
+                    padding: "8px 12px",
+                    fontSize: "13px",
+                    color: "#111",
+                    outline: "none",
+                    minHeight: "120px",
+                    boxSizing: "border-box",
+                    resize: "vertical",
+                  }}
                   placeholder="简述：你如何拆解需求、如何使用 AI、做了哪些取舍、还有哪些未完成项与原因。"
                   disabled={!isReady || submitStatus === "submitting"}
                 />
               </div>
 
               <button
-                className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 transition px-4 py-3 font-medium disabled:opacity-50"
+                style={{
+                  width: "100%",
+                  borderRadius: "12px",
+                  background: "#111",
+                  color: "#fff",
+                  border: "none",
+                  padding: "12px",
+                  fontWeight: 600,
+                  fontSize: "14px",
+                  cursor: (!isReady || submitStatus === "submitting") ? "not-allowed" : "pointer",
+                  opacity: (!isReady || submitStatus === "submitting") ? 0.5 : 1,
+                  letterSpacing: "0.01em",
+                }}
                 onClick={submitProject}
                 disabled={!isReady || submitStatus === "submitting"}
               >
@@ -396,17 +581,16 @@ export default function ExamPage() {
               </button>
 
               {submitStatus === "success" ? (
-                <div className="text-sm text-green-400">提交成功，正在跳转报告页…</div>
+                <div style={{ fontSize: "13px", color: "#22c55e" }}>提交成功，正在跳转报告页…</div>
               ) : submitStatus === "error" ? (
-                <div className="text-sm text-red-400">提交失败，请重试。</div>
+                <div style={{ fontSize: "13px", color: "#ef4444" }}>提交失败，请重试。</div>
               ) : (
-                <div className="text-xs text-gray-500">
+                <div style={{ fontSize: "11px", color: "#bbb" }}>
                   绑定信息：sessionId={sessionId || "—"}，taskId={task?.id || "—"}
                 </div>
               )}
             </div>
           </div>
-
         </section>
       </div>
     </main>
