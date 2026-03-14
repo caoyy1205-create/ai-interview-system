@@ -2,399 +2,286 @@
 
 import { useEffect, useState } from "react";
 
-type RubricItem = {
-  dimension: string;
-  weight: number;
-  whatGoodLooksLike: string;
-};
-
-type Submission = {
-  sessionId: string;
-  taskId: string;
-  taskTitle?: string; // F: added taskTitle
-  repoUrl: string;
-  notes: string;
-  submittedAt: number;
-  aiCount?: number;
-  rubric?: RubricItem[]; // C: added rubric
-  messages?: {
-    role: "user" | "assistant";
-    content: string;
-    time: number;
-  }[];
-};
-
 export default function ReportPage() {
-  const [submission, setSubmission] = useState<Submission | null>(null);
   const [sessionId, setSessionId] = useState<string>("");
+  const [candidateName, setCandidateName] = useState<string>("");
   const [evaluation, setEvaluation] = useState<any>(null);
   const [evaluating, setEvaluating] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sid = params.get("sessionId") || "";
     setSessionId(sid);
-
-    // MVP：优先从 localStorage 读取（更稳定）
-    const cached = sid ? localStorage.getItem(`submission:${sid}`) : null;
-    if (cached) {
-      try {
-        setSubmission(JSON.parse(cached));
-        return;
-      } catch {}
-    }
-
-    // 兜底：从内存 API 拉一次
-    async function load() {
-      if (!sid) return;
-      const res = await fetch(`/api/submit?sessionId=${encodeURIComponent(sid)}`);
-      const data = await res.json();
-      setSubmission(data.submission || null);
-    }
-    load();
+    try {
+      const name = localStorage.getItem("candidateName") || "";
+      setCandidateName(name);
+    } catch {}
   }, []);
 
   async function runEvaluation() {
-    if (!submission) return;
-
+    if (!sessionId) return;
     setEvaluating(true);
-
-    // G: truncate conversation to avoid token limits
-    const conversationSummary = submission.messages
-      ?.map((m) => `${m.role}: ${m.content}`)
-      .join("\n")
-      .slice(0, 4000) || "";
-
-    // F: use taskTitle if available, fallback to taskId
-    const taskTitle = submission.taskTitle || submission.taskId;
-
-    // C: pass real rubric array (not empty [])
-    const rubric = Array.isArray(submission.rubric) && submission.rubric.length > 0
-      ? submission.rubric
-      : [];
-
-    const res = await fetch("/api/evaluate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        taskTitle,    // F: real title
-        rubric,       // C: real rubric
-        notes: submission.notes,
-        aiCount: submission.aiCount || 0,
-        conversation: conversationSummary,
-      }),
-    });
-
-    const data = await res.json();
-
-    let text = data.raw || "";
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
+    setError("");
     try {
-      const parsed = JSON.parse(text);
-      setEvaluation(parsed);
-    } catch (e) {
-      console.error("解析失败:", text);
+      const res = await fetch("/api/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "评估失败，请重试");
+      } else {
+        setEvaluation(data);
+      }
+    } catch {
+      setError("网络错误，请重试");
     }
-
     setEvaluating(false);
   }
 
-  const getRiskColor = (level: string) => {
-    if (level === "low") return "#22c55e";
-    if (level === "medium") return "#f59e0b";
+  const getScoreColor = (score: number) => {
+    if (score >= 70) return "#22c55e";
+    if (score >= 50) return "#f59e0b";
     return "#ef4444";
   };
 
+  const getRecommendationStyle = (rec: string) => {
+    if (rec?.includes("强烈推荐")) return { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" };
+    if (rec?.includes("建议录用")) return { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" };
+    if (rec?.includes("待定")) return { bg: "#fefce8", color: "#854d0e", border: "#fef08a" };
+    return { bg: "#fef2f2", color: "#991b1b", border: "#fecaca" };
+  };
+
   return (
-    // H: light theme
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#FAFAFA",
-        color: "#111",
-        fontFamily: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "760px",
-          margin: "0 auto",
-          padding: "40px 24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "24px",
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.02em", color: "#111" }}>
+    <main style={{
+      minHeight: "100vh",
+      background: "#FAFAFA",
+      color: "#111",
+      fontFamily: "'Inter', -apple-system, sans-serif",
+    }}>
+      {/* Topbar */}
+      <div style={{
+        borderBottom: "1px solid #f0f0f0",
+        padding: "0 32px",
+        height: "56px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        background: "#fff",
+      }}>
+        <div style={{ fontWeight: 700, fontSize: "15px" }}>AI 面试系统</div>
+        <div style={{ fontSize: "12px", color: "#aaa" }}>面试报告</div>
+      </div>
+
+      <div style={{ maxWidth: "760px", margin: "0 auto", padding: "40px 32px 80px" }}>
+        {/* Header */}
+        <div style={{ marginBottom: "32px" }}>
+          <h1 style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "6px" }}>
             面试报告
           </h1>
-          <div style={{ fontSize: "12px", color: "#aaa", marginTop: "4px" }}>
-            Session：{sessionId || "—"}
+          {candidateName && (
+            <div style={{ fontSize: "14px", color: "#555" }}>候选人：{candidateName}</div>
+          )}
+          <div style={{ fontSize: "12px", color: "#aaa", marginTop: "2px" }}>
+            Session ID：{sessionId || "—"}
           </div>
         </div>
 
-        {/* Submission Info */}
-        <section
-          style={{
-            borderRadius: "16px",
-            border: "1px solid #E8E4F0",
-            background: "#fff",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-            padding: "24px",
-          }}
-        >
-          <h2 style={{ fontSize: "15px", fontWeight: 600, color: "#111", marginBottom: "14px" }}>
-            提交信息
-          </h2>
-
-          {!submission ? (
-            <div style={{ color: "#aaa", fontSize: "13px" }}>未找到提交记录。</div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "13px" }}>
-              {/* F: show taskTitle */}
-              {submission.taskTitle && (
-                <div>
-                  <span style={{ color: "#aaa" }}>题目：</span>
-                  <span style={{ color: "#333" }}>{submission.taskTitle}</span>
-                </div>
-              )}
-              <div>
-                <span style={{ color: "#aaa" }}>taskId：</span>
-                <span style={{ color: "#333" }}>{submission.taskId}</span>
-              </div>
-              <div style={{ wordBreak: "break-all" }}>
-                <span style={{ color: "#aaa" }}>repoUrl：</span>
-                <a
-                  href={submission.repoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "#7C5CBF", textDecoration: "underline" }}
-                >
-                  {submission.repoUrl}
-                </a>
-              </div>
-              <div>
-                <span style={{ color: "#aaa" }}>提交时间：</span>
-                <span style={{ color: "#333" }}>
-                  {new Date(submission.submittedAt).toLocaleString()}
-                </span>
-              </div>
-              <div>
-                <span style={{ color: "#aaa" }}>AI 使用次数：</span>
-                <span style={{ color: "#333" }}>{submission.aiCount ?? "—"}</span>
-              </div>
-              {submission.notes && (
-                <div>
-                  <div style={{ color: "#aaa", marginBottom: "4px" }}>提交说明：</div>
-                  <div
-                    style={{
-                      whiteSpace: "pre-wrap",
-                      color: "#333",
-                      background: "#FAFAFA",
-                      border: "1px solid #F0EDF8",
-                      borderRadius: "10px",
-                      padding: "10px 12px",
-                      lineHeight: "1.6",
-                    }}
-                  >
-                    {submission.notes}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-
-        {/* Auto Evaluation */}
-        <section
-          style={{
-            borderRadius: "16px",
-            border: "1px solid #E8E4F0",
-            background: "#fff",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-            padding: "24px",
-          }}
-        >
-          <h2 style={{ fontSize: "15px", fontWeight: 600, color: "#111", marginBottom: "14px" }}>
-            自动评估
-          </h2>
-
+        {/* 提示 */}
+        <div style={{
+          border: "1px solid #f0f0f0",
+          borderRadius: "8px",
+          padding: "20px 24px",
+          background: "#fff",
+          marginBottom: "24px",
+        }}>
+          <div style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px" }}>
+            🎉 面试已完成
+          </div>
+          <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7", marginBottom: "16px" }}>
+            感谢你完成本次 AI 产品经理测评。点击下方按钮生成详细的评估报告，包含三部分的评分和建议。
+          </div>
           <button
             onClick={runEvaluation}
+            disabled={evaluating || !sessionId}
             style={{
-              background: evaluating ? "#E8E4F0" : "#111",
-              color: evaluating ? "#888" : "#fff",
+              background: evaluating ? "#e5e5e5" : "#111",
+              color: evaluating ? "#aaa" : "#fff",
               border: "none",
-              borderRadius: "10px",
-              padding: "9px 18px",
+              borderRadius: "6px",
+              padding: "10px 20px",
               fontSize: "13px",
-              fontWeight: 500,
+              fontWeight: 600,
               cursor: evaluating ? "not-allowed" : "pointer",
-              letterSpacing: "0.01em",
             }}
-            disabled={evaluating || !submission}
           >
-            {evaluating ? "评估中…" : "生成评估报告"}
+            {evaluating ? "评估中，请稍候..." : "生成评估报告"}
           </button>
+          {error && (
+            <div style={{ marginTop: "10px", fontSize: "13px", color: "#dc2626" }}>{error}</div>
+          )}
+        </div>
 
-          {evaluation && (
-            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
-              {/* Total Score */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  padding: "16px",
-                  borderRadius: "12px",
-                  background: "#F9F8FF",
-                  border: "1px solid #E8E4F0",
-                }}
-              >
-                <div style={{ fontSize: "40px", fontWeight: 700, color: "#111" }}>
-                  {evaluation.totalScore}
-                </div>
-                <div>
-                  <div style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>总评分</div>
-                  <div style={{ fontSize: "12px", color: "#aaa" }}>满分 100</div>
-                </div>
+        {/* 评估结果 */}
+        {evaluation && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            {/* 总分 */}
+            <div style={{
+              border: "1px solid #f0f0f0",
+              borderRadius: "8px",
+              padding: "24px",
+              background: "#fff",
+              display: "flex",
+              alignItems: "center",
+              gap: "24px",
+            }}>
+              <div style={{
+                fontSize: "56px",
+                fontWeight: 700,
+                color: getScoreColor(evaluation.totalScore),
+                lineHeight: 1,
+              }}>
+                {evaluation.totalScore}
               </div>
+              <div>
+                <div style={{ fontSize: "13px", color: "#888", marginBottom: "6px" }}>综合评分（满分100）</div>
+                {evaluation.recommendation && (() => {
+                  const style = getRecommendationStyle(evaluation.recommendation);
+                  return (
+                    <div style={{
+                      display: "inline-block",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      padding: "4px 12px",
+                      borderRadius: "6px",
+                      background: style.bg,
+                      color: style.color,
+                      border: `1px solid ${style.border}`,
+                    }}>
+                      {evaluation.recommendation}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
 
-              {/* Dimensions */}
-              {evaluation.dimensions?.length > 0 && (
-                <div>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#555", marginBottom: "8px" }}>
-                    各维度评分
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {evaluation.dimensions.map((d: any) => (
-                      <div
-                        key={d.name}
-                        style={{
-                          borderRadius: "12px",
-                          border: "1px solid #F5E4E4",
-                          background: "#FAFAFA",
-                          padding: "14px 16px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            marginBottom: "6px",
-                          }}
-                        >
-                          <div style={{ fontWeight: 600, fontSize: "13px", color: "#111" }}>
-                            {d.name}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "18px",
-                              fontWeight: 700,
-                              color: d.score >= 70 ? "#22c55e" : d.score >= 50 ? "#f59e0b" : "#ef4444",
-                            }}
-                          >
-                            {d.score}
-                          </div>
+            {/* 三部分分数 */}
+            {evaluation.breakdown && (
+              <div style={{
+                border: "1px solid #f0f0f0",
+                borderRadius: "8px",
+                background: "#fff",
+                overflow: "hidden",
+              }}>
+                <div style={{
+                  padding: "16px 24px",
+                  borderBottom: "1px solid #f0f0f0",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                }}>
+                  分部评分
+                </div>
+                {[
+                  { key: "part1", label: "第一部分：基础认知", weight: "30%" },
+                  { key: "part2", label: "第二部分：AI 协作", weight: "30%" },
+                  { key: "part3", label: "第三部分：项目实战", weight: "40%" },
+                ].map(({ key, label, weight }) => {
+                  const part = evaluation.breakdown[key];
+                  if (!part) return null;
+                  return (
+                    <div key={key} style={{
+                      padding: "16px 24px",
+                      borderBottom: "1px solid #f5f5f5",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      gap: "16px",
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "4px" }}>
+                          {label}
+                          <span style={{ fontSize: "11px", color: "#aaa", fontWeight: 400, marginLeft: "6px" }}>权重 {weight}</span>
                         </div>
-                        {d.evidence && (
-                          <div style={{ fontSize: "12px", color: "#7C5CBF", marginBottom: "4px" }}>
-                            📌 {d.evidence}
+                        <div style={{ fontSize: "12px", color: "#555", lineHeight: "1.6" }}>
+                          {part.feedback}
+                        </div>
+                        {key === "part1" && part.mcCorrect !== undefined && (
+                          <div style={{ fontSize: "12px", color: "#888", marginTop: "2px" }}>
+                            选择题：{part.mcCorrect}/{part.mcTotal} 正确
                           </div>
                         )}
-                        <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.6" }}>
-                          {d.comment}
-                        </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                      <div style={{
+                        fontSize: "24px",
+                        fontWeight: 700,
+                        color: getScoreColor(part.score),
+                        flexShrink: 0,
+                      }}>
+                        {part.score}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
-              {/* AI Usage Analysis */}
-              {evaluation.aiUsageAnalysis && (
-                <div
-                  style={{
-                    borderRadius: "12px",
-                    border: "1px solid #E8E4F0",
-                    background: "#FAFAFA",
-                    padding: "14px 16px",
-                  }}
-                >
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#111", marginBottom: "8px" }}>
-                    AI 使用分析
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px" }}>
-                    <div>
-                      <span style={{ color: "#aaa" }}>模式：</span>
-                      <span style={{ color: "#333" }}>{evaluation.aiUsageAnalysis.pattern}</span>
+            {/* Part2 维度详情 */}
+            {evaluation.breakdown?.part2?.dimensions?.length > 0 && (
+              <div style={{ border: "1px solid #f0f0f0", borderRadius: "8px", background: "#fff", overflow: "hidden" }}>
+                <div style={{ padding: "16px 24px", borderBottom: "1px solid #f0f0f0", fontSize: "13px", fontWeight: 600 }}>
+                  AI 协作能力分析
+                </div>
+                {evaluation.breakdown.part2.dimensions.map((d: any, i: number) => (
+                  <div key={i} style={{
+                    padding: "14px 24px",
+                    borderBottom: "1px solid #f5f5f5",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: "16px",
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "2px" }}>{d.name}</div>
+                      <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.5" }}>{d.comment}</div>
                     </div>
-                    <div>
-                      <span style={{ color: "#aaa" }}>风险等级：</span>
-                      <span
-                        style={{
-                          color: getRiskColor(evaluation.aiUsageAnalysis.riskLevel),
-                          fontWeight: 600,
-                        }}
-                      >
-                        {evaluation.aiUsageAnalysis.riskLevel}
-                      </span>
-                    </div>
-                    <div>
-                      <span style={{ color: "#aaa" }}>说明：</span>
-                      <span style={{ color: "#555" }}>{evaluation.aiUsageAnalysis.reason}</span>
+                    <div style={{ fontSize: "20px", fontWeight: 700, color: getScoreColor(d.score), flexShrink: 0 }}>
+                      {d.score}
                     </div>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+            )}
 
-              {/* Strengths */}
-              {evaluation.strengths?.length > 0 && (
-                <div>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#22c55e", marginBottom: "6px" }}>
-                    ✅ 优势
-                  </div>
-                  <ul style={{ paddingLeft: "16px", fontSize: "13px", color: "#333", lineHeight: "1.7" }}>
-                    {evaluation.strengths.map((s: string, i: number) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
+            {/* Part3 维度详情 */}
+            {evaluation.breakdown?.part3?.dimensions?.length > 0 && (
+              <div style={{ border: "1px solid #f0f0f0", borderRadius: "8px", background: "#fff", overflow: "hidden" }}>
+                <div style={{ padding: "16px 24px", borderBottom: "1px solid #f0f0f0", fontSize: "13px", fontWeight: 600 }}>
+                  项目实战评估
                 </div>
-              )}
-
-              {/* Risks */}
-              {evaluation.risks?.length > 0 && (
-                <div>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#ef4444", marginBottom: "6px" }}>
-                    ⚠️ 风险
+                {evaluation.breakdown.part3.dimensions.map((d: any, i: number) => (
+                  <div key={i} style={{
+                    padding: "14px 24px",
+                    borderBottom: "1px solid #f5f5f5",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: "16px",
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "2px" }}>{d.name}</div>
+                      <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.5" }}>{d.comment}</div>
+                    </div>
+                    <div style={{ fontSize: "20px", fontWeight: 700, color: getScoreColor(d.score), flexShrink: 0 }}>
+                      {d.score}
+                    </div>
                   </div>
-                  <ul style={{ paddingLeft: "16px", fontSize: "13px", color: "#333", lineHeight: "1.7" }}>
-                    {evaluation.risks.map((r: string, i: number) => (
-                      <li key={i}>{r}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Follow-up Questions */}
-              {evaluation.followUpQuestions?.length > 0 && (
-                <div>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#7C5CBF", marginBottom: "6px" }}>
-                    💬 追问建议
-                  </div>
-                  <ul style={{ paddingLeft: "16px", fontSize: "13px", color: "#333", lineHeight: "1.7" }}>
-                    {evaluation.followUpQuestions.map((q: string, i: number) => (
-                      <li key={i}>{q}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </main>
   );
