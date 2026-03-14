@@ -204,9 +204,11 @@ export default function ReportPage() {
                           {label}
                           <span style={{ fontSize: "11px", color: "#aaa", fontWeight: 400, marginLeft: "6px" }}>权重 {weight}</span>
                         </div>
-                        <div style={{ fontSize: "12px", color: "#555", lineHeight: "1.6" }}>
-                          {part.feedback}
-                        </div>
+                        {key !== "part1" && part.feedback && (
+                          <div style={{ fontSize: "12px", color: "#555", lineHeight: "1.6" }}>
+                            {part.feedback}
+                          </div>
+                        )}
                         {key === "part1" && part.mcCorrect !== undefined && (
                           <div style={{ fontSize: "12px", color: "#888", marginTop: "2px" }}>
                             选择题：{part.mcCorrect}/{part.mcTotal} 正确
