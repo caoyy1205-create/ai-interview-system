@@ -2,31 +2,34 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { messages, task, sessionId } = await req.json();
+    const { messages, task } = await req.json();
 
     const apiKey = process.env.QWEN_API_KEY;
-
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "API key not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "API key not configured" }, { status: 500 });
     }
 
-    let systemPrompt = "You are a helpful AI assistant for a technical interview.";
+    let systemPrompt = `你是一个 AI 产品经理面试评测系统中的 AI 助手，帮助候选人完成面试任务。
+
+回复要求：
+- 使用清晰的段落结构
+- 重点内容用【】标注
+- 列表用数字或"·"符号
+- 每段之间空一行
+- 回复长度适中，不要过于冗长`;
+
     if (task) {
-      systemPrompt = `你是一个 AI 产品经理面试评测系统中的 AI 助手。候选人正在完成以下面试任务，请帮助候选人思考和解决问题。
+      systemPrompt += `
 
 当前面试任务：
-标题：${task.title || ""}
-背景：${task.background || ""}
-要求：
+【标题】${task.title || ""}
+【背景】${task.background || ""}
+【要求】
 ${(task.requirements || []).map((r: string, i: number) => `${i + 1}. ${r}`).join("\n")}
 
-请用中文回复，保持简洁专业，帮助候选人理清思路、拆解需求、给出建议。`;
+请帮助候选人理清思路、拆解需求、给出具体建议。`;
     }
 
-    // 将消息历史格式化（去掉 time 字段）
     const formattedMessages = Array.isArray(messages)
       ? messages.map((m: any) => ({ role: m.role, content: m.content }))
       : [];
@@ -46,7 +49,8 @@ ${(task.requirements || []).map((r: string, i: number) => `${i + 1}. ${r}`).join
             ...formattedMessages,
           ],
           temperature: 0.7,
-          max_tokens: 800,
+          max_tokens: 1000,
+          stream: false,
         }),
       }
     );
@@ -61,9 +65,7 @@ ${(task.requirements || []).map((r: string, i: number) => `${i + 1}. ${r}`).join
       );
     }
 
-    const content =
-      data?.choices?.[0]?.message?.content || "模型未返回内容";
-
+    const content = data?.choices?.[0]?.message?.content || "模型未返回内容";
     return NextResponse.json({ content });
   } catch (error: any) {
     console.error("Server error:", error);

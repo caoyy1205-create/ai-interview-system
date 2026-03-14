@@ -210,7 +210,7 @@ return (
 ) : messages.map((m, i) => (
 <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: m.role === "user" ? "flex-end" : "flex-start" }}>
 <div style={{ fontSize: "11px", color: "#ccc", marginBottom: "3px" }}>{m.role === "user" ? "你" : "AI"} · {new Date(m.time).toLocaleTimeString()}</div>
-<div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", lineHeight: "1.6", background: m.role === "user" ? "#111" : "#f5f5f5", color: m.role === "user" ? "#fff" : "#111" }}>{m.content}</div>
+<div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", lineHeight: "1.7", background: m.role === "user" ? "#111" : "#f5f5f5", color: m.role === "user" ? "#fff" : "#111", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.content}</div>
 </div>
 ))}
 <div ref={messagesEndRef} />
