@@ -120,4 +120,3 @@ return "不予考虑 (No Hire)";
 async function generateExecutiveSummary(p1: any, p2: any, p3: any) {
 return `候选人在 AI 协作中表现出 ${p2.score > 7 ? "较强" : "一般"} 的提示词工程能力。项目实战分数为 ${p3.score}。`;
 }
-ENDOFFILE
