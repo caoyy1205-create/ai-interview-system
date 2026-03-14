@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const { message, task } = await req.json();
 
     // B: Use DEEPSEEK_API_KEY (A fix)
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+    const apiKey = process.env.QWEN_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
@@ -29,7 +29,7 @@ Help the candidate think through this task. You can answer questions, help break
     }
 
     const response = await fetch(
-      "https://api.deepseek.com/chat/completions",
+      "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -37,7 +37,7 @@ Help the candidate think through this task. You can answer questions, help break
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "deepseek-chat",
+          model: "qwen-turbo-latest",
           messages: [
             {
               role: "system",

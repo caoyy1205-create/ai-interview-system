@@ -165,14 +165,14 @@ ${rubric.map((r: any) => `- ${r.dimension}（权重${r.weight}%）：${r.whatGoo
 
 async function callDeepSeek(prompt: string) {
   try {
-    const res = await fetch("https://api.deepseek.com/chat/completions", {
+    const res = await fetch("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+        Authorization: `Bearer ${process.env.QWEN_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "qwen-turbo-latest",
         messages: [
           { role: "system", content: "你是一个专业的招聘评估专家，只输出 JSON，不加任何解释。" },
           { role: "user", content: prompt },
