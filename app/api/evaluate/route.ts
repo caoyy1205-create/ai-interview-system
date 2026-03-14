@@ -172,7 +172,7 @@ async function callDeepSeek(prompt: string) {
         Authorization: `Bearer ${process.env.QWEN_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "qwen-turbo-latest",
+        model: "qwen-flash",
         messages: [
           { role: "system", content: "你是一个专业的招聘评估专家，只输出 JSON，不加任何解释。" },
           { role: "user", content: prompt },

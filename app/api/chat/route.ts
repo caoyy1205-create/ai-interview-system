@@ -37,7 +37,7 @@ Help the candidate think through this task. You can answer questions, help break
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "qwen-turbo-latest",
+          model: "qwen-flash",
           messages: [
             {
               role: "system",
