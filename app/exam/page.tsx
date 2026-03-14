@@ -129,7 +129,21 @@ const r = await fetch("/api/submit", { method: "POST", headers: { "Content-Type"
 if (r.ok) {
 setSubmitStatus("success");
 if (next) setTimeout(() => { setSubmitStatus("idle"); setActivePart(next); }, 800);
-else window.location.href = `/report?sessionId=${sessionId}`;
+else {
+const submission = {
+sessionId,
+taskId: task?.id || '',
+taskTitle: task?.title || '',
+repoUrl: data.repoUrl || '',
+notes: data.notes || '',
+submittedAt: Date.now(),
+aiCount,
+messages,
+rubric: task?.rubric || [],
+};
+localStorage.setItem('submission:' + sessionId, JSON.stringify(submission));
+window.location.href = '/report?sessionId=' + sessionId;
+}
 } else setSubmitStatus("error");
 } catch { setSubmitStatus("error"); }
 };
