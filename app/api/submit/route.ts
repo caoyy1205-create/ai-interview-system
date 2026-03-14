@@ -33,10 +33,16 @@ export async function POST(req: Request) {
     }
 
     const body = (await req.json()) as Partial<Submission>;
+import { supabase } from "@/app/lib/supabase"; // 确保路径指向你的 supabase 配置文件
 
-    if (!body.sessionId || !body.taskId) {
+export async function POST(request: Request) {
+  try {
+    const { sessionId, part, data } = await request.json();
+
+    // 1. 基础校验
+    if (!sessionId || !part || !data) {
       return NextResponse.json(
-        { error: "Missing sessionId or taskId" },
+        { error: "Missing required fields: sessionId, part, or data" },
         { status: 400 }
       );
     }
@@ -78,11 +84,55 @@ export async function POST(req: Request) {
 
     submissions.set(record.sessionId, record);
     submittedSessions.add(record.sessionId); // Lock session from re-submission
+    // 2. 映射前端传入的 part 到数据库字段名
+    // 前端传入的是 'part1', 'part2', 'part3'
+    const columnMap: Record<string, string> = {
+      part1: "part1_data",
+      part2: "part2_data",
+      part3: "part3_data",
+    };
 
-    return NextResponse.json({ ok: true, submission: record });
-  } catch (e: any) {
+    const columnName = columnMap[part];
+    if (!columnName) {
+      return NextResponse.json(
+        { error: "Invalid part identifier" },
+        { status: 400 }
+      );
+    }
+
+    // 3. 执行数据库更新操作
+    // 使用 .upsert 而不是 .update 的好处是：如果 session 记录不存在会自动创建（虽然通常应该在 session/start 创建）
+    const { error } = await supabase
+      .from("interview_sessions")
+      .upsert(
+        { 
+          session_id: sessionId, 
+          [columnName]: data, 
+          updated_at: new Date().toISOString(),
+          // 如果是最后一部分，可以顺便更新状态
+          status: part === "part3" ? "completed" : "in_progress"
+        },
+        { onConflict: "session_id" } // 关键：基于 session_id 进行冲突检查并更新
+      );
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return NextResponse.json(
+        { error: "Database update failed", details: error.message },
+        { status: 500 }
+      );
+    }
+
+    // 4. 返回成功状态
+    return NextResponse.json({ 
+      success: true, 
+      message: `${part} data submitted successfully` 
+    });
+
+  } catch (error: any) {
+    console.error("Submit API error:", error);
     return NextResponse.json(
-      { error: "Server internal error", details: e?.message },
+      { error: "Internal server error", details: error?.message },
       { status: 500 }
     );
   }
@@ -108,4 +158,5 @@ export async function PUT(req: Request) {
     (a, b) => b.submittedAt - a.submittedAt
   );
   return NextResponse.json({ submissions: all, total: all.length });
+}
 }
