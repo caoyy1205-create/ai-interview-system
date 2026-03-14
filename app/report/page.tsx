@@ -210,8 +210,11 @@ export default function ReportPage() {
                           </div>
                         )}
                         {key === "part1" && part.mcCorrect !== undefined && (
-                          <div style={{ fontSize: "12px", color: "#888", marginTop: "2px" }}>
-                            选择题：{part.mcCorrect}/{part.mcTotal} 正确
+                          <div style={{ fontSize: "12px", color: "#888", marginTop: "2px", display: "flex", gap: "12px" }}>
+                            <span>选择题：{part.mcCorrect}/{part.mcTotal} 正确（{part.mcScore}分）</span>
+                            {part.essayScore !== undefined && (
+                              <span>问答题：{part.essayScore}分</span>
+                            )}
                           </div>
                         )}
                       </div>

@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { message, task } = await req.json();
+    const { messages, task, sessionId } = await req.json();
 
-    // B: Use DEEPSEEK_API_KEY (A fix)
     const apiKey = process.env.QWEN_API_KEY;
 
     if (!apiKey) {
@@ -14,19 +13,23 @@ export async function POST(req: Request) {
       );
     }
 
-    // B: Build system prompt that injects task context
     let systemPrompt = "You are a helpful AI assistant for a technical interview.";
     if (task) {
-      systemPrompt = `You are a helpful AI assistant supporting a candidate during an interview exam.
+      systemPrompt = `你是一个 AI 产品经理面试评测系统中的 AI 助手。候选人正在完成以下面试任务，请帮助候选人思考和解决问题。
 
-Current Interview Task:
-Title: ${task.title || ""}
-Background: ${task.background || ""}
-Requirements:
+当前面试任务：
+标题：${task.title || ""}
+背景：${task.background || ""}
+要求：
 ${(task.requirements || []).map((r: string, i: number) => `${i + 1}. ${r}`).join("\n")}
 
-Help the candidate think through this task. You can answer questions, help break down requirements, suggest approaches, review code logic, etc. Be concise and helpful.`;
+请用中文回复，保持简洁专业，帮助候选人理清思路、拆解需求、给出建议。`;
     }
+
+    // 将消息历史格式化（去掉 time 字段）
+    const formattedMessages = Array.isArray(messages)
+      ? messages.map((m: any) => ({ role: m.role, content: m.content }))
+      : [];
 
     const response = await fetch(
       "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
@@ -39,52 +42,33 @@ Help the candidate think through this task. You can answer questions, help break
         body: JSON.stringify({
           model: "qwen-flash",
           messages: [
-            {
-              role: "system",
-              content: systemPrompt,
-            },
-            {
-              role: "user",
-              content: message,
-            },
+            { role: "system", content: systemPrompt },
+            ...formattedMessages,
           ],
           temperature: 0.7,
-          max_tokens: 500,
+          max_tokens: 800,
         }),
       }
     );
 
     const data = await response.json();
 
-    console.log(
-      "DeepSeek raw response:",
-      JSON.stringify(data, null, 2)
-    );
-
-    // 如果返回异常
     if (!response.ok) {
+      console.error("Qwen API error:", JSON.stringify(data));
       return NextResponse.json(
-        {
-          error: "DeepSeek API error",
-          details: data,
-        },
+        { error: "Qwen API error", details: data },
         { status: response.status }
       );
     }
 
-    // 正常返回
-    const reply =
+    const content =
       data?.choices?.[0]?.message?.content || "模型未返回内容";
 
-    return NextResponse.json({ reply });
+    return NextResponse.json({ content });
   } catch (error: any) {
     console.error("Server error:", error);
-
     return NextResponse.json(
-      {
-        error: "Server internal error",
-        details: error?.message,
-      },
+      { error: "Server internal error", details: error?.message },
       { status: 500 }
     );
   }
