@@ -1905,6 +1905,166 @@ export const multipleChoicePool = [
     difficulty: "hard",
     topics: ["OpenClaw", "Skill设计"]
   },
+{
+    question: "OpenClaw 中，当 Agent 在群聊场景收到每条消息时，最合理的行为是：",
+    options: ["每条消息都回复，保持活跃", "判断是否真正需要自己发言，只在有价值时开口，避免刷屏", "完全不回复任何消息", "只回复@自己的消息"],
+    correctAnswer: 1,
+    explanation: "OpenClaw AGENTS.md 中明确规定：群聊中要判断是否有必要发言（类似真实人类在群聊中的行为）。只有直接被问到、能补充有价值信息、纠正错误等情况才发言，casual 闲聊应保持沉默（HEARTBEAT_OK 式处理）。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "群聊行为"]
+  },
+  {
+    question: "以下关于 OpenClaw 的 'BOOTSTRAP.md' 文件，哪项描述最准确？",
+    options: ["每次启动都需要读取", "只在 Agent 首次初始化时使用，完成后应该删除", "记录所有 API 密钥", "控制 Agent 的记忆系统"],
+    correctAnswer: 1,
+    explanation: "BOOTSTRAP.md 是 OpenClaw Agent 的'出生证明'：仅在第一次运行时存在，引导 Agent 完成初始化（理解自己是谁、建立工作目录结构等）。完成初始化后应删除，不需要重复执行。",
+    difficulty: "easy",
+    topics: ["OpenClaw", "初始化"]
+  },
+  {
+    question: "以下关于 Agent 使用 'exec' 工具执行 Shell 命令的最佳安全实践是：",
+    options: ["所有命令都可以直接执行", "删除性、不可逆操作（rm/格式化/大量写入）执行前必须向用户确认", "永远不执行任何 Shell 命令", "只执行读取命令"],
+    correctAnswer: 1,
+    explanation: "OpenClaw AGENTS.md 安全原则：'trash > rm（可恢复胜于永久删除）'，破坏性命令执行前需要确认。读取、查看、搜索等低风险操作可以直接执行；写入、删除、修改系统配置等高风险操作需要明确用户授权。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "安全执行"]
+  },
+  {
+    question: "在 OpenClaw 的 Skill 系统中，'available_skills' 列表的作用是：",
+    options: ["存储已安装 Skill 的文件", "让 Agent 知道当前有哪些 Skill 可用，以便在任务匹配时进行语义路由", "管理 Skill 的版本号", "控制 Skill 的执行权限"],
+    correctAnswer: 1,
+    explanation: "available_skills 是 OpenClaw 的 Skill 发现机制：Agent 通过读取这个列表了解所有可用 Skill 的名称和描述，当接收到任务时在列表中语义匹配，找到最合适的 Skill 后读取其 SKILL.md 执行。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "Skill路由"]
+  },
+  {
+    question: "以下哪项最准确描述了 Agent 中'工具调用链'（Tool Call Chain）的执行方式？",
+    options: ["所有工具并行同时调用", "按依赖关系顺序调用：前一个工具的输出作为下一个工具的输入", "随机选择工具调用", "只能调用一个工具"],
+    correctAnswer: 1,
+    explanation: "工具调用链是 Agent 处理复杂任务的核心模式：搜索工具→获取内容→文件写入工具→写入结果→通知工具→发送消息。每步依赖上一步结果，Agent 必须正确处理中间结果并传递给下一步。",
+    difficulty: "medium",
+    topics: ["Agent", "工具链"]
+  },
+  {
+    question: "以下关于 AI Agent 的 'Scratchpad'（草稿本）机制，哪项说法最准确？",
+    options: ["Agent 用来存储最终答案", "Agent 在输出最终回复前的内部推理空间，用于分析问题、规划步骤、检查错误", "Agent 的历史对话记录", "用户不可见的系统日志"],
+    correctAnswer: 1,
+    explanation: "Scratchpad（思维草稿）是 Agent 的'内部思考'空间：在给出最终回复前，Agent 在此推理、规划、自我检查。这是 CoT（思维链）在 Agent 中的体现，让复杂任务的每步更准确，最终输出质量更高。",
+    difficulty: "medium",
+    topics: ["Agent", "推理机制"]
+  },
+  {
+    question: "以下关于 OpenClaw 的 'canvas' 工具，哪项描述最准确？",
+    options: ["只用于画画", "用于在 Agent 界面中展示和交互富内容（网页、数据可视化、交互式 UI）", "替代所有文字输出", "只支持静态图片展示"],
+    correctAnswer: 1,
+    explanation: "OpenClaw 的 canvas 工具让 Agent 能够呈现超越纯文字的富媒体内容：HTML 页面、数据图表、交互式界面等。当任务需要可视化展示时（如数据分析报告、网页预览），canvas 比纯文字输出更直观。",
+    difficulty: "easy",
+    topics: ["OpenClaw", "Canvas工具"]
+  },
+  {
+    question: "以下关于 Agent 的 'Reflection'（自我反思）机制，哪项描述最准确？",
+    options: ["Agent 对自己产生的感情", "Agent 在完成任务后对输出质量进行自我评估，发现错误后主动修正", "只有出错时才反思", "反思需要额外的人工触发"],
+    correctAnswer: 1,
+    explanation: "Reflection 是提升 Agent 输出质量的重要机制：任务执行完成后，Agent 用批评者视角审视输出（是否完整？是否有误？是否符合要求？），若发现问题则自动修正并重新输出，无需用户二次提示。",
+    difficulty: "medium",
+    topics: ["Agent", "自我反思"]
+  },
+  {
+    question: "以下哪项最准确描述了 Agent 框架中 'Tool' 和 'Action' 的关系？",
+    options: ["两者完全相同", "Tool 是 Agent 能调用的能力接口；Action 是 Agent 决定调用某 Tool 的具体行为", "Action 包含多个 Tool", "Tool 替代所有 Action"],
+    correctAnswer: 1,
+    explanation: "区别：Tool 是能力的静态定义（如'搜索工具'有什么参数、能做什么）；Action 是 Agent 在推理后决定执行的具体调用（如'用搜索工具查询X'）。Tool 是工具箱，Action 是拿起某个工具去做某件事。",
+    difficulty: "medium",
+    topics: ["Agent", "工具与行动"]
+  },
+  {
+    question: "以下关于 OpenClaw 中 'memory_search' 和 'memory_get' 工具的分工，哪项最准确？",
+    options: ["两者功能相同", "memory_search 语义搜索定位相关记忆；memory_get 精确读取指定文件的具体内容", "memory_get 比 memory_search 更快", "只需要用其中一个"],
+    correctAnswer: 1,
+    explanation: "两步记忆读取策略：先用 memory_search（语义搜索）找到相关记忆的位置和行号，再用 memory_get（精确读取）获取具体内容。这样避免每次加载整个 MEMORY.md，节省 Token 的同时确保记忆读取的准确性。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "记忆工具"]
+  },
+  {
+    question: "以下关于 AI Agent 的 'Hallucination Cascade'（幻觉级联）问题，哪项描述最准确？",
+    options: ["幻觉只出现一次", "Agent 某步的幻觉输出被作为下一步的输入，错误不断放大，最终导致完全错误的结果", "幻觉在 Agent 中比普通对话更少", "级联只影响最终输出"],
+    correctAnswer: 1,
+    explanation: "幻觉级联是 Agentic 场景的特有风险：普通对话幻觉是孤立的；但在 Agent 工具链中，步骤A的幻觉输出→错误地传入步骤B→产生更多错误→传入步骤C……错误在链路中不断累积放大，最终结果与事实完全偏离。",
+    difficulty: "hard",
+    topics: ["Agent", "幻觉级联"]
+  },
+  {
+    question: "以下哪项最准确描述了 OpenClaw 中 'sessions_spawn' 的使用场景？",
+    options: ["创建用户账号", "将复杂长耗时任务派发给独立子 Agent，实现任务隔离和并行处理", "重启主 Agent", "备份当前会话"],
+    correctAnswer: 1,
+    explanation: "sessions_spawn 是 OpenClaw 的任务委托机制：主 Agent 将复杂任务（如代码开发、数据分析）派发给独立子 Agent 执行，子 Agent 在隔离环境中运行，完成后推送结果回来。主 Agent 保持响应性，不被长任务阻塞。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "Sub-Agent"]
+  },
+  {
+    question: "以下关于 Agent 的 'State Management'（状态管理），哪项实践最能保证长任务的可靠性？",
+    options: ["把所有状态放在 Context 里", "将任务进度和中间结果持久化到文件，任务中断后能从断点恢复", "不需要管理状态", "只在任务完成时保存状态"],
+    correctAnswer: 1,
+    explanation: "长任务状态管理的核心是外化持久化：Context Window 有限且会话可能中断，将任务进度（完成了哪步、中间结果、待处理项）写入文件，使得任务中断后能从断点恢复而不是从头开始，这是可靠 Agent 系统的基础。",
+    difficulty: "hard",
+    topics: ["Agent", "状态管理"]
+  },
+  {
+    question: "以下关于 Skill 的 '触发词'（Trigger）设计最佳实践，哪项最有效？",
+    options: ["触发词越模糊越好，让 Agent 自由判断", "触发词要具体且互不重叠，避免多个 Skill 同时被误触发", "每个 Skill 只设置一个触发词", "触发词使用技术术语，普通用户看不懂"],
+    correctAnswer: 1,
+    explanation: "触发词设计原则：具体性（'发送大象消息'优于'发消息'）+ 互斥性（不同 Skill 的触发条件不应重叠）+ 覆盖性（列举用户可能用到的各种表达方式）。好的触发词设计是 Agent 正确路由 Skill 的基础。",
+    difficulty: "medium",
+    topics: ["Skill", "触发词设计"]
+  },
+  {
+    question: "以下关于 Agent 的 '并行工具调用'（Parallel Tool Calls），哪项说法最准确？",
+    options: ["工具只能串行调用", "当多个工具调用之间没有依赖关系时，并行调用可大幅缩短总执行时间", "并行调用会导致错误", "只有高级模型才支持并行调用"],
+    correctAnswer: 1,
+    explanation: "并行工具调用是 Agent 效率优化的重要手段：如果任务A（搜索）和任务B（读取文件）互不依赖，同时发起比串行快一倍。现代 LLM（如 GPT-4、Claude 3.5）支持在单次推理中输出多个工具调用请求，由运行时并行执行。",
+    difficulty: "medium",
+    topics: ["Agent", "并行工具调用"]
+  },
+  {
+    question: "以下哪项最准确描述了 OpenClaw 中 'daxiang-channel' Skill 的核心作用？",
+    options: ["管理大象 App 的用户账号", "规定大象消息的格式规范，确保图片/文件/链接等消息类型正确发送", "只用于接收消息", "替代所有其他消息 Skill"],
+    correctAnswer: 1,
+    explanation: "daxiang-channel Skill 是大象 IM 的消息发送规范：不同消息类型（文字/图片/文件/链接）有不同的 API 调用格式。Agent 发送大象消息前必须读取此 Skill，确保消息格式正确，避免因格式错误导致发送失败。",
+    difficulty: "easy",
+    topics: ["OpenClaw", "Daxiang Skill"]
+  },
+  {
+    question: "以下关于 Agent 的 'Grounding'（接地气/事实锚定）技术，哪项说法最准确？",
+    options: ["让 Agent 说更接地气的话", "将 Agent 的回答锚定到可验证的事实来源（数据库/文档/API），减少幻觉", "只用于语音交互", "让 Agent 理解物理世界"],
+    correctAnswer: 1,
+    explanation: "Grounding 是提升 Agent 可靠性的核心技术：通过 RAG（检索真实文档）、API 调用（获取实时数据）、数据库查询（核实事实）等方式，让 Agent 的每个陈述都有可追溯的真实来源，而非依赖参数记忆生成。",
+    difficulty: "medium",
+    topics: ["Agent", "事实锚定"]
+  },
+  {
+    question: "以下关于 OpenClaw 中 'web_fetch' 和 'browser' 工具的选择，哪项说法最准确？",
+    options: ["两者功能完全相同", "web_fetch 适合轻量内容提取；browser 适合需要 JS 渲染、点击交互的复杂网页自动化", "browser 总是更好的选择", "只有 web_fetch 能处理中文网页"],
+    correctAnswer: 1,
+    explanation: "工具选择原则：web_fetch（轻量、快速）适合静态网页内容提取，如新闻/文档/API返回；browser（完整浏览器）适合 SPA、登录后操作、点击填表等需要 JS 执行和用户交互模拟的场景。选错工具会导致内容获取失败或效率低下。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "工具选择"]
+  },
+  {
+    question: "以下关于构建 'Autonomous Agent'（自主 Agent）时最关键的设计约束是：",
+    options: ["给 Agent 越多权限越好", "明确定义 Agent 的行动边界：自主执行低风险操作，高风险操作必须人工确认", "Agent 应该能自主修改自己的目标", "不需要任何约束"],
+    correctAnswer: 1,
+    explanation: "自主 Agent 的核心设计约束：自主性和安全性需要平衡——给予足够自主性让 Agent 高效完成任务，同时通过明确边界（不可逆操作需确认、敏感数据不外传、不修改核心配置）保持人类的监督和控制权。",
+    difficulty: "medium",
+    topics: ["Agent", "自主性设计"]
+  },
+  {
+    question: "以下哪项最准确描述了 OpenClaw 在消息路由上的设计原则？",
+    options: ["所有消息都通过 curl 发送", "消息路由由 OpenClaw 内部处理，Agent 只需调用 message 工具，不应直接使用 curl/API", "Agent 需要自己实现各平台 API", "只支持大象消息"],
+    correctAnswer: 1,
+    explanation: "OpenClaw 消息抽象层：Agent 通过统一的 message 工具发送消息（指定 channel），OpenClaw 负责将其路由到正确的平台（大象/Telegram/Discord等）。Agent 不应绕过这个抽象层直接调用平台 API，这违反了 OpenClaw 的设计原则和安全规范。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "消息路由"]
+  },
 ];
 
 // ===== 问答题（30道）=====
@@ -3089,8 +3249,58 @@ export const projectTaskPool = [
 
 // ===== 随机选择函数 =====
 
+// Agent/OpenClaw/Skill 相关 topics 集合
+const AGENT_TOPICS = new Set([
+  "Agent", "OpenClaw", "Skill", "Sub-Agent", "Multi-Agent", "Agentic",
+  "ReAct", "Heartbeat", "Cron", "Workspace", "Agentic Loop", "Tool Use",
+  "AGENTS.md", "SOUL.md", "Agent安全", "Agent产品", "Agent能力", "Agent框架",
+  "Agent记忆", "Agent评估", "Multi-Agent架构", "Skill生态", "Skill设计",
+  "Skill优先", "Skill路由", "Daxiang Skill", "Canvas工具", "工具链",
+  "推理机制", "自我反思", "工具与行动", "记忆工具", "幻觉级联", "状态管理",
+  "触发词设计", "并行工具调用", "事实锚定", "工具选择", "自主性设计",
+  "消息路由", "群聊行为", "初始化", "安全执行", "Human-in-the-Loop",
+  "上下文管理", "任务分解", "可观测性", "错误处理", "规划能力"
+]);
+
+function isAgentQuestion(q: { topics: string[] }): boolean {
+  return q.topics.some(t => AGENT_TOPICS.has(t));
+}
+
 export function getRandomMultipleChoice(count: number = 8) {
-  return shuffleArray([...multipleChoicePool]).slice(0, count);
+  const AGENT_GUARANTEED = 4; // 强制至少4道 Agent/OpenClaw/Skill 题
+  const otherCount = count - AGENT_GUARANTEED;
+
+  // 分类
+  const agentPool = multipleChoicePool.filter(isAgentQuestion);
+  const otherPool = multipleChoicePool.filter(q => !isAgentQuestion(q));
+
+  // 1. 抽 Agent 题（保证4道，不足时取全部）
+  const agentPick = shuffleArray([...agentPool]).slice(0, Math.min(AGENT_GUARANTEED, agentPool.length));
+
+  // 2. 其余题按 topic 去重：每个 topic[0] 方向最多1道
+  const shuffledOther = shuffleArray([...otherPool]);
+  const usedTopics = new Set<string>();
+  const otherPick: typeof otherPool = [];
+
+  for (const q of shuffledOther) {
+    if (otherPick.length >= otherCount) break;
+    const primaryTopic = q.topics[0] || "other";
+    if (!usedTopics.has(primaryTopic)) {
+      usedTopics.add(primaryTopic);
+      otherPick.push(q);
+    }
+  }
+
+  // 如果 topic 去重后数量不够，补充允许重复 topic（兜底）
+  if (otherPick.length < otherCount) {
+    for (const q of shuffledOther) {
+      if (otherPick.length >= otherCount) break;
+      if (!otherPick.includes(q)) otherPick.push(q);
+    }
+  }
+
+  // 合并后打乱顺序（避免前4题永远是 Agent 题）
+  return shuffleArray([...agentPick, ...otherPick]);
 }
 
 export function getRandomEssayQuestions(count: number = 2) {
