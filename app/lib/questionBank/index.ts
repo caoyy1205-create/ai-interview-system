@@ -535,15 +535,6 @@ export const multipleChoicePool = [
     topics: ["产品设计", "边界定义"]
   },
   {
-    id: "mc_059",
-    question: "AI 产品的'冷启动问题'指的是：",
-    options: ["服务器启动慢", "新产品没有用户行为数据，AI 个性化效果差，难以吸引首批用户", "模型加载时间长", "首次运行需要下载模型"],
-    correctAnswer: 1,
-    explanation: "AI 产品依赖用户数据才能做好个性化，但没有用户就没有数据，没有数据就难以提供好体验——这是 AI 产品的冷启动悖论。",
-    difficulty: "medium",
-    topics: ["冷启动", "产品策略"]
-  },
-  {
     id: "mc_060",
     question: "以下哪种 AI 产品的护城河（Moat）最强？",
     options: ["使用了最新的 GPT-4 API", "构建了专有数据飞轮：用户越多→数据越多→模型越好→用户越多", "拥有精美的 UI", "发布了白皮书"],
@@ -607,15 +598,6 @@ export const multipleChoicePool = [
     topics: ["幻觉风险", "产品设计"]
   },
   {
-    id: "mc_067",
-    question: "以下哪个是 AI 产品 PMF（产品市场契合度）的最强信号？",
-    options: ["媒体曝光量多", "用户自发推荐并表示'离不开这个产品了'", "融资金额大", "注册用户数多"],
-    correctAnswer: 1,
-    explanation: "PMF 的最强信号是用户留存和口碑传播。用户说'如果你们关闭，我会非常失望'是 Sean Ellis 提出的经典 PMF 测试标准。",
-    difficulty: "easy",
-    topics: ["PMF", "产品增长"]
-  },
-  {
     id: "mc_068",
     question: "为什么 AI 产品的 A/B 测试比传统产品更复杂？",
     options: ["AI 产品没法做 A/B 测试", "AI 输出的随机性使得相同输入可能有不同输出，导致实验结果难以复现和解释", "A/B 测试成本更高", "AI 产品用户更少"],
@@ -623,24 +605,6 @@ export const multipleChoicePool = [
     explanation: "AI 的非确定性输出使 A/B 测试结果充满噪声，需要更大的样本量、控制随机性（固定 seed）和更严格的实验设计。",
     difficulty: "hard",
     topics: ["A/B测试", "产品实验"]
-  },
-  {
-    id: "mc_069",
-    question: "在设计 AI 写作助手时，以下哪个功能最能提升用户留存？",
-    options: ["更好看的字体", "个人风格学习：AI 逐渐学习用户写作风格，输出越来越符合个人偏好", "更多颜色主题", "更快的加载速度"],
-    correctAnswer: 1,
-    explanation: "个性化是 AI 产品留存的关键机制：用得越多，AI 越了解你，产品越难被替代。这就是数据飞轮在产品层面的体现。",
-    difficulty: "medium",
-    topics: ["个性化", "用户留存"]
-  },
-  {
-    id: "mc_070",
-    question: "以下哪种 AI 产品商业模式目前被验证最成熟？",
-    options: ["免费但看广告", "SaaS 订阅制（按月/年付费获取 AI 能力）", "一次性买断", "用户越多，价格越高"],
-    correctAnswer: 1,
-    explanation: "SaaS 订阅制是当前 AI 产品最主流的商业模式（Cursor、ChatGPT Plus、GitHub Copilot 等），与 AI 能力持续更新的特点完美匹配。",
-    difficulty: "easy",
-    topics: ["商业模式", "变现策略"]
   },
 
   // --- 数据标注与评估 (10道) ---
@@ -865,15 +829,6 @@ export const multipleChoicePool = [
     topics: ["图像生成", "竞品对比"]
   },
   {
-    id: "mc_095",
-    question: "以下哪个正确描述了'模型即服务'（Model as a Service）商业模式？",
-    options: ["买断模型软件", "按 API 调用次数或 Token 数量收费，无需管理底层基础设施", "免费使用所有功能", "按用户数量订阅"],
-    correctAnswer: 1,
-    explanation: "MaaS 模式（如 OpenAI API、Anthropic API）让开发者无需部署模型，按实际使用量付费（per token），降低了 AI 应用的开发门槛。",
-    difficulty: "easy",
-    topics: ["商业模式", "MaaS"]
-  },
-  {
     id: "mc_096",
     question: "以下哪家公司在企业 AI 助手市场占据最大优势？",
     options: ["Twitter", "Microsoft（凭借 Copilot 深度集成 Office 365 生态）", "Netflix", "Uber"],
@@ -918,6 +873,238 @@ export const multipleChoicePool = [
     difficulty: "medium",
     topics: ["产品趋势", "行业洞察"]
   }
+  {
+    question: "OpenClaw 中的 Skill 本质上是什么？",
+    options: ["一个独立的 AI 模型", "一套包含 SKILL.md 指令文件的能力扩展包，告诉 Agent 如何完成特定任务", "一个浏览器插件", "一种编程语言"],
+    correctAnswer: 1,
+    explanation: "OpenClaw 的 Skill 是能力扩展单元：核心是 SKILL.md 文件，描述该技能的触发条件、操作步骤和工具用法。Agent 读取 SKILL.md 后即可执行对应专项任务（如日历管理、文件上传、消息发送等）。",
+    difficulty: "easy",
+    topics: ["OpenClaw", "Skill"]
+  },
+  {
+    question: "以下关于 OpenClaw Skill 的触发机制，哪项描述最准确？",
+    options: ["用户必须手动输入 /skill 命令", "Agent 根据任务语义自动匹配最合适的 Skill，读取其 SKILL.md 后执行", "Skill 只能被管理员触发", "每次对话都会触发所有 Skill"],
+    correctAnswer: 1,
+    explanation: "OpenClaw 的 Skill 匹配是自动语义路由：Agent 扫描 available_skills 列表，根据任务描述选择最匹配的 Skill，再读取对应 SKILL.md 获取详细指令。用户无需手动指定，降低使用门槛。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "Skill"]
+  },
+  {
+    question: "OpenClaw 的 MEMORY.md 和每日 memory/YYYY-MM-DD.md 的分工是：",
+    options: ["两者内容完全相同", "MEMORY.md 是长期精华记忆（跨会话核心信息），每日文件是原始日志（当天细节）", "每日文件是 MEMORY.md 的备份", "MEMORY.md 每天自动清空"],
+    correctAnswer: 1,
+    explanation: "OpenClaw 的双层记忆设计：每日文件记录当天发生的原始信息（细节丰富但体量大）；MEMORY.md 是精华萃取（类似人类的长期记忆），只保留真正值得跨会话记住的核心信息，在 main session 中加载。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "记忆系统"]
+  },
+  {
+    question: "OpenClaw 的 Heartbeat 机制主要解决什么问题？",
+    options: ["检测服务器心跳", "让 Agent 在对话间隔期间主动做有价值的后台工作（检查邮件/日历/更新记忆）", "定期备份文件", "自动重启 Agent"],
+    correctAnswer: 1,
+    explanation: "Heartbeat 让 Agent 从'被动响应'变成'主动助理'：定期唤醒后检查邮件、日历、待办等，必要时主动提醒用户。HEARTBEAT.md 定义检查清单，保持 Agent 在空闲期间持续创造价值。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "Heartbeat"]
+  },
+  {
+    question: "以下关于 AI Agent 的 ReAct（Reasoning + Acting）框架，哪项描述最准确？",
+    options: ["只有推理，没有行动", "交替进行思考（Thought）→ 行动（Action）→ 观察结果（Observation）的循环", "一次性输出所有推理结果", "只适用于数学问题"],
+    correctAnswer: 1,
+    explanation: "ReAct 框架让 Agent 像人类一样工作：先思考（分析当前状态和目标）→ 执行行动（调用工具）→ 观察结果（读取工具输出）→ 再思考。这个循环让 Agent 能根据中间结果动态调整策略。",
+    difficulty: "medium",
+    topics: ["Agent", "ReAct"]
+  },
+  {
+    question: "以下哪项最能描述 AI Agent 与传统 RPA（机器人流程自动化）的核心区别？",
+    options: ["Agent 更贵", "Agent 能理解自然语言指令、动态规划路径；RPA 只能执行固定脚本流程", "RPA 效率更高", "两者完全相同"],
+    correctAnswer: 1,
+    explanation: "核心区别在于'智能性'：RPA 依赖预定义规则和固定路径，遇到例外就失败；Agent 能理解意图、动态规划、处理异常情况、在任务失败时自行调整策略。这是从'自动化'到'智能化'的本质跨越。",
+    difficulty: "easy",
+    topics: ["Agent", "RPA对比"]
+  },
+  {
+    question: "以下关于 Agent 的 'Tool Use'（工具使用）设计，哪项原则最重要？",
+    options: ["工具越多越好", "工具描述要清晰精准（名称/参数/用途），让 Agent 能正确判断何时使用哪个工具", "工具只能是代码执行", "工具调用越少越好"],
+    correctAnswer: 1,
+    explanation: "Agent 工具设计核心：工具描述质量决定 Agent 能否正确使用工具。模糊的工具描述会导致 Agent 误用或不用。最佳实践：每个工具有清晰的名称、参数说明和触发场景示例。",
+    difficulty: "medium",
+    topics: ["Agent", "工具设计"]
+  },
+  {
+    question: "OpenClaw 中 AGENTS.md 文件的主要作用是：",
+    options: ["列出所有 API 密钥", "定义 Agent 的工作规范、记忆策略、安全边界和行为准则", "存储对话历史", "配置网络连接"],
+    correctAnswer: 1,
+    explanation: "AGENTS.md 是 OpenClaw Agent 的行为说明书：定义每次 session 的初始化流程（读哪些文件）、记忆管理规范、安全红线（什么不能做）、工具使用约定等。是 Agent 一致性行为的基础。",
+    difficulty: "easy",
+    topics: ["OpenClaw", "AGENTS.md"]
+  },
+  {
+    question: "以下关于 OpenClaw 中 Cron 任务和 Heartbeat 的选择，哪项说法最准确？",
+    options: ["两者完全相同，随意选", "精确定时/独立任务用 Cron；批量周期检查/需要对话上下文的用 Heartbeat", "Cron 只能每天执行一次", "Heartbeat 比 Cron 更精确"],
+    correctAnswer: 1,
+    explanation: "选择策略：Cron 适合需要精确时间（'每天9点整'）、任务独立、不依赖主会话历史的场景；Heartbeat 适合批量检查（邮件+日历+通知一起处理）、需要会话上下文、时间可以漂移的场景。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "Cron", "Heartbeat"]
+  },
+  {
+    question: "以下关于 Agent 的 'Planning'（规划）能力，哪项说法最准确？",
+    options: ["Agent 只能执行单步任务", "Agent 能将复杂目标分解为有序子任务，根据中间结果动态调整执行路径", "规划只需要在任务开始时做一次", "规划越详细越好，不需要调整"],
+    correctAnswer: 1,
+    explanation: "Agent 规划的核心是动态性：不是一次性制定完整计划然后机械执行，而是在执行中根据工具返回结果、环境变化动态调整。这种'计划-执行-观察-修正'循环是 Agent 处理复杂任务的关键。",
+    difficulty: "medium",
+    topics: ["Agent", "规划能力"]
+  },
+  {
+    question: "以下哪种场景最适合使用 Multi-Agent 架构而非单一 Agent？",
+    options: ["简单的问答任务", "需要并行处理多个子任务，或不同任务需要不同专业能力（代码+搜索+写作）", "只需要生成一段文字", "用户提问频率很低"],
+    correctAnswer: 1,
+    explanation: "Multi-Agent 的优势场景：1）并行化（多个子任务同时处理，缩短总时间）；2）专业化（每个 Agent 专注自己擅长的领域，如'搜索Agent'+'写作Agent'+'校对Agent'）；3）复杂流程的模块化拆解。",
+    difficulty: "medium",
+    topics: ["Multi-Agent", "架构选型"]
+  },
+  {
+    question: "OpenClaw 的 SOUL.md 文件的作用是：",
+    options: ["存储 API 密钥", "定义 Agent 的性格、价值观和行为风格，让 Agent 有一致的'人格'", "记录所有错误日志", "配置语言模型参数"],
+    correctAnswer: 1,
+    explanation: "SOUL.md 是 OpenClaw Agent 的人格定义文件：规定沟通风格（直接/风趣/专业）、价值观（如'先尝试，再提问'）、行为原则（如'不做无意义的奉承'）。让 Agent 跨会话保持一致的'个性'。",
+    difficulty: "easy",
+    topics: ["OpenClaw", "SOUL.md"]
+  },
+  {
+    question: "以下关于 Agent 的 'Memory'（记忆）设计，哪种方式最适合跨会话保持用户偏好？",
+    options: ["依赖模型本身的参数记忆", "将用户偏好持久化写入文件或数据库，每次 session 启动时读取", "每次都让用户重新说明偏好", "把所有历史对话放进 Context"],
+    correctAnswer: 1,
+    explanation: "跨会话记忆的核心是持久化存储：LLM 本身不保存状态（每次 session 是全新的），必须将重要信息写入外部存储（文件/数据库）并在新 session 开始时读取，才能实现真正意义上的'记住用户'。",
+    difficulty: "medium",
+    topics: ["Agent", "记忆设计"]
+  },
+  {
+    question: "以下关于 OpenClaw Skill 的 SKILL.md 编写最佳实践，哪项最重要？",
+    options: ["越长越好，涵盖所有可能的情况", "明确定义触发条件、工具调用步骤和输出格式，保持简洁可操作", "只写工具名称，不需要说明步骤", "用代码注释代替文字说明"],
+    correctAnswer: 1,
+    explanation: "SKILL.md 设计原则：触发条件要精确（避免误触发或漏触发）；步骤要可操作（Agent 能直接按步骤执行）；输出格式要明确（确保结果符合预期）；整体保持简洁——过长的 SKILL.md 会消耗大量 Token 且容易让 Agent 迷失。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "Skill设计"]
+  },
+  {
+    question: "以下关于 Agent 在执行任务时的'错误恢复'策略，哪项最合理？",
+    options: ["遇到错误立即停止，等待用户指示", "分析错误原因，尝试替代方案，超过重试次数后才上报用户", "无限重试直到成功", "忽略所有错误继续执行"],
+    correctAnswer: 1,
+    explanation: "Agent 错误恢复的最佳实践：首先理解错误类型（是临时故障还是根本性问题）→ 尝试替代路径（如工具A失败换工具B）→ 设置重试上限（防止死循环）→ 必要时优雅降级并告知用户原因。",
+    difficulty: "medium",
+    topics: ["Agent", "错误处理"]
+  },
+  {
+    question: "以下哪项是 Agent 产品中最重要的安全边界设计？",
+    options: ["让 Agent 能访问所有系统资源", "最小权限原则：Agent 只获得完成任务所需的最小权限，敏感操作需要用户确认", "Agent 不需要安全限制", "只限制外部网络访问"],
+    correctAnswer: 1,
+    explanation: "Agent 安全的核心原则：最小权限（Principle of Least Privilege）——Agent 不应默认拥有超出任务需要的权限；高风险操作（删除文件、发送消息、支付）必须在执行前明确获得用户确认，防止误操作和恶意利用。",
+    difficulty: "medium",
+    topics: ["Agent安全", "权限设计"]
+  },
+  {
+    question: "以下关于 OpenClaw 中 Sub-Agent（子智能体）的使用场景，哪项描述最准确？",
+    options: ["Sub-Agent 只用于备份任务", "将复杂的长耗时任务派发给 Sub-Agent 独立完成，主 Agent 继续处理其他请求", "Sub-Agent 比主 Agent 智能", "每次对话都必须使用 Sub-Agent"],
+    correctAnswer: 1,
+    explanation: "Sub-Agent 的核心价值：隔离复杂任务（避免污染主会话上下文）、并行处理（多个子任务同时进行）、完成后主动推送结果。适合代码开发、数据分析等耗时任务，让主 Agent 保持响应性。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "Sub-Agent"]
+  },
+  {
+    question: "以下关于 Agentic AI 工作流中 'Human-in-the-Loop' 的最佳触发时机，哪项最合理？",
+    options: ["每一步操作都请求人工确认", "高风险/不可逆操作前确认，低风险/可恢复操作自动执行", "永远不需要人工介入", "只有任务失败时才确认"],
+    correctAnswer: 1,
+    explanation: "Human-in-the-Loop 触发原则：以'可逆性'和'风险等级'为判断依据——读取文件（低风险可逆）自动执行；发送邮件/删除数据（高风险不可逆）需要确认。这样在效率和安全间取得最优平衡。",
+    difficulty: "medium",
+    topics: ["Agent", "Human-in-the-Loop"]
+  },
+  {
+    question: "以下关于 Agent 的 'Context Window' 管理，当上下文接近上限时最佳策略是：",
+    options: ["直接截断早期对话", "对历史信息进行摘要压缩，保留关键状态，丢弃细节", "停止任务让用户重新开始", "增大模型参数"],
+    correctAnswer: 1,
+    explanation: "Agent 上下文管理策略：对话历史摘要（保留关键决策和发现，压缩具体细节）；任务状态外化（将进度写入文件而非依赖 Context）；重要信息持久化（防止被滚出 Context 后丢失）。",
+    difficulty: "hard",
+    topics: ["Agent", "上下文管理"]
+  },
+  {
+    question: "以下哪项最准确描述了 'Agentic Loop'（智能体循环）的工作原理？",
+    options: ["Agent 只运行一次就结束", "Agent 持续循环：感知环境→规划→执行工具→观察结果→更新状态，直到目标达成", "Agent 随机选择行动", "每次循环需要用户触发"],
+    correctAnswer: 1,
+    explanation: "Agentic Loop 是 Agent 的基本运作模式：感知（读取当前状态/工具结果）→ 规划（决定下一步行动）→ 执行（调用工具）→ 观察（读取结果）→ 循环。这个自主循环让 Agent 能独立完成多步骤任务。",
+    difficulty: "easy",
+    topics: ["Agent", "Agentic Loop"]
+  },
+  {
+    question: "以下关于 OpenClaw 中 USER.md 和 IDENTITY.md 的区别，哪项说法最准确？",
+    options: ["两者内容相同", "USER.md 记录被服务的人类用户信息；IDENTITY.md 定义 Agent 自身的名称和角色", "IDENTITY.md 记录 API 密钥", "USER.md 是 Agent 的行为规范"],
+    correctAnswer: 1,
+    explanation: "OpenClaw 双身份设计：USER.md（记录用户的姓名、偏好、工作目标、时区等，让 Agent 了解服务对象）；IDENTITY.md（定义 Agent 自己是谁——名字、性格特征、风格定位）。两者共同构建'我为谁服务，我是谁'的完整 Agent 人格。",
+    difficulty: "easy",
+    topics: ["OpenClaw", "身份系统"]
+  },
+  {
+    question: "以下关于 Agent 工具调用的'幂等性'（Idempotency）设计，哪项说法最重要？",
+    options: ["工具调用越快越好", "重复调用同一工具应产生相同结果，防止 Agent 重试时造成重复副作用", "工具不需要考虑重试", "每次调用结果必须不同"],
+    correctAnswer: 1,
+    explanation: "幂等性是 Agent 工具设计的关键安全特性：Agent 可能因为超时或错误多次调用同一工具。若工具不幂等（如'发送消息'），重试会造成重复发送。设计工具时需要考虑去重机制（如唯一请求ID）。",
+    difficulty: "hard",
+    topics: ["Agent", "工具设计"]
+  },
+  {
+    question: "以下关于 OpenClaw Skills 生态的设计哲学，哪项最准确？",
+    options: ["所有功能内置，不需要 Skill", "能力模块化：核心能力内置，专有场景能力通过 Skill 扩展，保持系统简洁可维护", "Skill 越多越好，应该全部安装", "Skill 只能由官方创建"],
+    correctAnswer: 1,
+    explanation: "OpenClaw Skill 生态的设计理念：关注点分离——核心 Agent 能力（记忆、工具调用、对话）内置；垂直场景能力（日历管理、代码执行、特定平台集成）通过 Skill 按需扩展。这保持了核心的简洁和场景的灵活性。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "Skill生态"]
+  },
+  {
+    question: "以下哪项是 Agent 在复杂任务中'任务分解'（Task Decomposition）的核心价值？",
+    options: ["让任务看起来更复杂", "将超出单次上下文或能力边界的大任务拆分为可管理的子任务，降低每步的失败概率", "减少工具调用次数", "让用户更容易理解"],
+    correctAnswer: 1,
+    explanation: "任务分解的价值：1）突破 Context 限制（子任务独立处理）；2）降低错误率（每步更简单，LLM 更准确）；3）便于并行化（子任务可分配给不同 Agent 同时处理）；4）方便错误定位（哪一步出问题一目了然）。",
+    difficulty: "medium",
+    topics: ["Agent", "任务分解"]
+  },
+  {
+    question: "以下关于 Agent 产品的'可观测性'（Observability）设计，哪项最重要？",
+    options: ["Agent 不需要日志", "记录 Agent 的每步推理、工具调用、中间结果，支持问题回溯和性能优化", "只记录最终输出", "只有出错时才需要日志"],
+    correctAnswer: 1,
+    explanation: "Agent 可观测性是调试和优化的基础：记录'思维链'（Agent 的推理过程）、工具调用（输入输出）、执行时间、失败点。没有可观测性就无法判断 Agent 为什么做了某个决策，也无法系统性优化。",
+    difficulty: "medium",
+    topics: ["Agent", "可观测性"]
+  },
+  {
+    question: "以下哪项最能体现 OpenClaw 中'技能优先于通用能力'的设计原则？",
+    options: ["让 Agent 自己摸索如何使用工具", "遇到专项任务时先读取对应 SKILL.md，获取精确指令后再执行，避免通用猜测", "所有任务都用通用 Prompt 处理", "Skill 只在用户明确要求时才读取"],
+    correctAnswer: 1,
+    explanation: "这个原则体现了'专业化胜于泛化'：Agent 在执行日历管理、文件上传、消息发送等专项任务时，读取专门编写的 SKILL.md 获取精确操作指引，远比依赖通用推理更可靠，避免格式错误和步骤遗漏。",
+    difficulty: "medium",
+    topics: ["OpenClaw", "Skill优先"]
+  },
+  {
+    question: "以下关于 AI Agent 的'幻觉'风险在 Agentic 场景中的危害，哪项说法最准确？",
+    options: ["Agent 的幻觉危害与普通对话相同", "Agent 的幻觉会直接导致错误的工具调用和不可逆的外部操作，危害远大于单次对话", "Agent 不会产生幻觉", "幻觉只影响文字输出"],
+    correctAnswer: 1,
+    explanation: "Agentic 场景中幻觉的放大效应：普通对话的幻觉只影响文字输出（用户可校验）；但 Agent 的幻觉会驱动真实操作（发送错误邮件、删除错误文件、调用错误 API），且可能已产生不可逆的外部影响。这是 Agent 安全设计的核心挑战。",
+    difficulty: "hard",
+    topics: ["Agent", "安全风险"]
+  },
+  {
+    question: "以下关于 OpenClaw 的 '工作空间'（Workspace）设计理念，哪项最准确？",
+    options: ["工作空间只存储代码文件", "工作空间是 Agent 的'家'：存储记忆、技能、配置和工作文件，是 Agent 持续性的基础", "工作空间每次重置", "工作空间只有管理员能访问"],
+    correctAnswer: 1,
+    explanation: "OpenClaw Workspace 是 Agent 持续存在的核心：SOUL.md/USER.md/MEMORY.md 构成 Agent 的'个性和记忆'；skills 目录扩展能力；日常工作文件积累形成'工作上下文'。没有 Workspace，Agent 每次都是空白的'失忆者'。",
+    difficulty: "easy",
+    topics: ["OpenClaw", "Workspace"]
+  },
+  {
+    question: "以下哪项是设计高质量 AI Agent Skill 时最容易被忽视的要素？",
+    options: ["工具调用的语法", "明确定义 Skill 的边界（什么情况触发、什么情况不触发），防止误激活", "Skill 的文件名", "Skill 的安装方式"],
+    correctAnswer: 1,
+    explanation: "Skill 边界定义是最容易被忽视却最重要的要素：触发条件定义不清会导致'误触发'（不该用这个 Skill 时用了）或'漏触发'（该用时没用）。精确的触发条件描述是 Skill 质量的核心，直接影响 Agent 的判断准确率。",
+    difficulty: "hard",
+    topics: ["OpenClaw", "Skill设计"]
+  },
 ];
 
 // ===== 问答题（30道）=====
