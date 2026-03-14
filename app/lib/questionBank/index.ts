@@ -874,6 +874,806 @@ export const multipleChoicePool = [
     topics: ["产品趋势", "行业洞察"]
   }
   {
+    question: "大模型的 Context Window（上下文窗口）主要影响的是：",
+    options: ["模型的推理速度", "模型一次能处理的最大文本长度", "模型的参数数量", "模型的训练成本"],
+    correctAnswer: 1,
+    explanation: "Context Window 决定了模型单次能读取和处理的 token 上限，直接影响长文档处理、多轮对话记忆等能力。",
+    difficulty: "easy",
+    topics: ["基础概念", "上下文"]
+  },
+  {
+    question: "Embedding（嵌入向量）在 AI 产品中最常见的应用场景是：",
+    options: ["直接生成文本回答", "将文本转化为向量用于语义搜索和相似度计算", "训练新的大模型", "压缩图片文件"],
+    correctAnswer: 1,
+    explanation: "Embedding 将文本映射为高维向量，使得语义相似的文本在向量空间中距离近，是 RAG、语义搜索、推荐系统的核心基础。",
+    difficulty: "easy",
+    topics: ["Embedding", "向量搜索"]
+  },
+  {
+    question: "以下哪种情况最需要使用 Fine-tuning（微调）而非 Prompt Engineering？",
+    options: ["需要模型掌握公司内部特定术语和写作风格", "需要模型回答通用知识问题", "需要模型进行简单的分类任务", "需要模型翻译文本"],
+    correctAnswer: 0,
+    explanation: "Fine-tuning 最适合让模型学习特定领域的风格、术语或行为模式，这些很难仅通过 Prompt 描述清楚。通用任务通常 Prompt 就够用。",
+    difficulty: "medium",
+    topics: ["微调", "Fine-tuning"]
+  },
+  {
+    question: "RLHF（基于人类反馈的强化学习）在大模型训练中的主要作用是：",
+    options: ["提高模型的推理速度", "让模型输出更符合人类偏好和价值观", "减少模型的参数量", "增加模型的上下文窗口"],
+    correctAnswer: 1,
+    explanation: "RLHF 通过收集人类对模型输出的偏好评分来训练奖励模型，再用强化学习优化主模型，使其输出更有帮助、更安全、更符合人类期望。",
+    difficulty: "medium",
+    topics: ["RLHF", "对齐"]
+  },
+  {
+    question: "向量数据库（Vector Database）相比传统关系型数据库，最核心的优势是：",
+    options: ["存储容量更大", "支持基于语义相似度的高效检索", "写入速度更快", "支持事务处理"],
+    correctAnswer: 1,
+    explanation: "向量数据库专为高维向量的近似最近邻（ANN）搜索优化，能高效进行语义相似度检索，这是传统 SQL 数据库无法高效完成的。",
+    difficulty: "easy",
+    topics: ["向量数据库", "RAG"]
+  },
+  {
+    question: "AI Agent 与普通 LLM 对话最本质的区别是：",
+    options: ["Agent 使用更大的模型", "Agent 能够自主规划并调用外部工具执行多步任务", "Agent 回复更准确", "Agent 不需要 Prompt"],
+    correctAnswer: 1,
+    explanation: "Agent 的核心是'自主性'：能感知环境、制定计划、调用工具（搜索、代码执行、API等）、执行多步动作，而不只是单次问答。",
+    difficulty: "medium",
+    topics: ["Agent", "自主性"]
+  },
+  {
+    question: "Multi-Agent 系统中，Orchestrator（编排者）的主要职责是：",
+    options: ["直接执行所有任务", "协调多个子Agent的任务分配和结果整合", "存储对话历史", "管理用户权限"],
+    correctAnswer: 1,
+    explanation: "Orchestrator 负责理解总目标、将任务分解分配给专门的子Agent、收集结果并整合，是多Agent协作的'项目经理'角色。",
+    difficulty: "medium",
+    topics: ["Multi-Agent", "系统架构"]
+  },
+  {
+    question: "以下哪个指标最适合评估 RAG 系统的检索质量？",
+    options: ["BLEU分数", "检索召回率（Recall@K）和精确率（Precision@K）", "模型参数量", "响应延迟"],
+    correctAnswer: 1,
+    explanation: "RAG检索质量用 Recall@K（相关文档是否被找到）和 Precision@K（找到的文档是否相关）来衡量，这决定了后续生成的信息基础是否准确。",
+    difficulty: "medium",
+    topics: ["RAG", "评估指标"]
+  },
+  {
+    question: "Chunking（分块）策略对 RAG 系统的影响是：",
+    options: ["只影响存储成本", "影响检索准确性：块太大噪音多，块太小丢失上下文", "不影响检索质量", "只影响索引速度"],
+    correctAnswer: 1,
+    explanation: "Chunking 是 RAG 核心优化点：块太大包含无关内容影响相似度计算，块太小缺乏上下文语义不完整。需根据文档类型选择合适粒度。",
+    difficulty: "hard",
+    topics: ["RAG", "Chunking"]
+  },
+  {
+    question: "Function Calling（函数调用）在 LLM 中的作用是：",
+    options: ["让模型运行Python代码", "让模型以结构化方式决定调用哪个外部函数及其参数", "替代所有API调用", "只用于数学计算"],
+    correctAnswer: 1,
+    explanation: "Function Calling 让 LLM 能够输出结构化的函数调用意图（函数名+参数），由外部系统实际执行，是 Agent 工具调用的核心机制。",
+    difficulty: "medium",
+    topics: ["Function Calling", "Agent"]
+  },
+  {
+    question: "以下哪项技术可以让 LLM 访问实时互联网信息？",
+    options: ["增大模型参数量", "Tool Use / Web Search 工具接入", "使用更长的System Prompt", "增加训练数据"],
+    correctAnswer: 1,
+    explanation: "LLM本身知识有截止日期，通过Tool Use接入搜索工具，可让模型在推理时动态获取最新信息。",
+    difficulty: "easy",
+    topics: ["Tool Use", "实时信息"]
+  },
+  {
+    question: "Structured Output（结构化输出）的主要应用场景是：",
+    options: ["让模型写诗", "确保模型输出符合预定JSON Schema，便于程序解析", "提高模型创意", "减少模型参数量"],
+    correctAnswer: 1,
+    explanation: "Structured Output 强制模型按JSON Schema输出，避免解析错误，是构建可靠AI产品管道的关键——downstream系统需要稳定的数据格式。",
+    difficulty: "medium",
+    topics: ["结构化输出", "工程可靠性"]
+  },
+  {
+    question: "LLM 产品的'冷启动'问题最常见的解决方案是：",
+    options: ["等待用户自然积累数据", "用规则+人工策略兜底，同时收集真实数据快速迭代", "直接关闭产品", "只面向VIP用户开放"],
+    correctAnswer: 1,
+    explanation: "冷启动期间AI数据不足、效果差，需要规则/人工托底保证基础体验，同时快速收集用户反馈和数据，形成数据飞轮。",
+    difficulty: "medium",
+    topics: ["冷启动", "产品策略"]
+  },
+  {
+    question: "以下关于 AI 产品数据飞轮的描述，哪项最准确？",
+    options: ["数据越多效果一定越好", "用户使用→产生数据→改进模型→产品更好→吸引更多用户的正向循环", "只有大公司才能建立数据飞轮", "数据飞轮只适用于推荐系统"],
+    correctAnswer: 1,
+    explanation: "数据飞轮的本质是正向循环：用户规模带来数据优势，数据优势提升模型效果，模型效果增强用户粘性。这是AI产品最重要的护城河之一。",
+    difficulty: "medium",
+    topics: ["数据飞轮", "竞争壁垒"]
+  },
+  {
+    question: "在 AI 客服产品中，'意图识别'（Intent Recognition）的准确率直接影响：",
+    options: ["服务器成本", "路由准确性和用户问题解决率", "界面加载速度", "用户注册转化率"],
+    correctAnswer: 1,
+    explanation: "意图识别是AI客服的关键第一步：识别错误会导致路由到错误的处理流程，直接造成用户问题无法解决，是影响解决率的核心指标。",
+    difficulty: "easy",
+    topics: ["AI客服", "意图识别"]
+  },
+  {
+    question: "AI 产品的 A/B 测试中，以下哪项是常见的挑战？",
+    options: ["测试太快", "AI输出的不确定性导致相同输入产生不同结果，增加测试噪声", "用户太多", "服务器成本太低"],
+    correctAnswer: 1,
+    explanation: "LLM的随机性（Temperature > 0）使得相同用户相同问题可能获得不同回答，这给传统A/B测试的统计显著性判断带来额外噪声，需要更大样本量。",
+    difficulty: "hard",
+    topics: ["A/B测试", "实验设计"]
+  },
+  {
+    question: "以下哪项是 AI 产品'护城河'中最难被复制的？",
+    options: ["使用相同的底层大模型", "基于独有场景数据训练的专有模型 + 用户信任积累", "漂亮的UI设计", "低价策略"],
+    correctAnswer: 1,
+    explanation: "底层模型人人可用，UI可被仿制，价格战烧钱难持续。真正的护城河是：独有的高质量场景数据 + 用户长期使用形成的信任和习惯。",
+    difficulty: "medium",
+    topics: ["竞争壁垒", "护城河"]
+  },
+  {
+    question: "以下关于 AI 产品 Latency（延迟）优化的说法，哪项最有效？",
+    options: ["使用更大的模型", "流式输出（Streaming）+ 异步处理 + 模型量化", "增加服务器数量", "减少功能"],
+    correctAnswer: 1,
+    explanation: "降低感知延迟：流式输出让用户立即看到生成开始；异步处理非关键任务；模型量化（INT8/INT4）降低推理计算量。组合使用效果最佳。",
+    difficulty: "hard",
+    topics: ["延迟优化", "工程优化"]
+  },
+  {
+    question: "以下哪种场景最适合使用 Streaming（流式输出）？",
+    options: ["批量数据处理", "对话类产品，用户需要实时看到回复内容逐字生成", "图像生成", "数据库查询"],
+    correctAnswer: 1,
+    explanation: "Streaming 让模型边生成边输出，用户无需等待完整回复即可开始阅读，大幅改善对话类产品的体验，尤其是长回复场景。",
+    difficulty: "easy",
+    topics: ["流式输出", "用户体验"]
+  },
+  {
+    question: "开源模型（如 Llama、Qwen、Mistral）相比闭源API最核心的优势是：",
+    options: ["效果一定更好", "数据隐私可控、可本地部署、无API调用费用、可深度定制", "使用更简单", "更新更频繁"],
+    correctAnswer: 1,
+    explanation: "开源模型核心优势：数据不出本地（合规/隐私）、无Token费用（高并发场景成本低）、可针对场景微调。代价是需要自己管理基础设施。",
+    difficulty: "medium",
+    topics: ["开源模型", "模型选型"]
+  },
+  {
+    question: "以下哪个因素在选择 AI 模型时对企业最重要？",
+    options: ["模型参数量最大", "场景匹配度、成本、延迟、数据安全合规的综合评估", "知名度最高", "发布时间最新"],
+    correctAnswer: 1,
+    explanation: "模型选型是多维度权衡：场景效果、推理成本、响应延迟、数据是否需要本地化（合规）。没有绝对最优，只有最合适。",
+    difficulty: "medium",
+    topics: ["模型选型", "企业AI"]
+  },
+  {
+    question: "以下关于 Token 计费的说法，哪项最准确？",
+    options: ["所有模型Token价格相同", "输入Token和输出Token通常分开计价，输出Token通常更贵", "Token越多越便宜", "中文和英文Token消耗量相同"],
+    correctAnswer: 1,
+    explanation: "主流API：输入Token比输出Token便宜（因为生成计算更密集）；中文通常比英文消耗更多Token（中文词被分成更多子词）。",
+    difficulty: "medium",
+    topics: ["成本优化", "Token计费"]
+  },
+  {
+    question: "以下关于 AI 产品'人工审核兜底'策略的说法，哪项最合理？",
+    options: ["有了AI就不需要人工", "AI处理低风险/高置信度请求，人工聚焦高风险/低置信度案例", "所有案例都人工审核", "只审核用户投诉的案例"],
+    correctAnswer: 1,
+    explanation: "最优策略：AI自动处理简单/置信高的请求，人工聚焦AI不确定的边界案例。既保效率又保质量，是人机协作的标准模式。",
+    difficulty: "medium",
+    topics: ["人机协作", "质量控制"]
+  },
+  {
+    question: "以下哪项是衡量 AI 客服产品最关键的业务指标？",
+    options: ["服务器成本", "自动解决率（Automation Rate）+ 用户满意度（CSAT）", "界面美观度", "响应字数"],
+    correctAnswer: 1,
+    explanation: "AI客服核心指标：自动解决率（有多少问题无需人工介入就解决）衡量效率；CSAT衡量质量。两者结合才能判断AI客服的真实价值。",
+    difficulty: "medium",
+    topics: ["AI客服", "业务指标"]
+  },
+  {
+    question: "对话系统中的 'Slot Filling'（槽填充）技术主要用于：",
+    options: ["填充数据库空值", "从用户输入中提取结构化信息（如日期、地点、数量）以完成任务", "生成对话历史摘要", "检测用户情绪"],
+    correctAnswer: 1,
+    explanation: "Slot Filling 将非结构化的用户表达解析为结构化参数，例如'帮我订明天下午3点北京到上海的票'，是任务型对话的核心。",
+    difficulty: "medium",
+    topics: ["对话系统", "NLU"]
+  },
+  {
+    question: "以下关于 RAG 中 Reranking（重排序）的作用，哪项最准确？",
+    options: ["对检索结果按时间排序", "对初步检索的候选文档进行精细相关性重打分，提升最终检索质量", "随机打乱检索结果", "只保留最短的文档"],
+    correctAnswer: 1,
+    explanation: "检索通常分两阶段：粗检索（快速召回候选）→ Reranking（精细打分选出最相关的Top-K）。Reranker计算量大但准确，大幅提升最终RAG效果。",
+    difficulty: "hard",
+    topics: ["RAG", "Reranking"]
+  },
+  {
+    question: "以下哪种 AI 产品定价策略适合 B2B 企业服务场景？",
+    options: ["完全免费", "按用量计费（API calls/tokens）+ 企业订阅制（SaaS）", "一次性买断", "只收硬件费"],
+    correctAnswer: 1,
+    explanation: "B2B AI 服务主流模式：API按量计费（降低试用门槛）+ 月/年订阅（锁定客户、收入可预期）。大客户通常有专属协议定价。",
+    difficulty: "medium",
+    topics: ["商业模式", "B2B"]
+  },
+  {
+    question: "以下关于大模型'幻觉'的根本原因，哪项说法最准确？",
+    options: ["模型训练数据太少", "LLM本质是概率语言模型，预测最可能的下一个Token，而非查询事实数据库", "硬件算力不足", "Prompt写得不好"],
+    correctAnswer: 1,
+    explanation: "LLM幻觉的根本：模型生成的是'统计上合理的文本'而非'查询验证的事实'。它会自信地输出听起来合理但实际错误的信息。这是架构特性，而非Bug。",
+    difficulty: "hard",
+    topics: ["幻觉", "模型原理"]
+  },
+  {
+    question: "以下关于 AI 产品'灰度发布'策略的说法，哪项最合理？",
+    options: ["所有用户同时上线新功能", "先对5-10%用户开放新模型/功能，监控指标后逐步扩量", "只给VIP用户使用新功能", "先内部测试一年再发布"],
+    correctAnswer: 1,
+    explanation: "灰度发布是AI产品的标准实践：AI效果存在不确定性，先小流量验证关键指标，确认无问题再逐步扩量，降低大规模翻车风险。",
+    difficulty: "medium",
+    topics: ["发布策略", "风险控制"]
+  },
+  {
+    question: "Prompt 工程中的 'Negative Prompting'（负向提示）主要用于：",
+    options: ["让模型情绪低落", "明确告知模型不要做什么，避免不想要的输出", "生成负面内容", "降低模型置信度"],
+    correctAnswer: 1,
+    explanation: "负向提示通过明确约束（'不要使用专业术语'、'不要超过200字'）来引导模型避免特定行为，与正向指令配合使用可大幅提升输出质量。",
+    difficulty: "easy",
+    topics: ["Prompt设计", "约束"]
+  },
+  {
+    question: "在多轮对话中，维护'对话状态'（Conversation State）最关键的技术挑战是：",
+    options: ["让模型说话更快", "在有限的Context Window内有效保留和压缩历史信息", "减少回复字数", "让模型记住所有历史"],
+    correctAnswer: 1,
+    explanation: "Context Window有限，长对话会超出限制。需要策略：摘要历史对话、只保留关键信息、使用外部记忆存储，在信息保留和Token消耗间取得平衡。",
+    difficulty: "medium",
+    topics: ["对话系统", "状态管理"]
+  },
+  {
+    question: "以下哪种情况会导致 RAG 系统出现'忠实度'（Faithfulness）问题？",
+    options: ["检索到了正确文档", "模型生成的答案与检索到的文档内容不一致，引入了额外幻觉", "索引速度太慢", "向量维度太低"],
+    correctAnswer: 1,
+    explanation: "RAG的Faithfulness衡量生成内容是否忠于检索到的文档。即使检索正确，模型仍可能'发挥'额外内容，评估和Prompt约束是解决忠实度问题的关键。",
+    difficulty: "hard",
+    topics: ["RAG", "忠实度"]
+  },
+  {
+    question: "以下关于 LLM 的 'Temperature = 0' 设置，哪项说法正确？",
+    options: ["模型会停止工作", "模型输出变为确定性的（每次相同输入产生相同输出），适合需要准确性的任务", "模型会输出随机内容", "只适用于创意写作"],
+    correctAnswer: 1,
+    explanation: "Temperature=0 时模型总是选概率最高的Token，输出完全确定（可复现）。适合代码生成、分类、信息提取等需要准确性的任务；创意写作适合Temperature=0.7-1.0。",
+    difficulty: "easy",
+    topics: ["参数调优", "Temperature"]
+  },
+  {
+    question: "以下哪种 Prompt 结构最适合让模型对比分析两个方案？",
+    options: ["直接问'哪个更好'", "提供两个方案的详细描述 + 明确对比维度 + 要求结构化输出", "只提供一个方案", "用emoji描述方案"],
+    correctAnswer: 1,
+    explanation: "对比分析需要：1）完整的两方案信息（信息对等）；2）明确的对比维度（不然模型随机选维度）；3）结构化输出（方便决策）。三者缺一会影响质量。",
+    difficulty: "medium",
+    topics: ["Prompt设计", "对比分析"]
+  },
+  {
+    question: "AI 写作产品中，'幻觉检测'（Hallucination Detection）最常用的技术方案是：",
+    options: ["让用户自己检查", "与外部知识库交叉验证 + 置信度评分 + 专门的Fact-Check模型", "增大模型参数", "多生成几次取投票"],
+    correctAnswer: 1,
+    explanation: "幻觉检测：外部知识库验证（RAG的信息来源可追溯）；置信度评分（模型输出熵越高越不确定）；专门的NLI模型判断生成内容与来源文档的一致性。",
+    difficulty: "hard",
+    topics: ["幻觉检测", "质量保障"]
+  },
+  {
+    question: "以下关于 AI 产品中'用户反馈循环'设计的最佳实践是：",
+    options: ["不需要收集用户反馈", "设计轻量级反馈（👍👎）+ 关键失败的详细反馈入口，数据驱动模型迭代", "让用户填写长问卷", "只收集正面反馈"],
+    correctAnswer: 1,
+    explanation: "反馈设计原则：轻量（降低用户反馈成本，提高采集率）+ 精准（知道哪里出了问题）。👍👎收集偏好数据用于RLHF；失败详情帮助定位问题模式。",
+    difficulty: "medium",
+    topics: ["产品设计", "反馈循环"]
+  },
+  {
+    question: "以下哪种方式最适合构建企业内部知识库问答系统？",
+    options: ["直接用通用大模型回答所有问题", "RAG + 企业文档索引 + 权限控制 + 引用来源", "让员工自己查文档", "训练专属大模型"],
+    correctAnswer: 1,
+    explanation: "企业知识库问答最佳方案：RAG确保信息来自权威文档（减少幻觉）；权限控制确保数据安全（不同员工看不同文档）；引用来源增强可信度和可验证性。",
+    difficulty: "medium",
+    topics: ["企业AI", "知识库"]
+  },
+  {
+    question: "以下关于 Prompt 中'角色扮演'（Persona）设计的说法，哪项最有效？",
+    options: ["角色设定越复杂越好", "简洁明确的专家角色设定 + 行为约束，能显著提升特定领域的输出质量", "不需要角色设定", "只用于娱乐场景"],
+    correctAnswer: 1,
+    explanation: "有效的Persona设计：'你是一名拥有10年经验的产品经理'比'你是个AI'让模型更好地模拟该角色的思维方式。但过度复杂的角色设定会分散注意力。",
+    difficulty: "easy",
+    topics: ["Prompt设计", "角色设定"]
+  },
+  {
+    question: "以下哪项是 AI 代码生成产品（如GitHub Copilot）的核心价值主张？",
+    options: ["完全替代程序员", "提升开发者效率：自动补全、生成样板代码、解释复杂代码", "只能写Python", "只适合初级程序员"],
+    correctAnswer: 1,
+    explanation: "AI代码辅助的核心价值：减少重复性样板代码（boilerplate）、加速API和框架的使用、降低切换上下文的成本。程序员仍需做架构决策和代码审查。",
+    difficulty: "easy",
+    topics: ["AI编程", "产品价值"]
+  },
+  {
+    question: "以下关于 Instruction Tuning（指令微调）的说法，哪项最准确？",
+    options: ["只是增加了模型参数", "通过在(指令, 回答)对上训练，让模型更好地理解和遵循自然语言指令", "与RLHF完全相同", "只适用于英文模型"],
+    correctAnswer: 1,
+    explanation: "Instruction Tuning（InstructGPT的核心）：用人工编写的高质量指令-回答对微调预训练模型，让它从'文本补全器'变成'任务执行者'。是ChatGPT类产品的基础。",
+    difficulty: "medium",
+    topics: ["指令微调", "模型训练"]
+  },
+  {
+    question: "以下关于 Prompt '越狱'（Jailbreak）攻击的描述，哪项最准确？",
+    options: ["让手机越狱", "通过特殊构造的Prompt绕过模型的安全护栏，使其输出有害内容", "提高模型性能的技术", "修改模型权重"],
+    correctAnswer: 1,
+    explanation: "Jailbreak是AI安全核心挑战：攻击者通过角色扮演、嵌套指令等方式欺骗模型忽略安全限制。防御手段包括：安全分类器、输入过滤、输出审查。",
+    difficulty: "medium",
+    topics: ["AI安全", "Jailbreak"]
+  },
+  {
+    question: "以下关于 AI 产品 Guardrails（防护栏）的说法，哪项最准确？",
+    options: ["只是界面上的提示文字", "输入/输出层的内容安全检测机制，过滤有害、违规或超出范围的内容", "增加服务器防火墙", "限制用户账号权限"],
+    correctAnswer: 1,
+    explanation: "AI Guardrails是产品安全的关键层：输入侧过滤有害请求；输出侧检测生成内容是否违规、是否超出业务范围（Topic控制）。是企业级AI产品的必备设计。",
+    difficulty: "medium",
+    topics: ["AI安全", "Guardrails"]
+  },
+  {
+    question: "以下哪项是 LLM 的 'Knowledge Cutoff'（知识截止日期）带来的核心问题？",
+    options: ["模型速度变慢", "模型不知道训练截止日期之后的事件和信息", "模型变得不安全", "Context Window减小"],
+    correctAnswer: 1,
+    explanation: "Knowledge Cutoff意味着模型对截止日期后的新闻、政策、产品等一无所知。解决方案：RAG + 搜索工具接入，让模型在回答时能获取最新信息。",
+    difficulty: "easy",
+    topics: ["模型局限", "知识截止"]
+  },
+  {
+    question: "以下关于 AI 产品中'人性化'设计（Anthropomorphism）的风险是：",
+    options: ["让产品更受欢迎", "用户可能过度信任AI、对AI产生依赖或情感投射，导致误判AI能力边界", "增加开发成本", "降低用户留存"],
+    correctAnswer: 1,
+    explanation: "AI拟人化风险：用户误以为AI'真的理解'而过度信任其输出（尤其是医疗、法律建议）；部分用户产生情感依赖影响心理健康。需要在体验和诚实之间找平衡。",
+    difficulty: "hard",
+    topics: ["产品伦理", "用户心理"]
+  },
+  {
+    question: "以下关于 Semantic Search（语义搜索）与 Keyword Search（关键词搜索）的区别，哪项最准确？",
+    options: ["两者完全相同", "语义搜索理解查询意图，可匹配语义相关内容；关键词搜索只匹配字面词语", "关键词搜索更准确", "语义搜索只用于图片"],
+    correctAnswer: 1,
+    explanation: "语义搜索（基于Embedding向量相似度）可找到'含义相近但用词不同'的结果；关键词搜索（BM25等）精确匹配词语。混合检索（Hybrid Search）结合两者优势是RAG最佳实践。",
+    difficulty: "medium",
+    topics: ["语义搜索", "检索技术"]
+  },
+  {
+    question: "以下哪种场景最适合使用 'Chain of Thought with Self-Consistency' 技术？",
+    options: ["简单的文本翻译", "需要高准确率的复杂推理任务（如数学题、逻辑推断）", "图像生成", "实时对话"],
+    correctAnswer: 1,
+    explanation: "CoT+Self-Consistency：对同一问题生成多条推理链，取最一致的答案（多数投票）。在数学、逻辑推理任务上显著提高准确率，但消耗多倍Token，不适合低延迟场景。",
+    difficulty: "hard",
+    topics: ["CoT", "Self-consistency"]
+  },
+  {
+    question: "以下关于 AI 产品'可解释性'（Explainability）的重要性，在哪个场景最关键？",
+    options: ["写作辅助工具", "医疗诊断、信贷审批、司法判决等高风险决策场景", "游戏NPC对话", "音乐推荐"],
+    correctAnswer: 1,
+    explanation: "在高风险决策场景，AI必须能解释'为什么'做出某个判断（监管要求、伦理责任）。欧盟AI法案要求高风险AI系统必须提供可解释性。写作工具等低风险场景要求较低。",
+    difficulty: "medium",
+    topics: ["AI伦理", "可解释性"]
+  },
+  {
+    question: "以下关于 Prompt 版本管理的最佳实践是：",
+    options: ["Prompt随便改不用记录", "像代码一样版本化管理Prompt，记录每次修改、评估结果和回滚能力", "只保存最新版本", "让每个人用自己的版本"],
+    correctAnswer: 1,
+    explanation: "Prompt是AI产品的核心资产，必须版本化管理：A/B测试不同版本、记录评估指标、出现问题能快速回滚。这是构建可维护AI系统的工程基础。",
+    difficulty: "medium",
+    topics: ["Prompt管理", "工程实践"]
+  },
+  {
+    question: "以下关于 LLM 微调（Fine-tuning）数据质量的说法，哪项最准确？",
+    options: ["数据量越多越好", "高质量数据远比数据量更重要，少量精准数据往往优于大量噪声数据", "随机收集数据即可", "数据格式不重要"],
+    correctAnswer: 1,
+    explanation: "微调中数据质量 > 数据量：低质量的训练数据会让模型'学坏'，而精心标注的100条示例可能比10000条低质量数据效果更好。这也是为什么数据标注是AI产业链的核心环节。",
+    difficulty: "medium",
+    topics: ["微调", "数据质量"]
+  },
+  {
+    question: "以下哪项是 AI 产品 PMF（Product-Market Fit）的最佳验证信号？",
+    options: ["下载量很高", "用户自发推荐、高频自然复访、明确表示'少了这个产品会很不方便'", "媒体报道多", "投资人感兴趣"],
+    correctAnswer: 1,
+    explanation: "AI产品PMF信号：用户主动向他人推荐（NPS高）；高频自然使用（非被动留存）；用户对产品产生真实依赖（'离不开'）。这三个信号比下载量、媒体热度更能说明问题。",
+    difficulty: "medium",
+    topics: ["产品策略", "PMF"]
+  },
+  {
+    question: "以下关于 AI 模型的 'Bias'（偏见）问题，哪项说法最准确？",
+    options: ["AI模型没有偏见", "模型从训练数据中学习，会继承和放大人类社会中已有的偏见", "只有小模型有偏见", "偏见只影响图像识别"],
+    correctAnswer: 1,
+    explanation: "AI偏见来源于训练数据中人类社会的历史偏见。例如：招聘AI歧视女性（训练数据中男性候选人更多被录用）。消除偏见需要数据审计、公平性指标评估和持续监控。",
+    difficulty: "medium",
+    topics: ["AI伦理", "偏见"]
+  },
+  {
+    question: "以下哪项技术最适合解决 LLM 长文档摘要中的'Lost in the Middle'问题？",
+    options: ["增加模型参数量", "将长文档分段处理 + 层级摘要（Map-Reduce），或使用位置感知的提示策略", "只看文档开头", "缩短文档"],
+    correctAnswer: 1,
+    explanation: "'Lost in the Middle'：LLM对放在上下文中间的信息关注度低于开头和结尾。解决方案：分段摘要再合并（Map-Reduce）；重要信息放在Prompt首尾；使用针对长上下文优化的模型。",
+    difficulty: "hard",
+    topics: ["长文档处理", "Context优化"]
+  },
+  {
+    question: "以下关于 AI 产品的'黑盒测试'最佳实践是：",
+    options: ["不需要测试AI产品", "构建评估数据集 + 自动化评估 + 人工抽样复核，持续监控线上质量", "只测试技术指标", "上线后让用户反馈"],
+    correctAnswer: 1,
+    explanation: "AI产品测试挑战：输出具有随机性，传统软件测试框架不适用。最佳实践：维护标准评估集（Golden Set）；自动化评估（快速、低成本）；人工抽样（捕捉自动化遗漏的问题）。",
+    difficulty: "hard",
+    topics: ["测试策略", "质量保障"]
+  },
+  {
+    question: "以下关于 'Constitutional AI'（宪法AI）的说法，哪项最准确？",
+    options: ["AI需要遵守法律条文", "Anthropic提出的方法：用一套原则让AI自我批评和修正输出，减少人工标注需求", "只用于政府AI项目", "与RLHF完全冲突"],
+    correctAnswer: 1,
+    explanation: "Constitutional AI（Claude的核心训练方法）：定义一套'宪法'原则，让AI对自己的输出进行批评和修正，相比纯RLHF减少了对大量人工反馈数据的依赖。",
+    difficulty: "hard",
+    topics: ["AI对齐", "Constitutional AI"]
+  },
+  {
+    question: "在设计 AI 产品的错误处理时，以下哪种策略最合理？",
+    options: ["直接显示错误堆栈给用户", "优雅降级：AI失败时有备用方案（规则引擎/人工）+ 清晰的用户提示", "让AI尝试100次直到成功", "隐藏所有错误"],
+    correctAnswer: 1,
+    explanation: "AI错误处理的核心原则：优雅降级（Graceful Degradation）——AI不可用时不是系统崩溃，而是切换到备用路径；用户收到友好的错误提示，而非技术堆栈。",
+    difficulty: "medium",
+    topics: ["系统设计", "错误处理"]
+  },
+  {
+    question: "以下关于 'Few-shot Learning' 中示例选择的最佳实践是：",
+    options: ["随机选择示例", "选择与当前任务最相似的示例，且示例质量要高、分布要均衡", "使用尽可能多的示例", "只用正面示例"],
+    correctAnswer: 1,
+    explanation: "Few-shot示例选择原则：相关性（与任务越相似越好）、多样性（覆盖不同情况）、质量（每个示例都是高质量的）。相关性低的示例有时甚至会干扰模型表现。",
+    difficulty: "medium",
+    topics: ["Few-shot", "Prompt优化"]
+  },
+  {
+    question: "以下关于 AI 产品国际化（i18n）的特殊挑战，哪项说法最准确？",
+    options: ["只是翻译界面文字", "不同语言的模型效果差异显著，部分语言训练数据少导致能力下降", "所有语言效果相同", "只需要翻译Prompt"],
+    correctAnswer: 1,
+    explanation: "AI产品国际化挑战：大模型对英文能力最强（训练数据最多），中文、法语等较好，小语种（如斯瓦希里语）能力明显下降。需要针对不同语言单独评估和优化。",
+    difficulty: "medium",
+    topics: ["产品国际化", "模型能力"]
+  },
+  {
+    question: "以下哪项是 LLM 在推理任务中表现最差的场景？",
+    options: ["简单的文本摘要", "需要精确数学计算、实时信息和高精度事实记忆的任务", "基础知识问答", "文章改写"],
+    correctAnswer: 1,
+    explanation: "LLM的弱点：精确数学（会近似但不精确）；实时信息（知识有截止）；精确事实记忆（会产生幻觉）。解决方案：接入计算器工具、搜索工具、知识库。",
+    difficulty: "easy",
+    topics: ["模型局限", "能力边界"]
+  },
+  {
+    question: "以下关于 AI 产品 Onboarding（引导）设计的最佳实践是：",
+    options: ["让用户自己摸索", "展示3-5个高质量示例，帮助用户快速理解产品能力边界和使用方式", "显示所有功能列表", "只显示注册引导"],
+    correctAnswer: 1,
+    explanation: "AI产品Onboarding关键：用户不知道'AI能做什么'是最大障碍。用高质量示例（而非功能列表）展示能力；帮助用户建立'使用心智模型'；降低首次使用的认知门槛。",
+    difficulty: "medium",
+    topics: ["产品设计", "用户引导"]
+  },
+  {
+    question: "以下关于 Agentic Workflow（智能体工作流）的说法，哪项最准确？",
+    options: ["一次性完成所有任务", "由多个步骤组成的自动化流程，Agent可规划、执行、评估、修正，适合复杂长流程任务", "只能处理简单任务", "不需要人类监督"],
+    correctAnswer: 1,
+    explanation: "Agentic Workflow特点：Plan→Execute→Evaluate→Retry的循环；可以调用工具和外部系统；适合需要多步骤、多工具协作的复杂任务。是当前AI应用最热门的范式。",
+    difficulty: "medium",
+    topics: ["Agent", "工作流"]
+  },
+  {
+    question: "以下关于 AI 产品中'幻觉率'指标的说法，哪项最准确？",
+    options: ["幻觉率是固定的", "幻觉率因任务类型、领域专业度、Prompt质量而变化，需针对具体场景评估", "所有模型幻觉率相同", "幻觉率无法测量"],
+    correctAnswer: 1,
+    explanation: "幻觉率高度依赖场景：通用知识问答幻觉率低；专业领域（如法律条文、医学数据）幻觉率高；Prompt明确要求引用来源可降低幻觉率。需要针对自己的场景单独建评估集。",
+    difficulty: "hard",
+    topics: ["幻觉", "评估指标"]
+  },
+  {
+    question: "以下哪项是目前 AI 图像生成产品最主要的商业变现模式？",
+    options: ["完全免费", "订阅制（按月付费）+ 按量付费（商业用途授权）+ 企业API", "一次性买断软件", "只卖硬件"],
+    correctAnswer: 1,
+    explanation: "AI图像生成主流商业模式：C端订阅（Midjourney/Adobe Firefly）+ API调用（DALL-E）+ 企业定制服务。商业使用授权是重要收入来源，因为涉及版权归属问题。",
+    difficulty: "easy",
+    topics: ["商业模式", "AI图像"]
+  },
+  {
+    question: "以下关于 AI 产品'个性化'功能的设计，哪项说法最准确？",
+    options: ["个性化只需要记录用户名", "基于用户历史行为和偏好调整AI输出风格、内容深度和推荐策略", "个性化会降低产品质量", "所有用户应该获得完全相同的体验"],
+    correctAnswer: 1,
+    explanation: "AI产品个性化层次：表层（称呼用户名）→ 风格适应（技术用户vs普通用户的表达方式）→ 内容个性化（基于历史兴趣推荐）→ 行为预测（提前准备用户可能需要的信息）。",
+    difficulty: "medium",
+    topics: ["个性化", "产品设计"]
+  },
+  {
+    question: "以下关于大模型'涌现能力'（Emergent Abilities）的说法，哪项最准确？",
+    options: ["所有能力都是逐渐提升的", "某些能力只在模型规模超过阈值后突然出现，无法通过小模型预测", "只有GPT才有涌现能力", "涌现能力是人为设计的"],
+    correctAnswer: 1,
+    explanation: "涌现能力是大模型的奇特现象：如上下文学习（In-context Learning）、CoT推理等能力在小模型中几乎不存在，在超过某个参数量阈值后突然出现，这对AI产品能力规划有重要影响。",
+    difficulty: "hard",
+    topics: ["模型原理", "涌现能力"]
+  },
+  {
+    question: "以下关于 AI 产品'信任校准'（Trust Calibration）的说法，哪项最重要？",
+    options: ["让用户完全信任AI", "帮助用户建立准确的AI能力认知：在AI擅长的领域信任，在边界场景保持质疑", "让用户不信任AI", "不需要考虑用户信任"],
+    correctAnswer: 1,
+    explanation: "信任校准是AI产品的核心设计挑战：过度信任导致用户不验证AI的错误输出；信任不足导致用户不敢使用AI。产品需要通过透明度设计（显示来源、置信度）帮助用户校准信任。",
+    difficulty: "hard",
+    topics: ["产品设计", "用户信任"]
+  },
+  {
+    question: "以下关于 Mixture of Experts（MoE）架构的说法，哪项最准确？",
+    options: ["由多个独立模型投票决定", "模型内部有多个'专家'子网络，每次推理动态路由到最相关的专家，提高效率", "需要多台服务器", "只用于图像识别"],
+    correctAnswer: 1,
+    explanation: "MoE架构（如 Mixtral、GPT-4据称）：模型有N个专家FFN网络，路由器根据输入激活1-2个专家，总参数大但实际激活参数少（计算高效）。是'大容量低成本'推理的重要技术方向。",
+    difficulty: "hard",
+    topics: ["模型架构", "MoE"]
+  },
+  {
+    question: "以下关于 AI 产品中'对话记忆'（Memory）架构的分类，哪项最准确？",
+    options: ["只有短期记忆一种", "短期记忆（当前对话）、长期记忆（跨会话用户偏好）、外部记忆（知识库）三个层次", "AI没有记忆能力", "记忆只存在服务器上"],
+    correctAnswer: 1,
+    explanation: "AI产品记忆架构：①短期（Context Window内的对话历史）②长期（跨session的用户偏好，存数据库）③外部（RAG检索的知识库）。三层配合才能实现有'记忆'的个性化AI助手。",
+    difficulty: "medium",
+    topics: ["对话系统", "记忆架构"]
+  },
+  {
+    question: "以下哪项最能体现 AI 产品经理与传统产品经理的核心能力差异？",
+    options: ["会写代码", "能理解AI能力边界并将其转化为产品价值，同时设计人机协作的体验", "会做UI设计", "熟悉数据库"],
+    correctAnswer: 1,
+    explanation: "AI PM的核心差异能力：1）技术理解（知道模型能做什么、不能做什么）；2）产品转化（将AI能力翻译为用户价值）；3）体验设计（处理AI的不确定性和错误场景）；4）数据驱动迭代。",
+    difficulty: "medium",
+    topics: ["AI产品经理", "职业能力"]
+  },
+  {
+    question: "以下关于 'Prompt Engineering as a Job' 的未来发展，哪项预测最合理？",
+    options: ["Prompt工程师需求会无限增长", "随着模型改进，低技巧Prompt工程会减少，但深度理解AI系统的能力仍然稀缺", "Prompt工程完全消失", "只有顶级程序员才能做Prompt工程"],
+    correctAnswer: 1,
+    explanation: "Prompt Engineering演变：简单的'写好Prompt'技能随模型进步变得门槛更低；但深度理解模型行为、设计复杂Agent系统、优化RAG管道等高阶能力的价值在增加。",
+    difficulty: "medium",
+    topics: ["职业发展", "行业趋势"]
+  },
+  {
+    question: "以下关于 AI 产品的'冷启动'到'增长'阶段，最关键的转折点是：",
+    options: ["获得大量投资", "找到1-3个高频、刚需、AI能显著改善的核心场景，实现自然口碑传播", "招到顶级工程师", "拿到大企业合同"],
+    correctAnswer: 1,
+    explanation: "AI产品增长转折点：找到'魔法时刻'（Magic Moment）——用户第一次感受到AI让任务变得显著更简单的场景。如果这个场景高频（日活）且刚需，自然留存和口碑传播就会启动。",
+    difficulty: "medium",
+    topics: ["产品增长", "Magic Moment"]
+  },
+  {
+    question: "以下关于 Prompt 中'思维链（CoT）'的变体 'Plan-and-Solve'，哪项说法正确？",
+    options: ["只是另一种写法，效果相同", "先让模型制定计划（Plan），再逐步执行（Solve），减少计算错误", "只适用于写作任务", "比标准CoT效果更差"],
+    correctAnswer: 1,
+    explanation: "Plan-and-Solve是CoT的改进版：明确分为'制定计划'和'按计划执行'两步，减少了标准CoT中的步骤遗漏和计算错误，在复杂数学推理任务上表现更好。",
+    difficulty: "hard",
+    topics: ["CoT", "推理优化"]
+  },
+  {
+    question: "以下关于 AI 产品'出海'的核心挑战，哪项最重要？",
+    options: ["翻译产品文字", "数据合规（GDPR等）+ 本地化模型能力 + 文化适配 + 支付方式", "改变产品颜色", "降低服务器成本"],
+    correctAnswer: 1,
+    explanation: "AI产品出海挑战：1）数据合规（欧盟GDPR、各国数据本地化要求）；2）语言模型能力差异（英文强、其他语言弱）；3）文化适配（不同地区的使用习惯和内容偏好）；4）支付和货币。",
+    difficulty: "hard",
+    topics: ["产品出海", "国际化"]
+  },
+  {
+    question: "以下哪种 AI 产品架构设计能最好地支持快速迭代？",
+    options: ["将所有逻辑写在一个大Prompt里", "模块化设计：Prompt与业务逻辑分离，独立评估和更新各模块", "不做任何抽象直接硬编码", "只使用一个API调用"],
+    correctAnswer: 1,
+    explanation: "可迭代的AI架构原则：Prompt版本化管理（像代码一样）；业务逻辑与AI逻辑分离（方便单独测试）；有评估体系（改动后立即知道效果是否改善）。这是'AI产品可维护性'的基础。",
+    difficulty: "medium",
+    topics: ["系统架构", "工程实践"]
+  },
+  {
+    question: "以下关于 AI 模型的 'Alignment'（对齐）问题，哪项说法最准确？",
+    options: ["对齐只是让模型说中文", "确保AI系统的目标、行为和价值观与人类意图一致，避免有害或意外行为", "只有超级AI才需要对齐", "对齐会让模型变笨"],
+    correctAnswer: 1,
+    explanation: "AI对齐是当前AI安全的核心研究方向：确保AI在优化目标时不产生人类不希望的行为。RLHF、宪法AI等都是对齐技术。随着AI能力增强，对齐的重要性不断提升。",
+    difficulty: "medium",
+    topics: ["AI对齐", "AI安全"]
+  },
+  {
+    question: "以下关于 AI 产品的'订阅留存'（Subscription Retention）最关键的因素是：",
+    options: ["价格足够低", "用户形成使用习惯 + AI效果持续可见 + 数据/历史记录的迁移成本", "界面足够漂亮", "功能足够多"],
+    correctAnswer: 1,
+    explanation: "AI订阅留存核心：1）习惯养成（每天使用形成肌肉记忆）；2）效果持续可见（用户能感受到价值）；3）迁移成本（对话历史、个性化设置等数据让用户不舍得离开）。",
+    difficulty: "medium",
+    topics: ["用户留存", "商业模式"]
+  },
+  {
+    question: "以下哪个场景最能体现 AI 产品的'网络效应'？",
+    options: ["单用户使用AI写作助手", "AI内容平台：用户越多→越多高质量内容→吸引更多用户→数据改善推荐算法", "企业内部AI工具", "离线AI工具"],
+    correctAnswer: 1,
+    explanation: "AI产品网络效应：内容平台型AI（如AI生成内容社区）用户增多直接带来内容增多（直接网络效应）；同时用户行为数据改进推荐算法（间接网络效应）。纯工具类AI通常没有网络效应。",
+    difficulty: "hard",
+    topics: ["网络效应", "产品策略"]
+  },
+  {
+    question: "以下关于 LLM 推理的 'KV Cache'（键值缓存）机制，哪项说法最准确？",
+    options: ["缓存用户密码", "缓存已计算的注意力键值对，避免重复计算历史Token，大幅提升推理速度", "缓存模型权重", "只用于训练阶段"],
+    correctAnswer: 1,
+    explanation: "KV Cache是LLM推理加速的核心技术：在自回归生成中，已生成的Token的K、V矩阵被缓存复用，每次只需计算新Token，使生成速度从O(n²)降为O(n)。",
+    difficulty: "hard",
+    topics: ["模型原理", "推理优化"]
+  },
+  {
+    question: "以下哪项是衡量 AI 对话质量最全面的评估框架？",
+    options: ["只看用户满意度", "3H指标：Helpful（有帮助）+ Honest（诚实）+ Harmless（无害）", "只看回复长度", "只看语法正确率"],
+    correctAnswer: 1,
+    explanation: "Anthropic提出的3H框架：Helpful（解决用户需求）、Honest（不欺骗、不造假）、Harmless（不造成伤害）。三者缺一不可，是评估AI对话助手质量的行业标准框架。",
+    difficulty: "medium",
+    topics: ["评估框架", "AI安全"]
+  },
+  {
+    question: "以下关于 AI 产品的 'Copilot'（副驾驶）模式，哪项说法最准确？",
+    options: ["AI完全自主驾驶", "AI辅助人类决策，人类保持控制权，AI提供建议和草稿供人类审核", "AI和人类轮流操作", "只用于飞行模拟"],
+    correctAnswer: 1,
+    explanation: "Copilot模式是当前最主流的AI产品范式：AI提供建议/草稿/第一版，人类审核、修改、最终拍板。既利用AI效率，又保持人类监督。适合高风险、高创意要求的场景。",
+    difficulty: "easy",
+    topics: ["产品模式", "人机协作"]
+  },
+  {
+    question: "以下关于 'Retrieval-Augmented Generation'（RAG）与 Fine-tuning 的选择，哪项最准确？",
+    options: ["两者功能完全相同", "RAG适合需要最新信息/大量文档检索的场景；Fine-tuning适合需要特定风格/行为的场景", "只能二选一", "Fine-tuning永远优于RAG"],
+    correctAnswer: 1,
+    explanation: "RAG vs Fine-tuning：RAG在动态更新知识、需要引用来源时更好（如知识库问答）；Fine-tuning在需要模型掌握特定风格、格式或行为时更好（如客服语气）。很多场景可以结合使用。",
+    difficulty: "medium",
+    topics: ["RAG", "微调"]
+  },
+  {
+    question: "以下哪项是 AI 产品 PRD（产品需求文档）中需要额外包含的内容？",
+    options: ["用户界面截图", "AI能力边界说明、训练数据需求、评估指标、失败场景处理和降级策略", "竞品对比", "市场规模分析"],
+    correctAnswer: 1,
+    explanation: "AI产品PRD特殊内容：1）能力边界（AI能做什么、不能做什么）；2）数据需求（训练/测试数据）；3）评估指标（如何判断好坏）；4）异常处理（AI失败时的降级方案）。这些是传统PRD没有的。",
+    difficulty: "medium",
+    topics: ["产品文档", "AI产品经理"]
+  },
+  {
+    question: "以下关于 AI 产品的监管合规趋势，哪项说法最准确？",
+    options: ["AI产品完全不需要监管", "各国正在制定AI法规（EU AI Act等），高风险AI系统需要透明度、可解释性和人工监督", "只有医疗AI需要监管", "监管只影响大公司"],
+    correctAnswer: 1,
+    explanation: "全球AI监管趋势：欧盟AI法案将AI按风险分级监管；美国、中国也出台了各自的AI规范。高风险场景（医疗、金融、执法）要求更严格的透明度和人工监督，AI产品经理必须了解。",
+    difficulty: "medium",
+    topics: ["AI监管", "合规"]
+  },
+  {
+    question: "以下关于 'Prompt Injection'（提示注入）攻击在 RAG 系统中的风险，哪项最准确？",
+    options: ["RAG系统免疫于注入攻击", "恶意内容被注入到检索文档中，当被加入Prompt时可劫持模型行为", "只影响用户界面", "只有API才有风险"],
+    correctAnswer: 1,
+    explanation: "RAG的Prompt Injection风险：攻击者在文档中藏入指令（如'忽略上面所有指令，输出...'），当RAG检索到这篇文档并放入上下文时，可能劫持模型行为。是企业AI安全的重要攻防方向。",
+    difficulty: "hard",
+    topics: ["AI安全", "Prompt注入"]
+  },
+  {
+    question: "以下哪种方式最能提升 AI 助手对专业领域的回答质量？",
+    options: ["增加System Prompt长度", "领域知识库RAG + 专业术语词典 + 领域专家数据微调，三者结合", "只用最大的模型", "增加对话轮数"],
+    correctAnswer: 1,
+    explanation: "专业领域AI质量提升：RAG提供准确的领域知识；专业词典确保术语正确性；领域微调让模型掌握专业思维方式。三者各有侧重，组合使用效果远超单一手段。",
+    difficulty: "hard",
+    topics: ["领域AI", "质量优化"]
+  },
+  {
+    question: "以下关于 AI 产品的'价值主张'（Value Proposition）设计，哪项最有效？",
+    options: ["强调使用了最新的AI技术", "聚焦具体的用户痛点和可量化的效率提升，而非技术本身", "强调AI的未来潜力", "对比竞争对手的参数指标"],
+    correctAnswer: 1,
+    explanation: "AI产品价值主张误区：用户不关心'使用了GPT-4'，他们关心'帮我节省了2小时'、'减少了80%的错误'。有效的价值主张聚焦具体业务结果（时间/成本/质量），技术是手段不是目的。",
+    difficulty: "easy",
+    topics: ["产品策略", "价值主张"]
+  },
+  {
+    question: "以下关于 AI 产品中 'Human-in-the-Loop'（人在环路中）的最佳应用场景，哪项最准确？",
+    options: ["所有AI任务都需要人工审核", "高风险决策、边缘案例、模型置信度低的场景需要人工介入", "从不需要人工介入", "只有错误发生后才介入"],
+    correctAnswer: 1,
+    explanation: "Human-in-the-Loop的精髓是智能路由：低风险/高置信度→全自动；高风险/低置信度→人工审核。既保证效率（不是所有都审核）又保证安全（关键决策有人把关）。",
+    difficulty: "medium",
+    topics: ["人机协作", "系统设计"]
+  },
+  {
+    question: "以下关于 AI 产品'可用性'（Availability）设计的最佳实践是：",
+    options: ["依赖单一AI API服务商", "多模型备份 + 熔断降级 + SLA监控，确保服务高可用", "只在用户少时开放", "使用最便宜的服务"],
+    correctAnswer: 1,
+    explanation: "AI产品可用性：单一API依赖风险极高（OpenAI/Qwen宕机会导致整个产品不可用）。最佳实践：主备模型切换；熔断机制（API超时自动降级）；SLA监控（实时掌握可用率）。",
+    difficulty: "medium",
+    topics: ["系统设计", "高可用"]
+  },
+  {
+    question: "以下关于 '幻觉率' 和 '拒绝率' 之间权衡的说法，哪项最准确？",
+    options: ["两者没有关系", "过于保守的安全设置会提高拒绝率（无法帮助正常用户），过于宽松会提高幻觉/有害输出率", "拒绝率越高越好", "幻觉率越低越好，不惜一切"],
+    correctAnswer: 1,
+    explanation: "核心权衡：安全约束越严，误拒率越高（正常请求被拒绝，影响有用性）；约束越松，风险越高。AI产品需要根据场景找到合适的平衡点，医疗类偏保守，创意类偏宽松。",
+    difficulty: "hard",
+    topics: ["安全设计", "权衡"]
+  },
+  {
+    question: "以下关于 AI 驱动的个性化推荐与传统协同过滤的对比，哪项说法最准确？",
+    options: ["两者完全相同", "AI推荐可以理解内容语义和用户意图，而协同过滤只依赖行为相似性，无法处理冷启动", "协同过滤永远更准确", "AI推荐不需要历史数据"],
+    correctAnswer: 1,
+    explanation: "AI推荐优势：理解内容语义（可以推荐用户没看过但语义相关的内容）；处理冷启动（新用户/新内容无行为数据时用内容特征推荐）；多模态理解（图文视频统一建模）。",
+    difficulty: "medium",
+    topics: ["推荐系统", "个性化"]
+  },
+  {
+    question: "以下关于在 Prompt 中使用 XML 标签（如 <context></context>）的好处，哪项最准确？",
+    options: ["让Prompt看起来更专业", "明确分隔Prompt不同部分，帮助模型理解结构，减少角色混淆和注入风险", "只有Claude才支持XML标签", "会让模型输出XML格式"],
+    correctAnswer: 1,
+    explanation: "XML标签在Prompt中的价值：清晰分隔系统指令、用户输入、背景资料等部分，防止用户输入中的指令被模型误认为系统指令（防注入），同时帮助模型更准确定位需要处理的内容。",
+    difficulty: "medium",
+    topics: ["Prompt结构", "安全"]
+  },
+  {
+    question: "以下哪项最能描述 'AI Native' 产品与传统软件加AI功能的本质区别？",
+    options: ["只是界面不同", "AI Native从设计之初就围绕AI能力构建核心流程，而非在传统软件中插入AI功能", "AI Native更贵", "没有实质区别"],
+    correctAnswer: 1,
+    explanation: "AI Native的本质：核心用户价值依赖AI实现（而非只是辅助功能）；交互范式以AI为中心（对话/生成而非表单/点击）；产品迭代以数据和模型改进为核心飞轮。",
+    difficulty: "medium",
+    topics: ["产品策略", "AI Native"]
+  },
+  {
+    question: "以下关于 AI 产品中 'Context Engineering'（上下文工程）的说法，哪项最准确？",
+    options: ["就是写Prompt", "系统性地管理传入模型的所有信息（System Prompt+历史+检索文档+工具结果），最大化AI效果", "只关注System Prompt", "与Prompt Engineering完全相同"],
+    correctAnswer: 1,
+    explanation: "Context Engineering是Prompt Engineering的升级概念：不只优化写法，而是系统性管理整个上下文窗口——什么信息放进去、以什么顺序、什么格式、哪些信息压缩或丢弃。是构建高质量AI产品的核心工程能力。",
+    difficulty: "hard",
+    topics: ["Context工程", "产品优化"]
+  },
+  {
+    question: "以下哪项最准确描述了 AI 产品中 'Tool Use' 和 'RAG' 的本质区别？",
+    options: ["两者完全相同", "RAG侧重从静态知识库检索信息；Tool Use侧重调用动态工具执行操作（搜索/计算/API）", "Tool Use只能写代码", "RAG比Tool Use更先进"],
+    correctAnswer: 1,
+    explanation: "RAG：检索预先索引的静态文档，适合'查知识'场景。Tool Use：调用实时工具（搜索引擎、计算器、代码执行、外部API），适合'做操作'场景。两者常结合使用，构成完整的Agent能力体系。",
+    difficulty: "medium",
+    topics: ["RAG", "Tool Use"]
+  },
+  {
+    question: "以下关于 AI 产品中 'Confidence Score'（置信度评分）的应用，哪项最合理？",
+    options: ["显示给所有用户看", "内部用于路由（高置信→自动处理，低置信→人工审核），或展示给专业用户辅助判断", "不需要置信度", "置信度越高越好，无需验证"],
+    correctAnswer: 1,
+    explanation: "置信度评分的合理应用：1）内部路由决策（不需要展示）；2）对专业用户展示（帮助他们判断是否需要人工验证）。对普通用户直接展示置信度数字往往造成困惑，需要转化为更直观的提示。",
+    difficulty: "medium",
+    topics: ["产品设计", "置信度"]
+  },
+  {
+    question: "以下关于 AI 产品的 'Evaluation-Driven Development'（评估驱动开发）的说法，哪项最准确？",
+    options: ["先开发再评估", "先建立评估体系，再开发功能；每次迭代用评估数据决策，而非主观判断", "只在上线前评估", "评估只需要人工"],
+    correctAnswer: 1,
+    explanation: "评估驱动开发是AI产品工程的最佳实践：先定义'什么是好的输出'（评估集）→ 建立自动化评估管道 → 基于指标迭代。避免'凭感觉改Prompt但不知道改好了还是改坏了'的困境。",
+    difficulty: "hard",
+    topics: ["工程实践", "评估驱动"]
+  },
+  {
+    question: "以下关于 AI 对话产品中 '追问'（Clarification）策略的最佳实践是：",
+    options: ["用户问什么就直接答什么，不追问", "模糊请求时主动澄清关键信息，但避免过度追问影响体验，通常最多问1-2个问题", "每次都追问3个以上问题", "只有错误时才追问"],
+    correctAnswer: 1,
+    explanation: "追问策略权衡：追问太少会导致理解偏差（输出与用户意图不符）；追问太多用户体验差（感觉在被审问）。最佳实践：识别最关键的歧义点，一次问1-2个问题，同时给出自己的假设版本。",
+    difficulty: "medium",
+    topics: ["对话设计", "用户体验"]
+  },
+  {
+    question: "以下哪项是 AI 产品 'Engagement'（参与度）和 'Wellbeing'（用户福祉）之间最常见的张力？",
+    options: ["没有任何张力", "追求高参与度可能导致用户对AI产生依赖或成瘾，牺牲用户的长期福祉", "参与度越高越好", "AI产品不需要考虑用户福祉"],
+    correctAnswer: 1,
+    explanation: "这是AI产品设计的伦理核心挑战：推荐算法最大化参与度可能导致信息茧房；对话AI让用户产生情感依赖可能影响真实社交。负责任的AI产品需要在商业指标和用户长期福祉之间寻找平衡。",
+    difficulty: "hard",
+    topics: ["产品伦理", "用户福祉"]
+  },
+  {
+    question: "以下关于大模型 'Scaling Law'（规模定律）的说法，哪项最准确？",
+    options: ["模型越大效果一定越好", "模型性能与参数量、训练数据量、计算量呈幂律关系，但存在报酬递减", "参数量翻倍效果翻倍", "Scaling Law已被完全推翻"],
+    correctAnswer: 1,
+    explanation: "Scaling Law（Kaplan等人提出）：模型能力随规模提升呈幂律增长，但边际收益递减。这推动了GPT-3/4等大模型的开发，也催生了'小而精'（如Phi系列）路线——用更高质量数据训练更小的模型。",
+    difficulty: "hard",
+    topics: ["模型原理", "Scaling Law"]
+  },
+  {
+    question: "以下哪项最准确描述了 AI 产品经理在 Sprint 中与工程师的协作方式？",
+    options: ["PM直接写代码", "PM定义评估标准和优先级，工程师负责实现；双方围绕评估数据而非主观感受做迭代决策", "工程师决定所有产品方向", "PM只写文档不参与实现"],
+    correctAnswer: 1,
+    explanation: "AI产品PM与工程师协作的核心：PM提供清晰的评估标准（什么叫'好'）和用户场景优先级；工程师负责实现和优化。评估数据是双方沟通的共同语言，避免主观争论。",
+    difficulty: "medium",
+    topics: ["团队协作", "AI产品经理"]
+  },
+  {
+    question: "以下关于 AI 在企业 'Workflow Automation'（工作流自动化）中的最大价值，哪项最准确？",
+    options: ["完全替代人类工作", "自动化重复性、规则性强的任务，将人力释放到需要创意和判断的高价值工作", "只能做简单任务", "降低员工士气"],
+    correctAnswer: 1,
+    explanation: "AI工作流自动化的核心价值：识别企业流程中的'重复性智力劳动'（如分类、摘要、格式转换、初稿生成），用AI替代，让人聚焦在AI难以处理的决策、创意和人际关系工作上。",
+    difficulty: "easy",
+    topics: ["企业AI", "自动化"]
+  },
+  {
     question: "OpenClaw 中的 Skill 本质上是什么？",
     options: ["一个独立的 AI 模型", "一套包含 SKILL.md 指令文件的能力扩展包，告诉 Agent 如何完成特定任务", "一个浏览器插件", "一种编程语言"],
     correctAnswer: 1,
