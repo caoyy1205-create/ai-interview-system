@@ -61,3 +61,24 @@ return NextResponse.json(
 );
 }
 }
+export async function PUT(request: Request) {
+  const adminToken = request.headers.get("x-admin-token");
+  if (!adminToken || adminToken !== process.env.ADMIN_TOKEN) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { data, error } = await supabase
+    .from("interview_sessions")
+    .select("session_id, candidate_name, candidate_email, status, started_at, updated_at, part1_data, part2_data, part3_data, final_report")
+    .order("started_at", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    submissions: data || [],
+    total: data?.length || 0,
+  });
+}
