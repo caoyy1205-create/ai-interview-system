@@ -58,7 +58,7 @@ async function evaluatePart1(data: any, examSet: any) {
   const questions = examSet?.part1?.questions || [];
   let mcCorrect = 0;
   let mcTotal = 0;
-  let essayAnswers: string[] = [];
+  const essayAnswers: string[] = [];
 
   questions.forEach((q: any) => {
     if (q.type === "multipleChoice") {
