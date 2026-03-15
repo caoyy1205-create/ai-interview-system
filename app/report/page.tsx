@@ -305,10 +305,6 @@ export default function ReportPage() {
               <div style={{ fontSize: "56px", fontWeight: 700, color: getScoreColor(evaluation.totalScore), lineHeight: 1 }}>{evaluation.totalScore}</div>
               <div>
                 <div style={{ fontSize: "13px", color: "#888", marginBottom: "6px" }}>综合评分（满分100）</div>
-                {evaluation.recommendation && (() => {
-                  const s = getRecStyle(evaluation.recommendation);
-                  return <div style={{ display: "inline-block", fontSize: "13px", fontWeight: 600, padding: "4px 12px", borderRadius: "6px", background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>{evaluation.recommendation}</div>;
-                })()}
               </div>
             </div>
 
