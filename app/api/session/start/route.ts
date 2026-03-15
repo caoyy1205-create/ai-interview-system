@@ -76,15 +76,22 @@ export async function POST(req: Request) {
     const sessionId = randomId("session");
     const startedAt = Date.now();
 
-    // 写入 Supabase
-    await supabase.from("interview_sessions").insert({
-      session_id: sessionId,
-      candidate_name: candidateName || null,
-      candidate_email: candidateEmail || null,
-      exam_set: examSet,
-      started_at: new Date(startedAt).toISOString(),
-      status: "in_progress",
-    });
+    // 写入 Supabase（失败不阻断流程，只记录日志）
+    try {
+      const { error: dbError } = await supabase.from("interview_sessions").insert({
+        session_id: sessionId,
+        candidate_name: candidateName || null,
+        candidate_email: candidateEmail || null,
+        exam_set: examSet,
+        started_at: new Date(startedAt).toISOString(),
+        status: "in_progress",
+      });
+      if (dbError) {
+        console.error("Supabase insert error:", JSON.stringify(dbError));
+      }
+    } catch (dbErr) {
+      console.error("Supabase unexpected error:", dbErr);
+    }
 
     return NextResponse.json({
       sessionId,
