@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const { part1_data, part2_data, part3_data, exam_set } = sessionData;
 
     const [p1Result, p2Result, p3Result] = await Promise.all([
-      evaluatePart1(part1_data, exam_set),
+      evaluatePart1(part1_data, exam_set, part1_data?.integrityEvents),
       evaluatePart2(part2_data, exam_set),
       evaluatePart3(part3_data, exam_set),
     ]);
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function evaluatePart1(data: any, examSet: any) {
+async function evaluatePart1(data: any, examSet: any, integrityEvents?: any[]) {
   if (!data || !data.answers) return { score: 0, feedback: "未提交", mcCorrect: 0, mcTotal: 0, mcScore: 0, essayScore: 0 };
 
   const questions = examSet?.part1?.questions || [];
@@ -85,6 +85,7 @@ async function evaluatePart1(data: any, examSet: any) {
   const mcScore = mcTotal > 0 ? Math.round((mcCorrect / mcTotal) * 40) : 0;
 
   let essayScore = 0;
+  let essayCredibilityNote = "正常";
   if (essayAnswers.some(a => a.length > 0)) {
     const essayQuestions = questions.filter((q: any) => q.type === "essay");
     const prompt = `你是资深 AI 产品专家，请评估以下问答题的回答质量（总分20分）。
@@ -97,15 +98,30 @@ async function evaluatePart1(data: any, examSet: any) {
 
 ${essayQuestions.map((q: any, i: number) => `题目${i + 1}：${q.question}\n候选人回答：${essayAnswers[i] || "（未作答）"}`).join("\n\n")}
 
-请返回 JSON：{"score": 0-20整数, "feedback": "评语"}`;
+【可信度信息（供参考，不强制扣分，但应体现在评语中）】
+粘贴次数：${(integrityEvents || []).filter((e: any) => e.type === "paste").length} 次
+快速输入次数：${(integrityEvents || []).filter((e: any) => e.type === "fast_input").length} 次
+切换标签页次数：${(integrityEvents || []).filter((e: any) => e.type === "tab_switch").length} 次
+
+如果粘贴次数>1或快速输入>2，说明候选人可能参考了外部答案，评语中需要体现"可信度存疑"，并适当降低评分（最多降低30%）。
+
+请返回 JSON：{"score": 0-20整数, "feedback": "评语", "credibilityNote": "可信度备注（如无异常写'正常'）"}`;
     const result = await callQwen(prompt);
     essayScore = Math.min(20, Math.max(0, result.score || 0));
+    essayCredibilityNote = result.credibilityNote || "正常";
   }
 
   const rawTotal = mcScore + essayScore;
   const score = Math.min(100, Math.round(rawTotal / 60 * 100));
 
-  return { score, mcCorrect, mcTotal, mcScore, essayScore, wrongQuestions, feedback: `选择题 ${mcCorrect}/${mcTotal} 正确` };
+  const intEvents = integrityEvents || [];
+  const credibility = {
+    pasteCount: intEvents.filter((e: any) => e.type === "paste").length,
+    tabSwitchCount: intEvents.filter((e: any) => e.type === "tab_switch").length,
+    fastInputCount: intEvents.filter((e: any) => e.type === "fast_input").length,
+    note: essayCredibilityNote,
+  };
+  return { score, mcCorrect, mcTotal, mcScore, essayScore, wrongQuestions, feedback: `选择题 ${mcCorrect}/${mcTotal} 正确`, credibility };
 }
 
 async function evaluatePart2(data: any, examSet: any) {

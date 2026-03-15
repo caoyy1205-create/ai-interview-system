@@ -180,15 +180,15 @@ export default function ReportPage() {
     try { setCandidateName(localStorage.getItem("candidateName") || ""); } catch {}
 
     if (sid) {
-      // 检查是否已生成过（仅对候选人视图有效）
-      try {
-        const generated = localStorage.getItem(`reportGenerated_${sid}`);
-        if (generated === "1") setAlreadyGenerated(true);
-      } catch {}
-
-      // 面试官视图：自动触发评估
+      // 面试官视图 或 已生成过：自动加载缓存结果
       if (admin) {
         autoEvaluate(sid);
+      } else {
+        // 候选人已生成过，自动加载已有报告（走缓存，不重新计算）
+        const generated = localStorage.getItem(`reportGenerated_${sid}`);
+        if (generated === "1") {
+          autoEvaluate(sid);
+        }
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -334,6 +334,12 @@ export default function ReportPage() {
                           <div style={{ fontSize: "12px", color: "#888", display: "flex", gap: "12px" }}>
                             <span>选择题：{part.mcCorrect}/{part.mcTotal} 正确（{part.mcScore}分）</span>
                             {part.essayScore !== undefined && <span>问答题：{part.essayScore}分</span>}
+                          </div>
+                        )}
+                        {key === "part1" && part.credibility && (part.credibility.pasteCount > 0 || part.credibility.tabSwitchCount > 0 || part.credibility.fastInputCount > 0) && (
+                          <div style={{ fontSize: "11px", color: "#d97706", marginTop: "6px", background: "#fffbeb", borderRadius: "4px", padding: "4px 8px", border: "1px solid #fde68a" }}>
+                            🔍 可信度信号：粘贴 {part.credibility.pasteCount} 次 · 切换标签 {part.credibility.tabSwitchCount} 次 · 异常快速输入 {part.credibility.fastInputCount} 次
+                            {part.credibility.note && part.credibility.note !== "正常" && <span style={{ marginLeft: "6px" }}>· {part.credibility.note}</span>}
                           </div>
                         )}
                         {key === "part2" && part.behaviorFlags && (

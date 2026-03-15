@@ -52,6 +52,7 @@ const SESSION_KEY = "examSession_v3";
 const MC_LIMIT = 3 * 60;
 const ESSAY_LIMIT = 10 * 60;
 const PART2_LIMIT = 5 * 60;
+const MAX_AI_TURNS = 10;
 
 function formatTime(s: number) {
   s = Math.max(0, s);
@@ -463,7 +464,7 @@ export default function ExamPage() {
   const renderPart2 = () => {
     if (!part2) return null;
     const t = part2.tasks[0];
-    const chatDisabled = isTimeUp || aiLoading || part2TimeLocked || part2Submitted;
+    const chatDisabled = isTimeUp || aiLoading || part2TimeLocked || part2Submitted || aiCount >= MAX_AI_TURNS;
 
     return (
       <div>

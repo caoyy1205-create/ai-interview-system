@@ -12,11 +12,10 @@ export async function POST(req: Request) {
     let systemPrompt = `你是一个 AI 产品经理面试评测系统中的 AI 助手，帮助候选人完成面试任务。
 
 回复要求：
-- 使用清晰的段落结构
-- 重点内容用【】标注
-- 列表用数字或"·"符号
-- 每段之间空一行
-- 回复长度适中，不要过于冗长`;
+- 每次回复严格控制在300字以内，超出则截断
+- 使用清晰的段落结构，重点用【】标注
+- 列表用数字或"·"符号，每段之间空一行
+- 直接给要点，不展开背景，不重复题目`;
 
     if (task) {
       systemPrompt += `
@@ -49,7 +48,7 @@ ${(task.requirements || []).map((r: string, i: number) => `${i + 1}. ${r}`).join
             ...formattedMessages,
           ],
           temperature: 0.7,
-          max_tokens: 1000,
+          max_tokens: 450,  // ~300中文字
           stream: false,
         }),
       }
