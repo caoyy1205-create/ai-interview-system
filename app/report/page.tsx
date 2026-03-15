@@ -328,8 +328,8 @@ export default function ReportPage() {
                         {key !== "part1" && part.feedback && <div style={{ fontSize: "12px", color: "#555", lineHeight: "1.6" }}>{part.feedback}</div>}
                         {key === "part1" && part.mcCorrect !== undefined && (
                           <div style={{ fontSize: "12px", color: "#888", display: "flex", gap: "12px", flexWrap: "wrap" as const }}>
-                            <span>选择题：{part.mcCorrect}/{part.mcTotal} 正确（{part.mcScore} / 40分）</span>
-                            {part.essayScore !== undefined && <span>问答题：{part.essayScore} / 20分</span>}
+                            <span>选择题：{part.mcCorrect}/{part.mcTotal} 正确（{part.mcScore} / 70分）</span>
+                            {part.essayScore !== undefined && <span>问答题：{part.essayScore} / 30分</span>}
                           </div>
                         )}
                         {key === "part1" && part.credibility && (part.credibility.pasteCount > 0 || part.credibility.tabSwitchCount > 0 || part.credibility.fastInputCount > 0) && (
@@ -345,7 +345,10 @@ export default function ReportPage() {
                           </div>
                         )}
                       </div>
-                      <div style={{ fontSize: "24px", fontWeight: 700, color: getScoreColor(part.score), flexShrink: 0 }}>{part.score}</div>
+                      <div style={{ flexShrink: 0, textAlign: "center" as const }}>
+                        <span style={{ fontSize: "24px", fontWeight: 700, color: getScoreColor(part.score) }}>{part.score}</span>
+                        {key !== "part1" && <span style={{ fontSize: "12px", color: "#bbb" }}> / 100</span>}
+                      </div>
                     </div>
                   );
                 })}

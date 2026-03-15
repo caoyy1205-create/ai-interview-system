@@ -82,19 +82,19 @@ async function evaluatePart1(data: any, examSet: any, integrityEvents?: any[]) {
     }
   });
 
-  const mcScore = mcTotal > 0 ? Math.round((mcCorrect / mcTotal) * 40) : 0;
+  const mcScore = mcCorrect * 7;  // 每题7分，满分70
 
   let essayScore = 0;
   let essayCredibilityNote = "正常";
   if (essayAnswers.some(a => a.length > 0)) {
     const essayQuestions = questions.filter((q: any) => q.type === "essay");
-    const prompt = `你是资深 AI 产品专家，请评估以下问答题的回答质量（总分20分）。
+    const prompt = `你是资深 AI 产品专家，请评估以下问答题的回答质量（共2题，每题满分15分，总分30分）。
 
 评分参考（few-shot）：
-- 满分回答：能准确定义概念，结合实际案例，提出自己的判断和延伸思考
-- 15分回答：定义正确，有一定案例，但缺少深度判断
-- 10分回答：概念模糊，描述表面，无实质案例
-- 5分以下：回答严重偏题或字数极少
+- 满分（15分）回答：能准确定义概念，结合实际案例，提出自己的判断和延伸思考
+- 12分回答：定义正确，有一定案例，但缺少深度判断
+- 8分回答：概念模糊，描述表面，无实质案例
+- 4分以下：回答严重偏题或字数极少
 
 ${essayQuestions.map((q: any, i: number) => `题目${i + 1}：${q.question}\n候选人回答：${essayAnswers[i] || "（未作答）"}`).join("\n\n")}
 
@@ -107,12 +107,11 @@ ${essayQuestions.map((q: any, i: number) => `题目${i + 1}：${q.question}\n候
 
 请返回 JSON：{"score": 0-20整数, "feedback": "评语", "credibilityNote": "可信度备注（如无异常写'正常'）"}`;
     const result = await callQwen(prompt);
-    essayScore = Math.min(20, Math.max(0, result.score || 0));
+    essayScore = Math.min(30, Math.max(0, result.score || 0));
     essayCredibilityNote = result.credibilityNote || "正常";
   }
 
-  const rawTotal = mcScore + essayScore;
-  const score = Math.min(100, Math.round(rawTotal / 60 * 100));
+  const score = Math.min(100, mcScore + essayScore);  // 选择题满分70 + 问答题满分30 = 100
 
   const intEvents = integrityEvents || [];
   const credibility = {

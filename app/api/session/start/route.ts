@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const candidateName = body.candidateName || "";
     const candidateEmail = body.candidateEmail || "";
 
-    const mcQuestions = getRandomMultipleChoice(8);
+    const mcQuestions = getRandomMultipleChoice(10);
     const essayQuestions = getRandomEssayQuestions(2);
     const collaborationTasks = getRandomCollaborationTasks(2);
     const projectTask = getRandomProjectTask(1);
