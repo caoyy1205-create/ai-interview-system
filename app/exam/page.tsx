@@ -44,8 +44,8 @@ const TOTAL_SECONDS = 6 * 60 * 60;
 const SESSION_KEY = "examSession_v2";
 
 // 每题限时（秒）
-const MC_LIMIT = 45;     // 选择题 45 秒
-const ESSAY_LIMIT = 180; // 问答题 3 分钟
+const MC_LIMIT = 8 * 60;    // 选择题 8 分钟     // 选择题 45 秒
+const ESSAY_LIMIT = 15 * 60; // 问答题 15 分钟（含选择题答题时间） // 问答题 3 分钟
 
 function formatTime(s: number) {
   s = Math.max(0, s);
