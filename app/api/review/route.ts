@@ -141,8 +141,17 @@ async function reviewProject(part3Data: any, examSet: any) {
         content += `文件结构:\n${files.join("\n")}`;
       }
       if (content) githubContent = content;
+      // 检查仓库是否为空（无 README 且无文件）
+      if (!content || content.trim() === "") {
+        return { repoUrl: part3Data.repoUrl, review: "仓库为空或无法访问，无法进行技术点评" };
+      }
     }
   } catch {}
+
+  // 如果 githubContent 仍是默认值，说明获取失败或仓库为空
+  if (githubContent === "未能获取仓库内容" || githubContent.includes("仓库为空") || githubContent.includes("不存在")) {
+    return { repoUrl: part3Data.repoUrl, review: `仓库无效或为空：${githubContent}` };
+  }
 
   const prompt = `你是一名资深技术专家，请对候选人的项目进行深度技术点评。
 
