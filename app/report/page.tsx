@@ -37,7 +37,6 @@ function ReviewSection({
         {state === "loading" && <span style={{ fontSize: "12px", color: "#aaa" }}>加载中...</span>}
         {state === "error" && <span style={{ fontSize: "12px", color: "#dc2626", cursor: "pointer" }} onClick={load}>重试</span>}
       </div>
-
       {state === "done" && data && (
         <div style={{ padding: "0 20px 20px", borderTop: "1px solid #f5f5f5" }}>
           {type === "mc" && <MCReview data={data} />}
@@ -166,16 +165,57 @@ export default function ReportPage() {
   const [evaluation, setEvaluation] = useState<any>(null);
   const [evaluating, setEvaluating] = useState(false);
   const [error, setError] = useState("");
+  const [isAdminView, setIsAdminView] = useState(false);
+  // 是否已生成过（持久化，防重复生成）
+  const [alreadyGenerated, setAlreadyGenerated] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sid = params.get("sessionId") || "";
+    const admin = params.get("admin") === "1";
     setSessionId(sid);
+    setIsAdminView(admin);
+
+    // 候选人名字：优先从 Supabase 获取（通过 evaluate 结果），fallback localStorage
     try { setCandidateName(localStorage.getItem("candidateName") || ""); } catch {}
+
+    if (sid) {
+      // 检查是否已生成过（仅对候选人视图有效）
+      try {
+        const generated = localStorage.getItem(`reportGenerated_${sid}`);
+        if (generated === "1") setAlreadyGenerated(true);
+      } catch {}
+
+      // 面试官视图：自动触发评估
+      if (admin) {
+        autoEvaluate(sid);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  async function autoEvaluate(sid: string) {
+    setEvaluating(true);
+    setError("");
+    try {
+      const res = await fetch("/api/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: sid }),
+      });
+      const data = await res.json();
+      if (!res.ok) setError(data.error || "评估失败");
+      else {
+        setEvaluation(data);
+        // 从评估结果里读候选人名字（Supabase 存的）
+        if (data.candidateName) setCandidateName(data.candidateName);
+      }
+    } catch { setError("网络错误，请重试"); }
+    setEvaluating(false);
+  }
+
   async function runEvaluation() {
-    if (!sessionId) return;
+    if (!sessionId || alreadyGenerated) return;
     setEvaluating(true);
     setError("");
     try {
@@ -185,8 +225,15 @@ export default function ReportPage() {
         body: JSON.stringify({ sessionId }),
       });
       const data = await res.json();
-      if (!res.ok) setError(data.error || "评估失败，请重试");
-      else setEvaluation(data);
+      if (!res.ok) {
+        setError(data.error || "评估失败，请重试");
+      } else {
+        setEvaluation(data);
+        if (data.candidateName) setCandidateName(data.candidateName);
+        // 标记已生成，防止重复点击
+        try { localStorage.setItem(`reportGenerated_${sessionId}`, "1"); } catch {}
+        setAlreadyGenerated(true);
+      }
     } catch { setError("网络错误，请重试"); }
     setEvaluating(false);
   }
@@ -204,27 +251,52 @@ export default function ReportPage() {
     <main style={{ minHeight: "100vh", background: "#FAFAFA", color: "#111", fontFamily: "'Inter', -apple-system, sans-serif" }}>
       <div style={{ borderBottom: "1px solid #f0f0f0", padding: "0 32px", height: "56px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fff" }}>
         <div style={{ fontWeight: 700, fontSize: "15px" }}>AI 面试系统</div>
-        <div style={{ fontSize: "12px", color: "#aaa" }}>面试报告</div>
+        <div style={{ fontSize: "12px", color: "#aaa" }}>{isAdminView ? "面试官视图" : "面试报告"}</div>
       </div>
 
       <div style={{ maxWidth: "760px", margin: "0 auto", padding: "40px 32px 80px" }}>
         <div style={{ marginBottom: "32px" }}>
           <h1 style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "6px" }}>面试报告</h1>
           {candidateName && <div style={{ fontSize: "14px", color: "#555" }}>候选人：{candidateName}</div>}
-          <div style={{ fontSize: "12px", color: "#aaa", marginTop: "2px" }}>Session ID：{sessionId || "—"}</div>
+          {/* ✅ 3: 不再显示 session id */}
         </div>
 
-        {/* 生成按钮 */}
-        <div style={{ border: "1px solid #f0f0f0", borderRadius: "8px", padding: "20px 24px", background: "#fff", marginBottom: "24px" }}>
-          <div style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px" }}>🎉 面试已完成</div>
-          <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7", marginBottom: "16px" }}>
-            点击下方按钮生成评估报告，包含三部分评分和录用建议。
+        {/* 面试官视图：自动触发，只显示加载状态 */}
+        {isAdminView && evaluating && (
+          <div style={{ border: "1px solid #f0f0f0", borderRadius: "8px", padding: "32px 24px", background: "#fff", marginBottom: "24px", textAlign: "center" }}>
+            <div style={{ fontSize: "13px", color: "#888" }}>正在加载评估报告，请稍候…</div>
           </div>
-          <button onClick={runEvaluation} disabled={evaluating || !sessionId} style={{ background: evaluating ? "#e5e5e5" : "#111", color: evaluating ? "#aaa" : "#fff", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: 600, cursor: evaluating ? "not-allowed" : "pointer" }}>
-            {evaluating ? "评估中，请稍候（约15秒）..." : "生成评估报告"}
-          </button>
-          {error && <div style={{ marginTop: "10px", fontSize: "13px", color: "#dc2626" }}>{error}</div>}
-        </div>
+        )}
+        {isAdminView && error && (
+          <div style={{ border: "1px solid #fee2e2", borderRadius: "8px", padding: "16px 24px", background: "#fff5f5", marginBottom: "24px" }}>
+            <div style={{ fontSize: "13px", color: "#dc2626" }}>{error}</div>
+          </div>
+        )}
+
+        {/* 候选人视图：手动触发按钮 */}
+        {!isAdminView && !evaluation && (
+          <div style={{ border: "1px solid #f0f0f0", borderRadius: "8px", padding: "20px 24px", background: "#fff", marginBottom: "24px" }}>
+            <div style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px" }}>🎉 面试已完成</div>
+            <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7", marginBottom: "16px" }}>
+              点击下方按钮生成你的评估报告，包含三部分评分和录用建议。
+            </div>
+            {/* ✅ 4: 生成后按钮置灰 */}
+            <button
+              onClick={runEvaluation}
+              disabled={evaluating || !sessionId || alreadyGenerated}
+              style={{
+                background: (evaluating || alreadyGenerated) ? "#e5e5e5" : "#111",
+                color: (evaluating || alreadyGenerated) ? "#aaa" : "#fff",
+                border: "none", borderRadius: "6px", padding: "10px 20px",
+                fontSize: "13px", fontWeight: 600,
+                cursor: (evaluating || alreadyGenerated) ? "not-allowed" : "pointer",
+              }}
+            >
+              {evaluating ? "评估中，请稍候（约15秒）..." : alreadyGenerated ? "已生成评估报告" : "生成评估报告"}
+            </button>
+            {error && <div style={{ marginTop: "10px", fontSize: "13px", color: "#dc2626" }}>{error}</div>}
+          </div>
+        )}
 
         {evaluation && (
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -264,7 +336,6 @@ export default function ReportPage() {
                             {part.essayScore !== undefined && <span>问答题：{part.essayScore}分</span>}
                           </div>
                         )}
-                        {/* Part2 行为标记 */}
                         {key === "part2" && part.behaviorFlags && (
                           <div style={{ fontSize: "11px", color: "#aaa", marginTop: "4px" }}>
                             对话 {part.behaviorFlags.turns} 轮 · {part.behaviorFlags.totalChars} 字

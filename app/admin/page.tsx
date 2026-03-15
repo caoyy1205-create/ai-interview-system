@@ -164,6 +164,10 @@ export default function AdminPage() {
                       <div style={{ fontSize: "15px", fontWeight: 600, color: "#111" }}>{group.name}</div>
                       {group.email && <div style={{ fontSize: "12px", color: "#aaa", marginTop: "2px" }}>{group.email}</div>}
                     </div>
+                    {/* 最近提交时间 */}
+                    <div style={{ fontSize: "11px", color: "#ccc", marginTop: "1px" }}>
+                      {formatDate(group.sessions[group.sessions.length - 1].updated_at || group.sessions[group.sessions.length - 1].started_at)}
+                    </div>
                     {/* 面试次数 */}
                     {hasMultiple && (
                       <div style={{ fontSize: "12px", color: "#888", background: "#f5f5f5", borderRadius: "4px", padding: "3px 8px", flexShrink: 0 }}>
@@ -181,7 +185,7 @@ export default function AdminPage() {
                     </div>
                     {/* 单次面试：显示查看报告；多次面试：只显示展开按钮，报告在展开里 */}
                     {!hasMultiple ? (
-                      <a href={`/report?sessionId=${encodeURIComponent(singleSession.session_id)}`}
+                      <a href={`/report?sessionId=${encodeURIComponent(singleSession.session_id)}&admin=1`}
                         target="_blank" rel="noopener noreferrer"
                         style={{ fontSize: "13px", color: "#111", fontWeight: 600, textDecoration: "none", border: "1px solid #111", borderRadius: "6px", padding: "6px 14px", flexShrink: 0, whiteSpace: "nowrap" }}>
                         查看报告 →
@@ -210,7 +214,7 @@ export default function AdminPage() {
                               {score !== undefined && score !== null ? score : "—"}
                             </div>
                             <div style={{ fontSize: "11px", color: "#aaa", minWidth: "56px" }}>{scoreLabel(score)}</div>
-                            <a href={`/report?sessionId=${encodeURIComponent(s.session_id)}`}
+                            <a href={`/report?sessionId=${encodeURIComponent(s.session_id)}&admin=1`}
                               target="_blank" rel="noopener noreferrer"
                               style={{ fontSize: "12px", color: "#111", fontWeight: 600, textDecoration: "none", border: "1px solid #ddd", borderRadius: "5px", padding: "4px 10px", whiteSpace: "nowrap" }}>
                               查看报告 →

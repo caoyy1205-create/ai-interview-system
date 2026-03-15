@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     // 已评估过，直接返回缓存结果
     if (sessionData.status === "evaluated" && sessionData.final_report) {
-      return NextResponse.json(sessionData.final_report);
+      return NextResponse.json({ ...sessionData.final_report, candidateName: sessionData.candidate_name || "" });
     }
 
     const { part1_data, part2_data, part3_data, exam_set } = sessionData;
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       totalScore,
       recommendation: getRecommendation(totalScore),
       breakdown: { part1: p1Result, part2: p2Result, part3: p3Result },
+      candidateName: sessionData.candidate_name || "",
     };
 
     await supabase
