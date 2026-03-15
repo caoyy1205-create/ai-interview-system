@@ -48,7 +48,7 @@ type IntegrityEvent = {
 };
 
 const TOTAL_SECONDS = 6 * 60 * 60;
-const SESSION_KEY = "examSession_v3";
+const SESSION_KEY = "examSession_v4";
 const MC_LIMIT = 5 * 60;
 const ESSAY_LIMIT = 5 * 60;
 const PART2_LIMIT = 5 * 60;
