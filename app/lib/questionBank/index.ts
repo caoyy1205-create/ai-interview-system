@@ -416,8 +416,6 @@ export const multipleChoicePool = [
     topics: ["Prompt设计", "Prompt工程"]
   },
   {
-    i,
-  {
     id: "mc_p05",
     question: "Prompt Injection 攻击的本质是？",
     options: ["注入恶意代码到服务器", "构造输入让模型忽略原有指令", "暴力破解API密钥", "向模型输入超长文本导致崩溃（不影响"],
