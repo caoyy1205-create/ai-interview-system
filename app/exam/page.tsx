@@ -600,7 +600,6 @@ export default function ExamPage() {
         <div style={S.logo}>AI 面试系统</div>
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           {isTimeUp && <span style={{ fontSize: "12px", color: "#dc2626", fontWeight: 600 }}>⏰ 时间已结束</span>}
-          <div style={S.timer(leftSeconds < 1800)}>{isReady ? formatTime(leftSeconds) : "--:--"}</div>
         </div>
       </div>
       <div style={S.tabs}>
