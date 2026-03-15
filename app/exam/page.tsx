@@ -44,8 +44,8 @@ const TOTAL_SECONDS = 6 * 60 * 60;
 const SESSION_KEY = "examSession_v2";
 
 // 每题限时（秒）
-const MC_LIMIT = 8 * 60;    // 选择题 8 分钟     // 选择题 45 秒
-const ESSAY_LIMIT = 15 * 60; // 问答题 15 分钟（含选择题答题时间） // 问答题 3 分钟
+const MC_LIMIT = 8 * 60;    // 选择题 8 分钟
+const ESSAY_LIMIT = 15 * 60; // 问答题 15 分钟（含选择题时间）
 
 function formatTime(s: number) {
   s = Math.max(0, s);
@@ -343,7 +343,7 @@ export default function ExamPage() {
         <div style={{ ...S.card, background: "#fffbeb", borderColor: "#fde68a" }}>
           <span style={S.badge("yellow")}>⚠️ 禁止 AI</span>
           <span style={{ fontSize: "13px", color: "#92400e", marginLeft: "10px" }}>
-            本部分请独立完成 · 选择题每题 {MC_LIMIT}秒 · 问答题每题 {ESSAY_LIMIT / 60}分钟 · 超时自动锁定
+            本部分请独立完成 · 选择题每题 {MC_LIMIT / 60}分钟 · 问答题每题 {ESSAY_LIMIT / 60}分钟 · 超时自动锁定
           </span>
         </div>
         {part1.questions.map((q, idx) => {
