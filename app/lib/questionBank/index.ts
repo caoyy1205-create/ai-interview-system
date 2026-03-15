@@ -404,7 +404,8 @@ export const multipleChoicePool = [
     correctAnswer: 1,
     explanation: "Orchestrator 负责任务分解、分配和结果整合，Worker 负责具体执行，形成分层协作。",
     difficulty: "hard",
-    topics: ["多Agent架构", "Orchestrator"],
+    topics: ["多Agent架构", "Orchestrator"]
+  },
   {
     id: "mc_045",
     question: "Agent 的 'planning' 能力主要解决什么问题？",
