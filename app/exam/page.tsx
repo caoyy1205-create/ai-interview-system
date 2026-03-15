@@ -48,7 +48,8 @@ type IntegrityEvent = {
 };
 
 const TOTAL_SECONDS = 6 * 60 * 60;
-const SESSION_KEY = "examSession_v4";
+const SESSION_KEY_PREFIX = "examSession_v4";
+const sessionKey = (id: string) => `${SESSION_KEY_PREFIX}_${id}`;
 const MC_LIMIT = 5 * 60;
 const ESSAY_LIMIT = 5 * 60;
 const PART2_LIMIT = 5 * 60;
@@ -187,7 +188,8 @@ export default function ExamPage() {
     let cancelled = false;
     async function init() {
       try {
-        const saved = localStorage.getItem(SESSION_KEY);
+        const lastId = localStorage.getItem("examSession_v4_lastId") || "";
+        const saved = lastId ? localStorage.getItem(sessionKey(lastId)) : null;
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.sessionId && parsed.examSet && parsed.leftSeconds > 0) {
@@ -215,7 +217,10 @@ export default function ExamPage() {
         part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
         finalSolution: "", integrityEvents: [],
       };
-      try { localStorage.setItem(SESSION_KEY, JSON.stringify(state)); } catch {}
+      try {
+        localStorage.setItem(sessionKey(sessionId), JSON.stringify(state));
+        localStorage.setItem("examSession_v4_lastId", sessionId);
+      } catch {}
       restoreSession(state);
     }
     init();
@@ -246,9 +251,11 @@ export default function ExamPage() {
 
   function persistState(patch: object) {
     try {
-      const saved = localStorage.getItem(SESSION_KEY);
+      const id = sessionId || localStorage.getItem("examSession_v4_lastId") || "";
+      if (!id) return;
+      const saved = localStorage.getItem(sessionKey(id));
       const current = saved ? JSON.parse(saved) : {};
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ ...current, ...patch }));
+      localStorage.setItem(sessionKey(id), JSON.stringify({ ...current, ...patch }));
     } catch {}
   }
 
@@ -351,7 +358,7 @@ export default function ExamPage() {
         if (part === "part1") { setPart1Submitted(true); persistState({ part1Submitted: true }); }
         if (part === "part2") { setPart2Submitted(true); persistState({ part2Submitted: true }); }
         if (next) { setTimeout(() => { setSubmitStatus("idle"); setActivePart(next); }, 800); }
-        else { try { localStorage.removeItem(SESSION_KEY); } catch {} window.location.href = "/report?sessionId=" + sessionId; }
+        else { try { localStorage.removeItem(sessionKey(sessionId)); localStorage.removeItem("examSession_v4_lastId"); } catch {} window.location.href = "/report?sessionId=" + sessionId; }
       } else { setSubmitStatus("error"); }
     } catch { setSubmitStatus("error"); }
   };
