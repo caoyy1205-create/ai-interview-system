@@ -19,6 +19,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "面试记录未找到" }, { status: 404 });
     }
 
+    // 已评估过，直接返回缓存结果
+    if (sessionData.status === "evaluated" && sessionData.final_report) {
+      return NextResponse.json(sessionData.final_report);
+    }
+
     const { part1_data, part2_data, part3_data, exam_set } = sessionData;
 
     const [p1Result, p2Result, p3Result] = await Promise.all([

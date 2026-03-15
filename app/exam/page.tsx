@@ -604,12 +604,22 @@ export default function ExamPage() {
         </div>
       </div>
       <div style={S.tabs}>
-        {(["part1", "part2", "part3"] as ActivePart[]).map((p, i) => (
-          <button key={p} style={S.tab(activePart === p)} onClick={() => setActivePart(p)}>
-            {["第一部分 基础认知", "第二部分 AI 协作", "第三部分 项目实战"][i]}
-            {[part1Submitted, part2Submitted, false][i] && <span style={{ marginLeft: "6px", color: "#16a34a", fontSize: "11px" }}>✓</span>}
-          </button>
-        ))}
+        {(["part1", "part2", "part3"] as ActivePart[]).map((p, i) => {
+          // part2 需要 part1 已提交；part3 需要 part2 已提交
+          const isDisabled = (p === "part2" && !part1Submitted) || (p === "part3" && !part2Submitted);
+          return (
+            <button
+              key={p}
+              style={{ ...S.tab(activePart === p), opacity: isDisabled ? 0.35 : 1, cursor: isDisabled ? "not-allowed" : "pointer" }}
+              onClick={() => { if (!isDisabled) setActivePart(p); }}
+              title={isDisabled ? "请先完成并提交前一部分" : undefined}
+            >
+              {["第一部分 基础认知", "第二部分 AI 协作", "第三部分 项目实战"][i]}
+              {[part1Submitted, part2Submitted, false][i] && <span style={{ marginLeft: "6px", color: "#16a34a", fontSize: "11px" }}>✓</span>}
+              {isDisabled && <span style={{ marginLeft: "4px", fontSize: "10px", color: "#bbb" }}>🔒</span>}
+            </button>
+          );
+        })}
       </div>
       <div style={S.body}>
         {!part1 ? (
