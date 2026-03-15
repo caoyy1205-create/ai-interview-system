@@ -49,8 +49,8 @@ type IntegrityEvent = {
 
 const TOTAL_SECONDS = 6 * 60 * 60;
 const SESSION_KEY = "examSession_v3";
-const MC_LIMIT = 3 * 60;
-const ESSAY_LIMIT = 10 * 60;
+const MC_LIMIT = 5 * 60;
+const ESSAY_LIMIT = 5 * 60;
 const PART2_LIMIT = 5 * 60;
 const MAX_AI_TURNS = 10;
 
@@ -381,7 +381,7 @@ export default function ExamPage() {
         <div style={{ ...S.card, background: "#fffbeb", borderColor: "#fde68a" }}>
           <span style={S.badge("yellow")}>⚠️ 禁止 AI</span>
           <span style={{ fontSize: "13px", color: "#92400e", marginLeft: "10px" }}>
-            本部分请独立完成 · 选择题共 {MC_LIMIT / 60}分钟 · 第一部分题目共 {ESSAY_LIMIT / 60}分钟 · 超时自动锁定
+            注意题目上方的倒计时 · 超时自动锁定
           </span>
         </div>
 
@@ -406,9 +406,9 @@ export default function ExamPage() {
               <div style={{ fontSize: "14px", fontWeight: 500, marginBottom: "16px", lineHeight: "1.6" }}>{q.question}</div>
 
               {q.type === "multipleChoice" && q.options?.map((opt, i) => (
-                <label key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", border: `1px solid ${part1Answers[q.id] === i ? "#111" : "#e5e5e5"}`, borderRadius: "6px", marginBottom: "8px", cursor: isLocked ? "not-allowed" : "pointer", fontSize: "13px", background: part1Answers[q.id] === i ? "#f9f9f9" : "#fff", opacity: isLocked && part1Answers[q.id] !== i ? 0.5 : 1 }}>
+                <label key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "10px 12px", border: `1px solid ${part1Answers[q.id] === i ? "#111" : "#e5e5e5"}`, borderRadius: "6px", marginBottom: "8px", cursor: isLocked ? "not-allowed" : "pointer", fontSize: "13px", background: part1Answers[q.id] === i ? "#f9f9f9" : "#fff", opacity: isLocked && part1Answers[q.id] !== i ? 0.5 : 1 }}>
                   <input type="radio" name={q.id} checked={part1Answers[q.id] === i} onChange={() => { if (isLocked) return; setPart1Answers(p => ({ ...p, [q.id]: i })); persistState({ part1Answers: { ...part1Answers, [q.id]: i } }); }} disabled={isLocked} />
-                  {opt}
+                  <span style={{ flex: 1, whiteSpace: "normal", wordBreak: "break-word" }}>{opt}</span>
                 </label>
               ))}
 
@@ -583,13 +583,13 @@ export default function ExamPage() {
         <div style={S.card}>
           <div style={{ fontSize: "14px", fontWeight: 600, marginBottom: "20px" }}>项目提交</div>
           <label style={S.label}>GitHub 仓库链接 *</label>
-          <input style={{ ...S.input, marginBottom: "16px" }} type="url" value={repoUrl} onChange={e => { setRepoUrl(e.target.value); persistState({ repoUrl: e.target.value }); }} placeholder="https://github.com/username/project-name" />
+          <input style={{ ...S.input, marginBottom: "16px" }} value={repoUrl} onChange={e => { setRepoUrl(e.target.value); persistState({ repoUrl: e.target.value }); }} placeholder="https://github.com/username/project-name" />
           <label style={S.label}>提交说明</label>
           <textarea style={{ ...S.textarea, marginBottom: "0" }} value={notes} onChange={e => { setNotes(e.target.value); persistState({ notes: e.target.value }); }} placeholder="简述你如何拆解需求、如何使用 AI、关键取舍与未完成项..." />
         </div>
         <div style={S.divider} />
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <button style={S.btnPrimary(submitStatus === "submitting" || !repoUrl.trim())} onClick={() => submitPart("part3", { repoUrl, notes, completedAt: Date.now() })} disabled={submitStatus === "submitting" || !repoUrl.trim()}>
+          <button style={S.btnPrimary(submitStatus === "submitting")} onClick={() => submitPart("part3", { repoUrl, notes, completedAt: Date.now() })} disabled={submitStatus === "submitting"}>
             {submitStatus === "submitting" ? "提交中..." : "完成面试并提交"}
           </button>
           {submitStatus === "success" && <span style={{ fontSize: "13px", color: "#16a34a" }}>✓ 提交成功，正在跳转...</span>}

@@ -314,7 +314,7 @@ export const multipleChoicePool = [
   {
     id: "mc_a34",
     question: "触发词设计（Trigger Word Design）在 Agent 系统中的作用是？",
-    options: ["防止用户滥用Agent", "让Agent识别何时调用特定Skill", "加密Agent的系统提示内容（不影响核心结论）", "限制用户可以输入的词汇范围"],
+    options: ["防止用户未经授权滥用Agent的调用权限", "让Agent识别何时调用特定Skill", "对系统提示内容进行非对称加密防止泄露", "限制用户可以输入的词汇范围"],
     correctAnswer: 1,
     explanation: "触发词帮助 Agent 或路由层识别用户意图，决定激活哪个 Skill 或工具。",
     difficulty: "medium",
@@ -382,7 +382,7 @@ export const multipleChoicePool = [
   {
     id: "mc_p01",
     question: "Temperature=0 时模型输出特征是？",
-    options: ["完全随机输出", "趋于确定的最高概率token", "拒绝所有请求", "输出长度变为零字符（不影响核心结论）"],
+    options: ["完全随机输出", "趋于确定的最高概率token", "拒绝所有请求", "强制输出空字符串后立即终止当前请求"],
     correctAnswer: 1,
     explanation: "Temperature=0 做贪心解码，每次选概率最高的 token，结果趋于固定可复现。",
     difficulty: "easy",
@@ -477,7 +477,7 @@ export const multipleChoicePool = [
   {
     id: "mc_r01",
     question: "RAG 系统减少幻觉的核心机制是？",
-    options: ["微调模型参数", "将外部知识注入Prompt供模型参考", "增加模型参数规模", "让模型自动爬取互联网内容（不影响核心结论）"],
+    options: ["微调模型参数", "将外部知识注入Prompt供模型参考", "增加模型参数规模", "让模型在每次推理时自动并发爬取多个互联网来源"],
     correctAnswer: 1,
     explanation: "RAG 检索相关文档注入 Prompt，让模型基于事实回答，而非完全依赖参数记忆。",
     difficulty: "easy",
@@ -513,7 +513,7 @@ export const multipleChoicePool = [
   {
     id: "mc_r05",
     question: "Re-ranking 在 RAG 中的作用是？",
-    options: ["重新建立文档索引（不影响核心结论）", "对粗召回结果精细打分提升精度", "加快向量检索速度", "减少文档分块数量"],
+    options: ["删除旧索引后从零开始重建所有文档向量", "对粗召回结果精细打分提升精度", "加快向量检索速度", "减少文档分块数量"],
     correctAnswer: 1,
     explanation: "Re-ranker 对粗检索候选文档精确打分，筛选出质量更高的内容传给生成模型。",
     difficulty: "hard",
@@ -531,7 +531,7 @@ export const multipleChoicePool = [
   {
     id: "mc_r07",
     question: "RAG 评估中 'faithfulness' 衡量的是？",
-    options: ["模型回答速度", "生成内容是否基于检索文档", "向量检索准确率（不影响核心结论）", "用户满意度评分"],
+    options: ["模型回答速度", "生成内容是否基于检索文档", "整体向量检索的召回准确率百分比", "用户满意度评分"],
     correctAnswer: 1,
     explanation: "faithfulness 衡量模型输出是否有文档依据，高分说明模型没有凭空编造内容。",
     difficulty: "hard",
@@ -617,7 +617,7 @@ export const multipleChoicePool = [
   {
     id: "mc_m06",
     question: "'Needle in a Haystack' 问题描述的是？",
-    options: ["文档含敏感信息", "超长文本中模型难以利用关键细节", "文档格式不兼容", "模型处理时间过长（不影响核心结论）"],
+    options: ["文档含敏感信息", "超长文本中模型难以利用关键细节", "文档格式不兼容", "处理超大文本时单次推理计算时间过长导致超时"],
     correctAnswer: 1,
     explanation: "在极长上下文中，模型倾向忽视中间的关键信息，无法有效检索'针'（关键细节）。",
     difficulty: "hard",
@@ -644,7 +644,7 @@ export const multipleChoicePool = [
   {
     id: "mc_m09",
     question: "Multimodal LLM 相比纯文本模型的核心扩展是？",
-    options: ["支持更多编程语言（不影响核心结论）", "能理解和处理图像音频等非文本", "参数量翻倍", "支持更长的上下文"],
+    options: ["跨编程语言处理代码和指令的兼容能力", "能理解和处理图像音频等非文本", "参数量翻倍", "支持更长的上下文"],
     correctAnswer: 1,
     explanation: "多模态模型通过统一编码器处理图文音视频，实现跨模态理解和生成。",
     difficulty: "easy",
@@ -667,7 +667,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d01",
     question: "'Graceful degradation'（优雅降级）在 AI 产品中指的是？",
-    options: ["逐步减少功能", "AI不足时回退到可靠备选方案", "降低产品视觉质量（不影响核心结论）", "减少AI响应频率"],
+    options: ["逐步减少功能", "AI不足时回退到可靠备选方案", "在保持功能的前提下降低界面视觉渲染质量", "减少AI响应频率"],
     correctAnswer: 1,
     explanation: "优雅降级确保 AI 失败时产品仍可用，如超时时显示缓存答案或提示人工介入。",
     difficulty: "medium",
@@ -685,7 +685,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d03",
     question: "AI 客服中 intent recognition 准确率低直接导致？",
-    options: ["响应速度变慢", "用户进入错误解决流程满意度下降", "API调用次数增多（不影响核心结论）", "知识库更新频率变高"],
+    options: ["响应速度变慢", "用户进入错误解决流程满意度下降", "每次用户请求需要更多API调用次数", "知识库更新频率变高"],
     correctAnswer: 1,
     explanation: "意图识别错误让用户进入错误的对话分支，无法解决实际问题，是客服体验的核心痛点。",
     difficulty: "medium",
@@ -694,7 +694,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d04",
     question: "Streaming output（流式输出）的用户体验优势是？",
-    options: ["减少服务器计算量", "让用户即时看到输出感知等待更短", "提高输出准确性", "降低API调用费用（不影响核心结论）"],
+    options: ["减少服务器计算量", "让用户即时看到输出感知等待更短", "提高输出准确性", "通过批量请求策略降低单次API调用费用"],
     correctAnswer: 1,
     explanation: "流式输出让用户看到 token 逐步生成，相比等待完整结果，主观感受响应更快。",
     difficulty: "easy",
@@ -703,7 +703,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d05",
     question: "衡量 AI 客服替代人工效果的最直接指标是？",
-    options: ["API调用成功率（不影响核心结论）", "AI自主解决率（无需转人工比例）", "对话轮次数量", "系统平均响应时间"],
+    options: ["接口层面的API调用成功率和稳定性指标", "AI自主解决率（无需转人工比例）", "对话轮次数量", "系统平均响应时间"],
     correctAnswer: 1,
     explanation: "自主解决率（containment rate）直接反映 AI 多大程度替代了人工，是核心业务指标。",
     difficulty: "medium",
@@ -721,7 +721,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d07",
     question: "A/B 测试中最常见的误区是？",
-    options: ["测试周期过长", "样本量不足时过早宣布结果", "测试指标过多", "未记录实验参数（不影响核心结论）"],
+    options: ["测试周期过长", "样本量不足时过早宣布结果", "测试指标过多", "实验启动前未完整记录所有配置参数"],
     correctAnswer: 1,
     explanation: "过早停止测试受'窥视问题'影响，样本不足时的显著差异很可能是随机误差。",
     difficulty: "hard",
@@ -730,7 +730,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d08",
     question: "AI 产品设计 'user control' 原则要求？",
-    options: ["让AI完全替代用户（不影响核心结论）", "保留用户修改和拒绝AI建议的能力", "限制用户输入内容", "让AI自动发布内容"],
+    options: ["将AI设计为完全替代用户做出所有操作决策", "保留用户修改和拒绝AI建议的能力", "限制用户输入内容", "让AI自动发布内容"],
     correctAnswer: 1,
     explanation: "用户控制原则确保人类始终是最终决策者，AI 是辅助工具不强制替代人类判断。",
     difficulty: "easy",
@@ -739,7 +739,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d09",
     question: "AI 产品 onboarding 中最能帮助用户建立正确心智模型的方式是？",
-    options: ["展示大量技术参数", "具体示例展示能做什么不能做什么", "只提供文字说明文档（不影响核心结论）", "让用户自行探索功能"],
+    options: ["展示大量技术参数", "具体示例展示能做什么不能做什么", "只向用户提供纯文字形式的功能说明文档", "让用户自行探索功能"],
     correctAnswer: 1,
     explanation: "具体示例帮助用户快速校准对 AI 的预期，避免过度依赖或误解 AI 能力边界。",
     difficulty: "medium",
@@ -748,7 +748,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d10",
     question: "AI 产品出现输出质量问题时最科学的定位方法是？",
-    options: ["立即更换底层模型（不影响核心结论）", "通过错误案例系统分析根本原因", "增加人工客服", "扩大训练数据量"],
+    options: ["不做定位分析直接切换到更昂贵的底层模型", "通过错误案例系统分析根本原因", "增加人工客服", "扩大训练数据量"],
     correctAnswer: 1,
     explanation: "系统性错误分析（案例归因、错误分类）才能识别是 Prompt、数据、模型还是工程问题。",
     difficulty: "medium",
@@ -762,7 +762,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s01",
     question: "'Algorithmic bias'（算法偏见）最可能源于？",
-    options: ["服务器硬件故障", "训练数据中的历史偏见被放大", "模型参数设置不当（不影响核心结论）", "用户界面设计缺陷"],
+    options: ["服务器硬件故障", "训练数据中的历史偏见被放大", "推理时temperature和top_p等参数配置不合理", "用户界面设计缺陷"],
     correctAnswer: 1,
     explanation: "训练数据反映现实偏见（种族、性别等），模型学习后可能在决策中复制和放大。",
     difficulty: "medium",
@@ -789,7 +789,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s04",
     question: "AI 公平性最难解决的挑战是？",
-    options: ["计算公平性指标成本高", "不同公平性定义之间数学上不可兼得", "公平性只适用于分类任务（不影响核心结论）", "公平性与用户体验无关"],
+    options: ["计算公平性指标成本高", "不同公平性定义之间数学上不可兼得", "公平性评估框架只对二分类任务有实际意义", "公平性与用户体验无关"],
     correctAnswer: 1,
     explanation: "个体公平与群体公平等不同定义数学上无法同时满足，需根据场景做权衡取舍。",
     difficulty: "hard",
@@ -807,7 +807,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s06",
     question: "防御 Prompt Injection 攻击最有效的方式是？",
-    options: ["增加API调用频率限制（不影响核心结论）", "输入验证+权限分离+输出过滤组合", "关闭用户自定义输入", "使用更大参数量的模型"],
+    options: ["对每个用户IP设置更严格的API调用频率限制", "输入验证+权限分离+输出过滤组合", "关闭用户自定义输入", "使用更大参数量的模型"],
     correctAnswer: 1,
     explanation: "单一防御难以应对多样攻击，需要输入清洗、权限隔离、输出监控等多层防御策略。",
     difficulty: "hard",
@@ -857,7 +857,7 @@ export const multipleChoicePool = [
   {
     id: "mc_e01",
     question: "BLEU 分数的主要局限性是？",
-    options: ["计算速度太慢", "只衡量词汇重叠忽略语义等价", "只适用于图像评估（不影响核心结论）", "需要大量人工标注"],
+    options: ["计算速度太慢", "只衡量词汇重叠忽略语义等价", "BLEU指标只能用于图像生成质量的评估场景", "需要大量人工标注"],
     correctAnswer: 1,
     explanation: "BLEU 基于 n-gram 匹配，语义相同但词汇不同的表达得分低，对摘要评估不够准确。",
     difficulty: "medium",
@@ -884,7 +884,7 @@ export const multipleChoicePool = [
   {
     id: "mc_e04",
     question: "'Benchmark saturation'（基准饱和）指的是？",
-    options: ["训练数据用完", "模型在旧基准接近满分区分度下降", "评估服务器过载（不影响核心结论）", "测试题目太简单"],
+    options: ["训练数据用完", "模型在旧基准接近满分区分度下降", "大量并发请求导致评估服务器资源耗尽过载", "测试题目太简单"],
     correctAnswer: 1,
     explanation: "随模型能力提升，旧基准趋于饱和失去区分度，需要更难的新基准衡量真实能力差距。",
     difficulty: "hard",
@@ -929,7 +929,7 @@ export const multipleChoicePool = [
   {
     id: "mc_e09",
     question: "人工评估 AI 输出时最常见的标注挑战是？",
-    options: ["硬件设备故障", "不同标注员对相同输出判断存在差异", "数据存储格式问题", "标注工具界面不友好（不影响核心结论）"],
+    options: ["硬件设备故障", "不同标注员对相同输出判断存在差异", "数据存储格式问题", "标注平台的交互界面设计不够直观操作不便"],
     correctAnswer: 1,
     explanation: "主观性任务标注员间一致性（inter-annotator agreement）通常较低，需明确评分标准。",
     difficulty: "medium",

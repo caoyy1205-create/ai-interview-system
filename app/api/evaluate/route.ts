@@ -196,9 +196,18 @@ ${conversation}
 3. 批判性思维与自主判断（25%）
 4. 最终方案完整性与任务完成度（15%）
 
-返回 JSON：{"score": 0-100, "feedback": "整体评语（需引用具体对话内容）", "dimensions": [{"name": "维度名", "score": 分数, "comment": "评语"}], "behaviorFlags": {"turns": ${totalTurns}, "totalChars": ${userTotalChars}, "pasteDetected": ${isPasteDetected}}}`;
+返回 JSON：{"score": 0-100, "feedback": "整体评语（需引用具体对话内容）", "dimensions": [{"name": "维度名", "score": 分数（不超过该维度满分）, "comment": "评语"}], "behaviorFlags": {"turns": ${totalTurns}, "totalChars": ${userTotalChars}, "pasteDetected": ${isPasteDetected}}}`;
 
-  return await callQwen(prompt);
+  const p2Result = await callQwen(prompt);
+  // 截断每个维度得分，防止超出满分
+  const DIM_MAX: Record<number, number> = { 0: 25, 1: 35, 2: 25, 3: 15 };
+  if (p2Result && p2Result.dimensions) {
+    p2Result.dimensions = p2Result.dimensions.map((d: any, i: number) => ({
+      ...d,
+      score: Math.min(d.score ?? 0, DIM_MAX[i] ?? 100),
+    }));
+  }
+  return p2Result;
 }
 
 async function fetchGitHubContent(repoUrl: string): Promise<{ content: string; isEmpty: boolean }> {
@@ -250,7 +259,7 @@ async function fetchGitHubContent(repoUrl: string): Promise<{ content: string; i
 }
 
 async function evaluatePart3(data: any, examSet: any) {
-  if (!data || !data.repoUrl) return { score: 0, feedback: "项目未提交" };
+  if (!data || !data.repoUrl || !data.repoUrl.trim()) return { score: 0, feedback: "未提交 GitHub 仓库链接，本题得 0 分" };
   if (!data.repoUrl.includes("github.com")) return { score: 0, feedback: "请提交有效的 GitHub 仓库链接" };
 
   const task = examSet?.part3?.task;
