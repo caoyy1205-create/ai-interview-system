@@ -872,7 +872,7 @@ export const multipleChoicePool = [
     explanation: "2024-2025 年 AI 产品趋势：通用大模型能力趋于饱和，差异化竞争转向垂直场景。Agent 自动化工作流成为最热门的产品方向。",
     difficulty: "medium",
     topics: ["产品趋势", "行业洞察"]
-  }
+  },
   {
     question: "大模型的 Context Window（上下文窗口）主要影响的是：",
     options: ["模型的推理速度", "模型一次能处理的最大文本长度", "模型的参数数量", "模型的训练成本"],
