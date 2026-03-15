@@ -269,7 +269,7 @@ ${rubric.map((r: any) => `- ${r.dimension}（权重${r.weight}%）：${r.whatGoo
 - 指出明显不足或可改进的地方
 - 评估AI工具使用痕迹和产品思维
 
-返回 JSON：{"score": 0-100, "feedback": "总体评语（技术专家视角，具体有据）", "dimensions": [{"name": "维度名", "score": 分数, "comment": "具体评语"}], "highlights": ["优点1", "优点2"], "improvements": ["改进点1", "改进点2"]}`;
+返回 JSON：{"score": 0-100, "feedback": "总体评语（技术专家视角，具体有据）", "dimensions": [{"name": "维度名", "score": 分数, "max": 满分（等于该维度weight值）, "comment": "具体评语"}], "highlights": ["优点1", "优点2"], "improvements": ["改进点1", "改进点2"]}`;
 
   return await callQwen(prompt);
 }

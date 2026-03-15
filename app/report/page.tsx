@@ -327,14 +327,14 @@ export default function ReportPage() {
                         </div>
                         {key !== "part1" && part.feedback && <div style={{ fontSize: "12px", color: "#555", lineHeight: "1.6" }}>{part.feedback}</div>}
                         {key === "part1" && part.mcCorrect !== undefined && (
-                          <div style={{ fontSize: "12px", color: "#888", display: "flex", gap: "12px" }}>
-                            <span>选择题：{part.mcCorrect}/{part.mcTotal} 正确（{part.mcScore}分）</span>
-                            {part.essayScore !== undefined && <span>问答题：{part.essayScore}分</span>}
+                          <div style={{ fontSize: "12px", color: "#888", display: "flex", gap: "12px", flexWrap: "wrap" as const }}>
+                            <span>选择题：{part.mcCorrect}/{part.mcTotal} 正确（{part.mcScore} / 40分）</span>
+                            {part.essayScore !== undefined && <span>问答题：{part.essayScore} / 20分</span>}
                           </div>
                         )}
                         {key === "part1" && part.credibility && (part.credibility.pasteCount > 0 || part.credibility.tabSwitchCount > 0 || part.credibility.fastInputCount > 0) && (
                           <div style={{ fontSize: "11px", color: "#d97706", marginTop: "6px", background: "#fffbeb", borderRadius: "4px", padding: "4px 8px", border: "1px solid #fde68a" }}>
-                            🔍 可信度信号：粘贴 {part.credibility.pasteCount} 次 · 切换标签 {part.credibility.tabSwitchCount} 次 · 异常快速输入 {part.credibility.fastInputCount} 次
+                            候选人回答问答题时，粘贴 {part.credibility.pasteCount} 次 · 切换标签 {part.credibility.tabSwitchCount} 次 · 异常快速输入 {part.credibility.fastInputCount} 次
                             {part.credibility.note && part.credibility.note !== "正常" && <span style={{ marginLeft: "6px" }}>· {part.credibility.note}</span>}
                           </div>
                         )}
@@ -356,15 +356,24 @@ export default function ReportPage() {
             {evaluation.breakdown?.part2?.dimensions?.length > 0 && (
               <div style={{ border: "1px solid #f0f0f0", borderRadius: "8px", background: "#fff", overflow: "hidden" }}>
                 <div style={{ padding: "16px 24px", borderBottom: "1px solid #f0f0f0", fontSize: "13px", fontWeight: 600 }}>AI 协作能力分析</div>
-                {evaluation.breakdown.part2.dimensions.map((d: any, i: number) => (
-                  <div key={i} style={{ padding: "14px 24px", borderBottom: "1px solid #f5f5f5", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px" }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "2px" }}>{d.name}</div>
-                      <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.5" }}>{d.comment}</div>
-                    </div>
-                    <div style={{ fontSize: "20px", fontWeight: 700, color: getScoreColor(d.score), flexShrink: 0 }}>{d.score}</div>
-                  </div>
-                ))}
+                {(() => {
+                  const maxScores: Record<number, number> = { 0: 25, 1: 35, 2: 25, 3: 15 };
+                  return evaluation.breakdown.part2.dimensions.map((d: any, i: number) => {
+                    const max = maxScores[i] ?? 100;
+                    return (
+                      <div key={i} style={{ padding: "14px 24px", borderBottom: "1px solid #f5f5f5", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px" }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "2px" }}>{d.name}</div>
+                          <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.5" }}>{d.comment}</div>
+                        </div>
+                        <div style={{ textAlign: "center" as const, flexShrink: 0 }}>
+                          <span style={{ fontSize: "20px", fontWeight: 700, color: getScoreColor(d.score) }}>{d.score}</span>
+                          <span style={{ fontSize: "11px", color: "#bbb" }}> / {max}</span>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             )}
 
@@ -378,7 +387,10 @@ export default function ReportPage() {
                       <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "2px" }}>{d.name}</div>
                       <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.5" }}>{d.comment}</div>
                     </div>
-                    <div style={{ fontSize: "20px", fontWeight: 700, color: getScoreColor(d.score), flexShrink: 0 }}>{d.score}</div>
+                    <div style={{ textAlign: "center" as const, flexShrink: 0 }}>
+                      <span style={{ fontSize: "20px", fontWeight: 700, color: getScoreColor(d.score) }}>{d.score}</span>
+                      {d.max !== undefined && <span style={{ fontSize: "11px", color: "#bbb" }}> / {d.max}</span>}
+                    </div>
                   </div>
                 ))}
               </div>
