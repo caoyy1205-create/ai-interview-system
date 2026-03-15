@@ -486,13 +486,17 @@ export default function ExamPage() {
 
         {/* 对话区 */}
         <div style={{ ...S.card, padding: "0" }}>
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "13px", fontWeight: 600 }}>AI 对话</span>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={{ padding: "12px 20px", borderBottom: "1px solid #f0f0f0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+              <span style={{ fontSize: "13px", fontWeight: 600 }}>AI 对话</span>
               {!part2Submitted && (
                 <Part2Timer limitSeconds={PART2_LIMIT} savedLeft={part2TimerLeft} onExpire={handlePart2Expire} locked={part2TimeLocked} />
               )}
-              <span style={{ fontSize: "12px", color: "#aaa" }}>已使用 {aiCount} 次</span>
+            </div>
+            <div style={{ fontSize: "11px", color: aiCount >= MAX_AI_TURNS ? "#dc2626" : "#888", fontWeight: aiCount >= MAX_AI_TURNS ? 600 : 400 }}>
+              {aiCount >= MAX_AI_TURNS
+                ? "⚠️ 已达到最大交互次数（10次），无法继续提问"
+                : `已使用 ${aiCount} / ${MAX_AI_TURNS} 次 · 剩余 ${MAX_AI_TURNS - aiCount} 次`}
             </div>
           </div>
           <div style={{ height: "360px", overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
