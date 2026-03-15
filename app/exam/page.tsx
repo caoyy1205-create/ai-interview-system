@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 type Task = {
   id: string;
@@ -40,8 +40,12 @@ type ExamSet = {
 
 type Message = { role: "user" | "assistant"; content: string; time: number };
 
-const TOTAL_SECONDS = 6 * 60 * 60; // 6小时
+const TOTAL_SECONDS = 6 * 60 * 60;
 const SESSION_KEY = "examSession_v2";
+
+// 每题限时（秒）
+const MC_LIMIT = 45;     // 选择题 45 秒
+const ESSAY_LIMIT = 180; // 问答题 3 分钟
 
 function formatTime(s: number) {
   s = Math.max(0, s);
@@ -72,6 +76,70 @@ const S = {
   statusBar: { position: "fixed" as const, bottom: 0, left: 0, right: 0, background: "#fff", borderTop: "1px solid #f0f0f0", padding: "10px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px", color: "#888" },
 };
 
+// ─── 单题倒计时组件 ──────────────────────────────────────────────────────────
+function QuestionTimer({
+  questionId,
+  limitSeconds,
+  onExpire,
+  locked,
+}: {
+  questionId: string;
+  limitSeconds: number;
+  onExpire: (id: string) => void;
+  locked: boolean;
+}) {
+  const [left, setLeft] = useState(limitSeconds);
+  const calledRef = useRef(false);
+
+  useEffect(() => {
+    setLeft(limitSeconds);
+    calledRef.current = false;
+  }, [questionId, limitSeconds]);
+
+  useEffect(() => {
+    if (locked) return;
+    if (left <= 0) {
+      if (!calledRef.current) {
+        calledRef.current = true;
+        onExpire(questionId);
+      }
+      return;
+    }
+    const t = setTimeout(() => setLeft(p => p - 1), 1000);
+    return () => clearTimeout(t);
+  }, [left, locked, questionId, onExpire]);
+
+  const pct = left / limitSeconds;
+  const urgent = pct < 0.25;
+  const barColor = urgent ? "#dc2626" : pct < 0.5 ? "#f59e0b" : "#16a34a";
+
+  if (locked) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px" }}>
+        <span style={{ fontSize: "11px", color: "#888" }}>⏱</span>
+        <span style={{ fontSize: "11px", color: "#888" }}>已锁定</span>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginBottom: "14px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+        <span style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>剩余时间</span>
+        <span style={{ fontFamily: "monospace", fontSize: "13px", fontWeight: 700, color: urgent ? "#dc2626" : "#555" }}>
+          {formatTime(left)}
+        </span>
+      </div>
+      <div style={{ height: "3px", background: "#f0f0f0", borderRadius: "2px", overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${pct * 100}%`, background: barColor, borderRadius: "2px", transition: "width 1s linear, background 0.3s" }} />
+      </div>
+      {urgent && left > 0 && (
+        <div style={{ fontSize: "11px", color: "#dc2626", marginTop: "4px", fontWeight: 500 }}>⚠️ 即将锁定，请尽快作答！</div>
+      )}
+    </div>
+  );
+}
+
 export default function ExamPage() {
   type ActivePart = "part1" | "part2" | "part3";
   const [activePart, setActivePart] = useState<ActivePart>("part1");
@@ -94,12 +162,13 @@ export default function ExamPage() {
   const [part2Submitted, setPart2Submitted] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // 初始化：优先复用 localStorage session
+  // 每题锁定状态
+  const [lockedQuestions, setLockedQuestions] = useState<{ [id: string]: boolean }>({});
+
   useEffect(() => {
     let cancelled = false;
 
     async function init() {
-      // 尝试从 localStorage 恢复
       try {
         const saved = localStorage.getItem(SESSION_KEY);
         if (saved) {
@@ -112,7 +181,6 @@ export default function ExamPage() {
         }
       } catch {}
 
-      // 否则新建 session
       const candidateName = localStorage.getItem("candidateName") || "";
       const candidateEmail = localStorage.getItem("candidateEmail") || "";
 
@@ -136,6 +204,7 @@ export default function ExamPage() {
         notes: "",
         part1Submitted: false,
         part2Submitted: false,
+        lockedQuestions: {},
       };
       try { localStorage.setItem(SESSION_KEY, JSON.stringify(state)); } catch {}
       restoreSession(state);
@@ -159,9 +228,9 @@ export default function ExamPage() {
     setNotes(state.notes ?? "");
     setPart1Submitted(state.part1Submitted ?? false);
     setPart2Submitted(state.part2Submitted ?? false);
+    setLockedQuestions(state.lockedQuestions ?? {});
   }
 
-  // 持久化 session 状态
   function persistState(patch: object) {
     try {
       const saved = localStorage.getItem(SESSION_KEY);
@@ -170,7 +239,6 @@ export default function ExamPage() {
     } catch {}
   }
 
-  // 全局倒计时
   useEffect(() => {
     if (!sessionId) return;
     timerRef.current = setInterval(() => {
@@ -183,7 +251,6 @@ export default function ExamPage() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [sessionId]);
 
-  // 时间到自动提交当前部分
   useEffect(() => {
     if (leftSeconds === 0 && sessionId) {
       if (activePart === "part1" && !part1Submitted) {
@@ -192,12 +259,21 @@ export default function ExamPage() {
         submitPart("part2", { messages, aiCount, completedAt: Date.now(), autoSubmit: true }, "part3");
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leftSeconds]);
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const isReady = !!task && !!sessionId;
   const isTimeUp = leftSeconds <= 0 && isReady;
+
+  const handleQuestionExpire = useCallback((questionId: string) => {
+    setLockedQuestions(prev => {
+      const next = { ...prev, [questionId]: true };
+      persistState({ lockedQuestions: next });
+      return next;
+    });
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim() || isTimeUp || aiLoading) return;
@@ -213,10 +289,7 @@ export default function ExamPage() {
       const r = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: newMessages,
-          task: part2?.tasks?.[0], // ← 传入当前协作任务
-        }),
+        body: JSON.stringify({ messages: newMessages, task: part2?.tasks?.[0] }),
       });
       const d = await r.json();
       const aiMsg: Message = { role: "assistant", content: d.content || "（无回复）", time: Date.now() };
@@ -245,7 +318,6 @@ export default function ExamPage() {
         if (next) {
           setTimeout(() => { setSubmitStatus("idle"); setActivePart(next); }, 800);
         } else {
-          // 清除 session 缓存，跳转报告页
           try { localStorage.removeItem(SESSION_KEY); } catch {}
           window.location.href = "/report?sessionId=" + sessionId;
         }
@@ -270,32 +342,101 @@ export default function ExamPage() {
         )}
         <div style={{ ...S.card, background: "#fffbeb", borderColor: "#fde68a" }}>
           <span style={S.badge("yellow")}>⚠️ 禁止 AI</span>
-          <span style={{ fontSize: "13px", color: "#92400e", marginLeft: "10px" }}>本部分请独立完成，系统会记录答题过程</span>
+          <span style={{ fontSize: "13px", color: "#92400e", marginLeft: "10px" }}>
+            本部分请独立完成 · 选择题每题 {MC_LIMIT}秒 · 问答题每题 {ESSAY_LIMIT / 60}分钟 · 超时自动锁定
+          </span>
         </div>
-        {part1.questions.map((q, idx) => (
-          <div key={q.id} style={S.card}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-              <span style={S.badge(q.type === "multipleChoice" ? "blue" : "green")}>
-                {q.type === "multipleChoice" ? `选择题 ${idx + 1}` : "问答题"}
-              </span>
-              {q.difficulty && <span style={{ fontSize: "11px", color: "#aaa" }}>{q.difficulty}</span>}
+        {part1.questions.map((q, idx) => {
+          const isLocked = part1Submitted || !!lockedQuestions[q.id];
+          const limit = q.type === "multipleChoice" ? MC_LIMIT : ESSAY_LIMIT;
+          return (
+            <div
+              key={q.id}
+              style={{
+                ...S.card,
+                borderColor: isLocked && !part1Submitted ? "#fde68a" : "#f0f0f0",
+                background: isLocked && !part1Submitted ? "#fffbeb" : "#fff",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                <span style={S.badge(q.type === "multipleChoice" ? "blue" : "green")}>
+                  {q.type === "multipleChoice" ? `选择题 ${idx + 1}` : "问答题"}
+                </span>
+                {q.difficulty && <span style={{ fontSize: "11px", color: "#aaa" }}>{q.difficulty}</span>}
+                {isLocked && !part1Submitted && (
+                  <span style={{ fontSize: "11px", color: "#b45309", fontWeight: 600, marginLeft: "auto" }}>🔒 已超时锁定</span>
+                )}
+              </div>
+
+              <QuestionTimer
+                questionId={q.id}
+                limitSeconds={limit}
+                onExpire={handleQuestionExpire}
+                locked={isLocked}
+              />
+
+              <div style={{ fontSize: "14px", fontWeight: 500, marginBottom: "16px", lineHeight: "1.6" }}>{q.question}</div>
+
+              {q.type === "multipleChoice" && q.options?.map((opt, i) => (
+                <label
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 12px",
+                    border: `1px solid ${part1Answers[q.id] === i ? "#111" : "#e5e5e5"}`,
+                    borderRadius: "6px",
+                    marginBottom: "8px",
+                    cursor: isLocked ? "not-allowed" : "pointer",
+                    fontSize: "13px",
+                    background: part1Answers[q.id] === i ? "#f9f9f9" : "#fff",
+                    opacity: isLocked && part1Answers[q.id] !== i ? 0.5 : 1,
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name={q.id}
+                    checked={part1Answers[q.id] === i}
+                    onChange={() => {
+                      if (isLocked) return;
+                      setPart1Answers(p => ({ ...p, [q.id]: i }));
+                      persistState({ part1Answers: { ...part1Answers, [q.id]: i } });
+                    }}
+                    disabled={isLocked}
+                  />
+                  {opt}
+                </label>
+              ))}
+
+              {q.type === "essay" && (
+                <textarea
+                  style={{
+                    ...S.textarea,
+                    background: isLocked ? "#fafafa" : "#fff",
+                    color: isLocked ? "#888" : "#111",
+                  }}
+                  value={(part1Answers[q.id] as string) || ""}
+                  onChange={e => {
+                    if (isLocked) return;
+                    setPart1Answers(p => ({ ...p, [q.id]: e.target.value }));
+                    persistState({ part1Answers: { ...part1Answers, [q.id]: e.target.value } });
+                  }}
+                  placeholder={isLocked ? "已超时锁定" : "请输入你的回答（建议 300-500 字）..."}
+                  disabled={isLocked}
+                />
+              )}
             </div>
-            <div style={{ fontSize: "14px", fontWeight: 500, marginBottom: "16px", lineHeight: "1.6" }}>{q.question}</div>
-            {q.type === "multipleChoice" && q.options?.map((opt, i) => (
-              <label key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", border: `1px solid ${part1Answers[q.id] === i ? "#111" : "#e5e5e5"}`, borderRadius: "6px", marginBottom: "8px", cursor: "pointer", fontSize: "13px", background: part1Answers[q.id] === i ? "#f9f9f9" : "#fff" }}>
-                <input type="radio" name={q.id} checked={part1Answers[q.id] === i} onChange={() => { setPart1Answers(p => ({ ...p, [q.id]: i })); persistState({ part1Answers: { ...part1Answers, [q.id]: i } }); }} disabled={part1Submitted} />
-                {opt}
-              </label>
-            ))}
-            {q.type === "essay" && (
-              <textarea style={S.textarea} value={(part1Answers[q.id] as string) || ""} onChange={e => { setPart1Answers(p => ({ ...p, [q.id]: e.target.value })); persistState({ part1Answers: { ...part1Answers, [q.id]: e.target.value } }); }} placeholder="请输入你的回答（建议 300-500 字）..." disabled={part1Submitted} />
-            )}
-          </div>
-        ))}
+          );
+        })}
         {!part1Submitted && (
           <>
             <div style={S.divider} />
-            <button style={S.btnPrimary(submitStatus === "submitting")} onClick={() => submitPart("part1", { answers: part1Answers, completedAt: Date.now() }, "part2")} disabled={submitStatus === "submitting"}>
+            <button
+              style={S.btnPrimary(submitStatus === "submitting")}
+              onClick={() => submitPart("part1", { answers: part1Answers, completedAt: Date.now() }, "part2")}
+              disabled={submitStatus === "submitting"}
+            >
               {submitStatus === "submitting" ? "提交中..." : "提交并进入第二部分 →"}
             </button>
           </>
@@ -320,7 +461,9 @@ export default function ExamPage() {
           <div style={{ fontSize: "15px", fontWeight: 600, marginBottom: "8px" }}>{t.title}</div>
           <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7", marginBottom: "16px" }}>{t.description}</div>
           <div style={{ fontSize: "12px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>挑战与冲突</div>
-          {t.conflicts.map((c, i) => <div key={i} style={{ fontSize: "13px", color: "#555", padding: "6px 0", borderTop: i > 0 ? "1px solid #f5f5f5" : "none" }}>· {c}</div>)}
+          {t.conflicts.map((c, i) => (
+            <div key={i} style={{ fontSize: "13px", color: "#555", padding: "6px 0", borderTop: i > 0 ? "1px solid #f5f5f5" : "none" }}>· {c}</div>
+          ))}
         </div>
         <div style={{ ...S.card, padding: "0" }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -348,7 +491,14 @@ export default function ExamPage() {
           </div>
           {!part2Submitted && (
             <div style={{ padding: "12px 16px", borderTop: "1px solid #f0f0f0", display: "flex", gap: "8px" }}>
-              <input style={{ ...S.input, flex: 1 }} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()} placeholder={isTimeUp ? "时间已结束" : "输入问题... (Enter 发送)"} disabled={isTimeUp || aiLoading} />
+              <input
+                style={{ ...S.input, flex: 1 }}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                placeholder={isTimeUp ? "时间已结束" : "输入问题... (Enter 发送)"}
+                disabled={isTimeUp || aiLoading}
+              />
               <button style={S.btnPrimary(isTimeUp || aiLoading)} onClick={sendMessage} disabled={isTimeUp || aiLoading}>发送</button>
             </div>
           )}
@@ -356,7 +506,11 @@ export default function ExamPage() {
         {!part2Submitted && (
           <>
             <div style={S.divider} />
-            <button style={S.btnPrimary(submitStatus === "submitting")} onClick={() => submitPart("part2", { messages, aiCount, completedAt: Date.now() }, "part3")} disabled={submitStatus === "submitting"}>
+            <button
+              style={S.btnPrimary(submitStatus === "submitting")}
+              onClick={() => submitPart("part2", { messages, aiCount, completedAt: Date.now() }, "part3")}
+              disabled={submitStatus === "submitting"}
+            >
               {submitStatus === "submitting" ? "提交中..." : "提交并进入第三部分 →"}
             </button>
           </>
@@ -376,21 +530,40 @@ export default function ExamPage() {
           <div style={{ fontSize: "12px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>背景</div>
           <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7", marginBottom: "16px" }}>{part3.task.background}</div>
           <div style={{ fontSize: "12px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>要求</div>
-          {part3.task.requirements.map((r, i) => <div key={i} style={{ fontSize: "13px", color: "#555", padding: "4px 0" }}>· {r}</div>)}
+          {part3.task.requirements.map((r, i) => (
+            <div key={i} style={{ fontSize: "13px", color: "#555", padding: "4px 0" }}>· {r}</div>
+          ))}
           <div style={{ ...S.divider, margin: "16px 0" }} />
           <div style={{ fontSize: "12px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>交付物</div>
-          {part3.task.deliverables.map((d, i) => <div key={i} style={{ fontSize: "13px", color: "#555", padding: "4px 0" }}>· {d}</div>)}
+          {part3.task.deliverables.map((d, i) => (
+            <div key={i} style={{ fontSize: "13px", color: "#555", padding: "4px 0" }}>· {d}</div>
+          ))}
         </div>
         <div style={S.card}>
           <div style={{ fontSize: "14px", fontWeight: 600, marginBottom: "20px" }}>项目提交</div>
           <label style={S.label}>GitHub 仓库链接 *</label>
-          <input style={{ ...S.input, marginBottom: "16px" }} type="url" value={repoUrl} onChange={e => { setRepoUrl(e.target.value); persistState({ repoUrl: e.target.value }); }} placeholder="https://github.com/username/project-name" />
+          <input
+            style={{ ...S.input, marginBottom: "16px" }}
+            type="url"
+            value={repoUrl}
+            onChange={e => { setRepoUrl(e.target.value); persistState({ repoUrl: e.target.value }); }}
+            placeholder="https://github.com/username/project-name"
+          />
           <label style={S.label}>提交说明</label>
-          <textarea style={{ ...S.textarea, marginBottom: "0" }} value={notes} onChange={e => { setNotes(e.target.value); persistState({ notes: e.target.value }); }} placeholder="简述你如何拆解需求、如何使用 AI、关键取舍与未完成项..." />
+          <textarea
+            style={{ ...S.textarea, marginBottom: "0" }}
+            value={notes}
+            onChange={e => { setNotes(e.target.value); persistState({ notes: e.target.value }); }}
+            placeholder="简述你如何拆解需求、如何使用 AI、关键取舍与未完成项..."
+          />
         </div>
         <div style={S.divider} />
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <button style={S.btnPrimary(submitStatus === "submitting" || !repoUrl.trim())} onClick={() => submitPart("part3", { repoUrl, notes, completedAt: Date.now() })} disabled={submitStatus === "submitting" || !repoUrl.trim()}>
+          <button
+            style={S.btnPrimary(submitStatus === "submitting" || !repoUrl.trim())}
+            onClick={() => submitPart("part3", { repoUrl, notes, completedAt: Date.now() })}
+            disabled={submitStatus === "submitting" || !repoUrl.trim()}
+          >
             {submitStatus === "submitting" ? "提交中..." : "完成面试并提交"}
           </button>
           {submitStatus === "success" && <span style={{ fontSize: "13px", color: "#16a34a" }}>✓ 提交成功，正在跳转...</span>}
