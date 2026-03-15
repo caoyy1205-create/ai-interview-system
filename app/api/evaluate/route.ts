@@ -109,6 +109,22 @@ ${essayQuestions.map((q: any, i: number) => `题目${i + 1}：${q.question}\n候
     const result = await callQwen(prompt);
     essayScore = Math.min(30, Math.max(0, result.score || 0));
     essayCredibilityNote = result.credibilityNote || "正常";
+
+    // 可信度惩罚扣分：硬性扣除，不依赖 AI 自觉
+    const intEvts = integrityEvents || [];
+    const pasteN = intEvts.filter((e: any) => e.type === "paste").length;
+    const fastN = intEvts.filter((e: any) => e.type === "fast_input").length;
+    if (pasteN >= 2 || fastN >= 3) {
+      // 严重：粘贴≥2次或快速输入≥3次，扣30%
+      const penalty = Math.round(essayScore * 0.3);
+      essayScore = Math.max(0, essayScore - penalty);
+      essayCredibilityNote = `可信度存疑（粘贴${pasteN}次/快速输入${fastN}次），扣除${penalty}分`;
+    } else if (pasteN === 1 || fastN >= 2) {
+      // 轻微：扣15%
+      const penalty = Math.round(essayScore * 0.15);
+      essayScore = Math.max(0, essayScore - penalty);
+      essayCredibilityNote = `轻微可信度异常（粘贴${pasteN}次/快速输入${fastN}次），扣除${penalty}分`;
+    }
   }
 
   const score = Math.min(100, mcScore + essayScore);  // 选择题满分70 + 问答题满分30 = 100
@@ -268,9 +284,27 @@ ${rubric.map((r: any) => `- ${r.dimension}（权重${r.weight}%）：${r.whatGoo
 - 指出明显不足或可改进的地方
 - 评估AI工具使用痕迹和产品思维
 
-返回 JSON：{"score": 0-100, "feedback": "总体评语（技术专家视角，具体有据）", "dimensions": [{"name": "维度名", "score": 分数, "max": 满分（等于该维度weight值）, "comment": "具体评语"}], "highlights": ["优点1", "优点2"], "improvements": ["改进点1", "改进点2"]}`;
+请先判断项目与题目要求的相关性（relevanceScore 0-10）：
+- 10分：项目功能与题目要求高度一致
+- 5-9分：部分功能符合，有偏差但仍相关
+- 1-4分：项目功能与要求严重脱节，核心交付物缺失
+- 0分：项目与题目完全无关
 
-  return await callQwen(prompt);
+返回 JSON：{"relevanceScore": 0-10, "score": 0-100, "feedback": "总体评语（技术专家视角，具体有据）", "dimensions": [{"name": "维度名", "score": 分数, "max": 满分（等于该维度weight值）, "comment": "具体评语"}], "highlights": ["优点1", "优点2"], "improvements": ["改进点1", "改进点2"]}`;
+
+  const result = await callQwen(prompt);
+
+  // 功能严重脱节时强制 0 分
+  if (result && result.relevanceScore !== undefined && result.relevanceScore <= 3) {
+    return {
+      score: 0,
+      feedback: `项目功能与题目要求严重脱节（相关性 ${result.relevanceScore}/10）：${result.feedback}`,
+      dimensions: (result.dimensions || []).map((d: any) => ({ ...d, score: 0 })),
+      relevanceScore: result.relevanceScore,
+    };
+  }
+
+  return result;
 }
 
 async function callQwen(prompt: string): Promise<any> {
