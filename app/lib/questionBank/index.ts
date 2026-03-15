@@ -4,923 +4,950 @@
 // ===== 选择题（100道）=====
 // 新选择题题库 v3 - 100道
 // 约束：正确答案非最长选项，四选项字数差异<30%，干扰项有迷惑性
+// 选择题题库 v4 - 100道
+// 设计原则：正确答案用简短核心表达，干扰项更长但包含错误
+// Agent相关：40道（topics含Agent/ReAct/工具调用等）
+// 其他方向：60道，覆盖Prompt/RAG/模型能力/AI产品/AI安全/模型评估各10道
 export const multipleChoicePool = [
-  // --- Prompt Engineering (20道) ---
+
+  // ══════════════════════════════════════
+  // Agent 方向（40道）
+  // ══════════════════════════════════════
+
   {
-    id: "mc_001",
-    question: "Temperature 参数设置为 0 时，模型的输出特征是：",
-    options: ["每次输出完全随机", "输出最高概率的 token，结果趋于确定", "模型拒绝回答", "输出长度变为零"],
+    id: "mc_a01",
+    question: "ReAct 框架中 'Thought' 步骤的作用是什么？",
+    options: ["触发外部工具调用", "模型的推理过程，用于决定下一步动作", "记录用户的输入内容并格式化为JSON", "存储上一步工具调用的输出结果到内存中"],
     correctAnswer: 1,
-    explanation: "Temperature=0 时模型做贪心解码，每次选概率最高的 token，结果趋于固定。",
-    difficulty: "easy",
-    topics: ["参数调优", "采样策略"]
-  },
-  {
-    id: "mc_002",
-    question: "Chain-of-Thought prompting 相比 standard prompting 最主要的优势是：",
-    options: ["减少 token 消耗", "提升模型在推理任务上的准确率", "让模型输出更简短", "降低 API 调用延迟"],
-    correctAnswer: 1,
-    explanation: "CoT 让模型逐步展示推理过程，显著提升复杂推理和数学类任务的准确率。",
-    difficulty: "easy",
-    topics: ["CoT", "推理"]
-  },
-  {
-    id: "mc_003",
-    question: "Few-shot prompting 中提供示例的主要作用是：",
-    options: ["增加模型参数量", "帮助模型理解任务格式和期望输出", "让模型记住更多知识", "减少幻觉现象"],
-    correctAnswer: 1,
-    explanation: "Few-shot 示例（input-output 对）帮助模型推断任务格式、风格和输出规范。",
-    difficulty: "easy",
-    topics: ["Few-shot", "基础概念"]
-  },
-  {
-    id: "mc_004",
-    question: "System Prompt 的核心作用是：",
-    options: ["存储用户的历史对话", "定义模型的角色、行为规则和约束", "提高模型输出速度", "降低 API 调用成本"],
-    correctAnswer: 1,
-    explanation: "System Prompt 用于设定模型全局行为准则，如角色、语气、禁止话题等。",
-    difficulty: "easy",
-    topics: ["Prompt结构", "角色设定"]
-  },
-  {
-    id: "mc_005",
-    question: "以下哪种场景最容易导致大模型产生幻觉？",
-    options: ["让模型做文本格式转换", "询问模型实时股价或最新事件", "让模型进行代码注释", "让模型翻译已知文本"],
-    correctAnswer: 1,
-    explanation: "模型无法获取训练截止日期后的实时数据，容易编造不存在的信息。",
+    explanation: "Thought 是模型的内部推理，分析当前状态并决定下一步该做什么，不直接调用工具。",
     difficulty: "medium",
-    topics: ["幻觉", "局限性"]
-  },
-  {
-    id: "mc_006",
-    question: "当 Prompt 中指令出现矛盾时，模型通常会：",
-    options: ["报错并拒绝执行", "优先遵循后出现的指令或做出折中处理", "忽略所有指令", "随机选择一条指令执行"],
-    correctAnswer: 1,
-    explanation: "模型通常优先遵循更靠后的指令，或尝试折中处理，不同模型行为略有差异。",
-    difficulty: "medium",
-    topics: ["Prompt设计", "指令优先级"]
-  },
-  {
-    id: "mc_007",
-    question: "Top-p（nucleus sampling）参数的作用是：",
-    options: ["控制输出的最大 token 数", "从累积概率达到 p 的候选集合中采样", "设置输出的段落数量", "限制每个 token 的最低概率"],
-    correctAnswer: 1,
-    explanation: "Top-p 从累积概率刚好超过 p 的最小候选集采样，平衡多样性与质量。",
-    difficulty: "medium",
-    topics: ["采样策略", "参数调优"]
-  },
-  {
-    id: "mc_008",
-    question: "Role prompting（角色扮演提示）的主要优势是：",
-    options: ["降低模型的计算成本", "帮助模型以特定视角和风格输出内容", "完全避免模型的安全限制", "提高模型的推理速度"],
-    correctAnswer: 1,
-    explanation: "角色设定让模型用特定专业视角回答问题，输出风格更符合预期场景。",
-    difficulty: "easy",
-    topics: ["角色设定", "Prompt技巧"]
-  },
-  {
-    id: "mc_009",
-    question: "以下哪种 Prompt 写法最能减少模型的歧义理解？",
-    options: ["使用简短模糊的描述", "提供明确的输出格式、示例和约束条件", "让模型自由发挥", "使用大量修饰词增加丰富度"],
-    correctAnswer: 1,
-    explanation: "明确的格式要求、示例和约束能有效减少模型的多种解读可能性。",
-    difficulty: "easy",
-    topics: ["Prompt设计", "清晰度"]
-  },
-  {
-    id: "mc_010",
-    question: "在使用 GPT 类模型时，'context window'（上下文窗口）限制意味着：",
-    options: ["模型每次只能处理一个问题", "模型能处理的总 token 数有上限", "模型只能记住最近一句话", "模型不支持多轮对话"],
-    correctAnswer: 1,
-    explanation: "上下文窗口是模型单次处理的最大 token 数，超出后早期内容会被截断丢失。",
-    difficulty: "easy",
-    topics: ["上下文", "基础概念"]
-  },
-  {
-    id: "mc_011",
-    question: "Self-consistency 技术的核心思路是：",
-    options: ["让模型对同一问题只回答一次", "多次采样后取多数投票结果来提高准确率", "让模型检查自己的语法错误", "让多个模型同时回答后取平均"],
-    correctAnswer: 1,
-    explanation: "Self-consistency 多次用 CoT 采样，取多数一致的答案，显著提升推理准确率。",
-    difficulty: "hard",
-    topics: ["Self-consistency", "推理增强"]
-  },
-  {
-    id: "mc_012",
-    question: "Prompt injection 攻击的本质是：",
-    options: ["向模型输入超长文本导致崩溃", "通过构造输入让模型忽略原有指令", "破解模型的加密机制", "通过 API 注入恶意代码"],
-    correctAnswer: 1,
-    explanation: "Prompt injection 通过精心构造的用户输入，覆盖或绕过系统 prompt 中的安全指令。",
-    difficulty: "medium",
-    topics: ["安全", "Prompt攻击"]
-  },
-  {
-    id: "mc_013",
-    question: "在 Prompt 中使用 XML 标签（如 <context></context>）的主要好处是：",
-    options: ["减少模型的推理时间", "帮助模型清晰区分不同内容块的边界", "让模型输出更长的内容", "降低 API 调用费用"],
-    correctAnswer: 1,
-    explanation: "结构化标签帮助模型明确区分系统指令、上下文、用户输入等不同内容，减少混淆。",
-    difficulty: "medium",
-    topics: ["Prompt结构", "格式化"]
-  },
-  {
-    id: "mc_014",
-    question: "以下哪种任务最不适合用 Zero-shot prompting 直接完成？",
-    options: ["简单的文本分类", "需要特定格式的复杂数据提取", "基础的语言翻译", "常见问题的简单回答"],
-    correctAnswer: 1,
-    explanation: "复杂格式提取需要示例来说明期望的输出结构，Zero-shot 容易偏离格式要求。",
-    difficulty: "medium",
-    topics: ["Zero-shot", "任务适配"]
-  },
-  {
-    id: "mc_015",
-    question: "ReAct 框架结合了推理和行动，其主要特点是：",
-    options: ["只能处理单步任务", "交替进行思考和工具调用来完成复杂任务", "不需要外部工具支持", "每步只能执行预定义动作"],
-    correctAnswer: 1,
-    explanation: "ReAct 让模型交替输出 Thought（推理）和 Action（工具调用），逐步完成复杂任务。",
-    difficulty: "hard",
     topics: ["ReAct", "Agent框架"]
   },
   {
-    id: "mc_016",
-    question: "当需要让模型输出严格的 JSON 格式时，最可靠的方法是：",
-    options: ["在 Prompt 中说'请输出 JSON'", "使用 response_format 参数强制 JSON 模式", "增大 temperature 参数", "减少 max_tokens 限制"],
+    id: "mc_a02",
+    question: "AI Agent 与普通 LLM 调用的核心区别是？",
+    options: ["模型参数量更大", "能自主循环执行多步骤", "界面更美观响应更快", "每次请求消耗更少token数量"],
     correctAnswer: 1,
-    explanation: "支持 JSON mode 的 API 参数（如 response_format）在底层强制保证输出合法 JSON。",
-    difficulty: "medium",
-    topics: ["输出格式", "结构化输出"]
-  },
-  {
-    id: "mc_017",
-    question: "Prompt 中的 'negative prompting'（负面提示）主要用于：",
-    options: ["让模型输出负面情绪内容", "明确告知模型不应该做什么", "降低模型的回复质量", "减少模型的输出长度"],
-    correctAnswer: 1,
-    explanation: "负面提示通过明确禁止行为来约束模型输出，如'不要提供医疗建议''不要使用专业术语'。",
-    difficulty: "medium",
-    topics: ["Prompt技巧", "约束设计"]
-  },
-  {
-    id: "mc_018",
-    question: "在多轮对话系统中，'conversation history' 的管理核心挑战是：",
-    options: ["如何让模型忘记之前的对话", "如何在上下文窗口限制内保留关键历史信息", "如何加快每轮回复速度", "如何让模型始终重复相同答案"],
-    correctAnswer: 1,
-    explanation: "随对话增长，历史会超出窗口限制，需要摘要压缩或滑动窗口等策略保留关键信息。",
-    difficulty: "medium",
-    topics: ["多轮对话", "上下文管理"]
-  },
-  {
-    id: "mc_019",
-    question: "以下哪个 Prompt 策略最适合让模型做复杂的逻辑推断？",
-    options: ["给出尽量简短的指令", "让模型先列出假设再逐步推导结论", "要求模型直接给出最终答案", "增加无关背景信息"],
-    correctAnswer: 1,
-    explanation: "要求模型显式列举前提和逐步推导，可以减少跳步导致的逻辑错误。",
-    difficulty: "medium",
-    topics: ["推理", "CoT变体"]
-  },
-  {
-    id: "mc_020",
-    question: "Prompt 中提供的 few-shot 示例质量不高时，可能导致：",
-    options: ["模型完全无法运行", "模型学到错误的输出模式，质量下降", "模型自动忽略示例", "模型输出速度加快"],
-    correctAnswer: 1,
-    explanation: "低质量示例会误导模型学习错误格式或错误答案，反而比 Zero-shot 更差。",
-    difficulty: "medium",
-    topics: ["Few-shot", "示例质量"]
-  },
-
-  // --- RAG与知识库 (15道) ---
-  {
-    id: "mc_021",
-    question: "RAG（检索增强生成）的核心思路是：",
-    options: ["对模型进行再次训练", "将外部知识检索结果注入 Prompt 辅助生成", "增加模型的参数规模", "让模型自动爬取互联网内容"],
-    correctAnswer: 1,
-    explanation: "RAG 将用户问题向量化后检索相关文档，拼入 Prompt 让模型基于事实回答，减少幻觉。",
-    difficulty: "easy",
-    topics: ["RAG", "知识增强"]
-  },
-  {
-    id: "mc_022",
-    question: "向量数据库在 RAG 中的核心作用是：",
-    options: ["存储模型的权重参数", "支持语义相似度检索，快速找到相关文档", "替代传统关系型数据库", "训练嵌入模型"],
-    correctAnswer: 1,
-    explanation: "向量数据库将文档转为向量，支持高效的相似度搜索，是 RAG 的核心检索组件。",
-    difficulty: "easy",
-    topics: ["向量数据库", "RAG架构"]
-  },
-  {
-    id: "mc_023",
-    question: "在 RAG 系统中，chunk size（分块大小）过大会导致：",
-    options: ["检索速度加快", "召回内容包含过多无关信息，降低回答精准度", "减少存储空间占用", "嵌入模型无法工作"],
-    correctAnswer: 1,
-    explanation: "chunk 过大会让每块包含多个话题，检索时引入噪音，模型难以聚焦关键信息。",
-    difficulty: "medium",
-    topics: ["RAG优化", "分块策略"]
-  },
-  {
-    id: "mc_024",
-    question: "Embedding 模型的主要功能是：",
-    options: ["直接回答用户的问题", "将文本转换为高维向量表示", "压缩模型的参数量", "生成图像内容"],
-    correctAnswer: 1,
-    explanation: "Embedding 模型将文本映射到语义向量空间，语义相似的文本向量距离近，支持相似度检索。",
-    difficulty: "easy",
-    topics: ["Embedding", "语义向量"]
-  },
-  {
-    id: "mc_025",
-    question: "RAG 系统中 'hallucination'（幻觉）仍然可能发生，原因是：",
-    options: ["向量数据库存在故障", "检索到的文档与问题不相关，模型仍会推断", "Embedding 模型精度不足", "用户问题太复杂"],
-    correctAnswer: 1,
-    explanation: "即使提供了检索文档，若文档不相关或模型忽视文档自行推断，仍会产生幻觉。",
-    difficulty: "medium",
-    topics: ["RAG局限", "幻觉"]
-  },
-  {
-    id: "mc_026",
-    question: "Hybrid Search（混合搜索）在 RAG 中结合了：",
-    options: ["多个向量数据库的结果", "语义向量检索和关键词精确匹配", "多种嵌入模型的输出", "向量检索和图数据库查询"],
-    correctAnswer: 1,
-    explanation: "混合搜索结合语义相似度（dense retrieval）和 BM25 关键词匹配，互补提升召回质量。",
-    difficulty: "medium",
-    topics: ["检索策略", "混合搜索"]
-  },
-  {
-    id: "mc_027",
-    question: "Re-ranking（重排序）步骤在 RAG 中的作用是：",
-    options: ["对文档库重新建立索引", "对粗召回结果精细打分，提升 top-k 精度", "加快向量检索速度", "减少文档分块数量"],
-    correctAnswer: 1,
-    explanation: "Re-ranker 对粗检索的候选文档打更精确的相关度分，筛选出质量更高的内容传给模型。",
-    difficulty: "hard",
-    topics: ["Re-ranking", "RAG优化"]
-  },
-  {
-    id: "mc_028",
-    question: "在 RAG 中，'context stuffing'（上下文填充过多）会导致：",
-    options: ["模型回答速度加快", "关键信息被稀释，模型难以聚焦正确答案", "检索召回率提高", "向量数据库索引更新"],
-    correctAnswer: 1,
-    explanation: "塞入过多检索结果会超出模型处理重点的能力，出现'lost in the middle'现象，准确率下降。",
-    difficulty: "hard",
-    topics: ["RAG优化", "上下文管理"]
-  },
-  {
-    id: "mc_029",
-    question: "知识库定期更新时，RAG 系统需要处理的核心问题是：",
-    options: ["模型权重重新训练", "更新文档的向量索引以保持检索准确性", "重新设计 Prompt 模板", "更换向量数据库类型"],
-    correctAnswer: 1,
-    explanation: "文档更新后需重新嵌入并更新索引，否则检索的是旧版内容，影响答案时效性。",
-    difficulty: "medium",
-    topics: ["知识更新", "RAG运维"]
-  },
-  {
-    id: "mc_030",
-    question: "Query Expansion（查询扩展）技术用于解决 RAG 中的什么问题？",
-    options: ["减少向量数据库的存储占用", "弥补用户查询与文档表达之间的词汇鸿沟", "加快模型生成速度", "降低 Embedding 模型成本"],
-    correctAnswer: 1,
-    explanation: "用户查询词与文档用词不一致时，通过扩展同义词或生成多种查询变体来提升召回率。",
-    difficulty: "hard",
-    topics: ["查询优化", "RAG技术"]
-  },
-  {
-    id: "mc_031",
-    question: "在 RAG 评估中，'faithfulness'（忠实度）指标衡量的是：",
-    options: ["模型回答速度是否快", "模型生成内容是否基于检索到的文档", "向量检索准确率", "用户满意度评分"],
-    correctAnswer: 1,
-    explanation: "faithfulness 衡量模型输出是否有文档依据，高分说明模型没有凭空编造内容。",
-    difficulty: "hard",
-    topics: ["RAG评估", "指标"]
-  },
-  {
-    id: "mc_032",
-    question: "Sentence-level chunking（句子级分块）相比 fixed-size chunking 的优点是：",
-    options: ["处理速度更快", "保留语义完整性，避免在句子中间截断", "索引文件更小", "支持更大的文档库"],
-    correctAnswer: 1,
-    explanation: "按句子边界分块保证每块语义完整，避免固定长度截断导致的语义割裂。",
-    difficulty: "medium",
-    topics: ["分块策略", "RAG架构"]
-  },
-  {
-    id: "mc_033",
-    question: "当 RAG 系统的检索召回率（recall）低时，最可能的原因是：",
-    options: ["向量数据库服务器响应慢", "Embedding 模型语义理解不足或 chunk 设计不合理", "生成模型参数量太小", "用户查询语言与文档语言相同"],
-    correctAnswer: 1,
-    explanation: "召回率低通常源于 Embedding 质量差、chunk 边界不合理或索引未覆盖相关文档。",
-    difficulty: "medium",
-    topics: ["RAG诊断", "召回率"]
-  },
-  {
-    id: "mc_034",
-    question: "GraphRAG 相比标准 RAG 的主要优势在于：",
-    options: ["检索速度更快", "能够捕获文档中实体之间的关系和结构信息", "存储成本更低", "支持更多文件格式"],
-    correctAnswer: 1,
-    explanation: "GraphRAG 将文档建模为知识图谱，能检索实体关系和跨段落的结构化关联信息。",
-    difficulty: "hard",
-    topics: ["GraphRAG", "高级RAG"]
-  },
-  {
-    id: "mc_035",
-    question: "Parent Document Retriever 策略的核心思想是：",
-    options: ["用父类嵌入模型替代标准模型", "检索细粒度小块，但将其父文档传给模型以保留上下文", "只索引文档的父级目录", "将多个小块合并成一个大块"],
-    correctAnswer: 1,
-    explanation: "小块便于精准检索，大块提供完整上下文，Parent Retriever 兼顾精准度和上下文完整性。",
-    difficulty: "hard",
-    topics: ["检索策略", "RAG优化"]
-  },
-
-  // --- Agent与工具调用 (15道) ---
-  {
-    id: "mc_036",
-    question: "AI Agent 与普通 LLM 应用的核心区别是：",
-    options: ["使用了更大的模型", "能自主规划并执行多步骤动作完成目标", "响应速度更快", "界面更加美观"],
-    correctAnswer: 1,
-    explanation: "Agent 具备自主决策、工具调用和多步规划能力，而非简单的单次问答。",
+    explanation: "Agent 能感知环境、决策、执行工具并循环直到完成目标，普通 LLM 只做单次问答。",
     difficulty: "easy",
     topics: ["Agent基础", "自主规划"]
   },
   {
-    id: "mc_037",
-    question: "Function Calling（函数调用）功能让 LLM 能够：",
-    options: ["执行任意系统命令", "以结构化格式调用外部工具和 API", "修改自身的模型权重", "直接访问互联网"],
+    id: "mc_a03",
+    question: "Function Calling 让 LLM 能做到什么？",
+    options: ["直接访问互联网", "结构化调用外部工具", "修改自身权重参数", "执行任意系统级命令不受限制"],
     correctAnswer: 1,
-    explanation: "Function Calling 让模型输出结构化的函数调用参数，由外部代码执行，再将结果传回模型。",
+    explanation: "Function Calling 输出结构化的工具调用参数，由外部代码执行后将结果返回给模型。",
     difficulty: "easy",
-    topics: ["Function Calling", "工具调用"]
+    topics: ["工具调用", "Function Calling"]
   },
   {
-    id: "mc_038",
-    question: "在 Agent 设计中，'memory'（记忆）模块的主要作用是：",
-    options: ["存储模型的训练数据", "让 Agent 在多步任务中保持状态和历史信息", "提高模型的推理速度", "减少 API 调用次数"],
+    id: "mc_a04",
+    question: "Agent 的 Memory 模块核心功能是？",
+    options: ["提高模型推理速度", "跨步骤保存状态与历史", "替代知识库存储全量数据", "自动压缩所有对话历史并上传到云端"],
     correctAnswer: 1,
-    explanation: "记忆模块让 Agent 在长期任务中保留中间状态、工具输出和对话历史，支持多步决策。",
+    explanation: "Memory 让 Agent 在多步任务中保留中间状态、工具输出和对话历史，支持连续决策。",
     difficulty: "medium",
     topics: ["Agent记忆", "状态管理"]
   },
   {
-    id: "mc_039",
-    question: "Multi-agent 系统的主要应用场景是：",
-    options: ["替代单一模型处理简单问答", "将复杂任务分解给专业子 Agent 并行或协作完成", "减少 API 调用总成本", "实现模型的自动更新"],
+    id: "mc_a05",
+    question: "Multi-agent 系统最适合解决什么问题？",
+    options: ["简单问答加速响应", "复杂任务并行分工协作", "降低单次API调用的成本费用", "减少模型在推理时所需的显存占用"],
     correctAnswer: 1,
-    explanation: "多 Agent 系统通过任务分解、专业化分工和协作，解决单 Agent 难以处理的复杂任务。",
+    explanation: "多 Agent 通过任务分解和专业化分工，解决单 Agent 难以处理的复杂并行任务。",
     difficulty: "medium",
-    topics: ["多Agent", "协作架构"]
+    topics: ["多Agent架构", "并行工具调用"]
   },
   {
-    id: "mc_040",
-    question: "在 Agent 的 ReAct 循环中，'Observation' 步骤指的是：",
-    options: ["Agent 对用户进行提问", "获取工具执行的返回结果并反馈给模型", "模型输出最终答案", "用户对 Agent 进行评分"],
+    id: "mc_a06",
+    question: "Orchestrator-Worker 架构中 Orchestrator 负责什么？",
+    options: ["直接执行工具调用", "协调分配任务给子Agent", "存储所有执行结果到数据库中", "对用户输入做语法检查和格式验证"],
     correctAnswer: 1,
-    explanation: "Observation 是将工具调用的实际执行结果返回给模型，作为下一步推理的输入。",
-    difficulty: "medium",
-    topics: ["ReAct", "Agent循环"]
-  },
-  {
-    id: "mc_041",
-    question: "Tool use 中 'tool schema' 的作用是：",
-    options: ["存储工具的执行结果", "描述工具的名称、参数和功能，让模型知道如何调用", "限制模型调用工具的次数", "加密工具的 API key"],
-    correctAnswer: 1,
-    explanation: "Tool schema 是工具的接口说明文档，模型根据 schema 生成正确的调用参数。",
-    difficulty: "medium",
-    topics: ["工具调用", "Schema设计"]
-  },
-  {
-    id: "mc_042",
-    question: "Agent 在执行长任务时最常见的失败模式是：",
-    options: ["模型权重损坏", "推理链偏离目标或陷入循环，无法收敛", "工具调用格式错误", "用户取消了任务"],
-    correctAnswer: 1,
-    explanation: "长任务中 Agent 容易积累错误、偏离原始目标或陷入无意义的重复循环。",
-    difficulty: "medium",
-    topics: ["Agent局限", "失败模式"]
-  },
-  {
-    id: "mc_043",
-    question: "在 Agent 设计中，'guardrails'（护栏）的作用是：",
-    options: ["提高 Agent 的执行速度", "限制 Agent 的行为范围，防止危险或越权操作", "增加 Agent 可用工具数量", "帮助 Agent 学习新技能"],
-    correctAnswer: 1,
-    explanation: "护栏对 Agent 的行为做边界约束，如禁止删除操作、限制访问范围，保障系统安全。",
-    difficulty: "medium",
-    topics: ["Agent安全", "护栏设计"]
-  },
-  {
-    id: "mc_044",
-    question: "Orchestrator-Worker 架构中，Orchestrator 的主要职责是：",
-    options: ["直接执行所有的工具调用", "协调和分配任务给各个 Worker Agent", "存储所有的执行结果", "对用户输入进行预处理"],
-    correctAnswer: 1,
-    explanation: "Orchestrator 负责任务分解、分配和结果整合，Worker 负责具体执行，形成分层协作。",
+    explanation: "Orchestrator 负责任务分解和分配，Worker 负责具体执行，形成分层协作架构。",
     difficulty: "hard",
     topics: ["多Agent架构", "Orchestrator"]
   },
   {
-    id: "mc_045",
-    question: "Agent 的 'planning' 能力主要解决什么问题？",
-    options: ["减少模型的推理时间", "将复杂目标分解为可执行的有序步骤", "自动生成用户界面", "压缩对话历史长度"],
+    id: "mc_a07",
+    question: "Agent 设计中 'guardrails' 的作用是？",
+    options: ["加速Agent执行速度", "限制行为范围防止越权", "增加Agent可调用的工具数量上限", "帮助Agent自动学习用户的使用习惯"],
     correctAnswer: 1,
-    explanation: "规划能力让 Agent 在行动前制定步骤方案，避免盲目执行导致资源浪费和错误积累。",
+    explanation: "护栏约束 Agent 的行为边界，如禁止删除操作、限制访问范围，保障系统安全。",
     difficulty: "medium",
-    topics: ["Agent规划", "任务分解"]
+    topics: ["Agent安全", "安全执行"]
   },
   {
-    id: "mc_046",
-    question: "以下哪种工具最适合让 Agent 处理实时数据？",
-    options: ["静态知识库查询", "Web 搜索或实时 API 接口", "本地文件读取", "历史对话回放"],
+    id: "mc_a08",
+    question: "Tool schema 在工具调用中的作用是？",
+    options: ["加密工具的API密钥", "描述工具名称和参数供模型调用", "记录工具的历史调用日志信息", "限制工具每秒钟的最大调用频率（不影响"],
     correctAnswer: 1,
-    explanation: "实时数据需要通过搜索引擎或实时 API 获取，静态知识库无法覆盖实时信息。",
-    difficulty: "easy",
-    topics: ["工具选择", "实时数据"]
-  },
-  {
-    id: "mc_047",
-    question: "在 Agent 系统中，'human-in-the-loop' 设计模式的目的是：",
-    options: ["让人类替代 Agent 执行所有操作", "在关键决策点引入人工确认，降低自动化风险", "减少模型的推理步骤", "提高 Agent 的响应速度"],
-    correctAnswer: 1,
-    explanation: "人在回路设计在高风险或不确定步骤引入人工审批，平衡自动化效率与操作安全性。",
+    explanation: "Tool schema 是工具的接口文档，模型根据 schema 生成正确格式的调用参数。",
     difficulty: "medium",
-    topics: ["人机协作", "Agent设计"]
+    topics: ["工具调用", "工具选择"]
   },
   {
-    id: "mc_048",
-    question: "Agent 进行 'code execution'（代码执行）时，最重要的安全考量是：",
-    options: ["代码的运行速度", "在沙箱环境中隔离执行，防止恶意代码危害系统", "代码的注释质量", "代码语言的选择"],
+    id: "mc_a09",
+    question: "Agent 执行长任务时最常见的失败模式是？",
+    options: ["API密钥失效", "推理链偏离目标陷入循环", "工具调用返回格式错误导致崩溃", "用户在任务执行中途主动取消了请求"],
     correctAnswer: 1,
-    explanation: "Agent 生成的代码需在受控沙箱运行，防止越权访问文件系统、网络或执行危险命令。",
+    explanation: "长任务中 Agent 容易积累错误、偏离原始目标或陷入无意义的重复循环。",
+    difficulty: "medium",
+    topics: ["Agent局限", "错误处理"]
+  },
+  {
+    id: "mc_a10",
+    question: "Human-in-the-loop 模式的核心目的是？",
+    options: ["让人类执行所有操作", "在关键节点引入人工确认", "减少Agent需要做出的决策次数", "让用户实时查看Agent的全部内部状态"],
+    correctAnswer: 1,
+    explanation: "在高风险或不确定步骤引入人工审批，平衡自动化效率与操作安全性。",
+    difficulty: "medium",
+    topics: ["人机协作", "Human-in-the-Loop"]
+  },
+  {
+    id: "mc_a11",
+    question: "Agent 进行代码执行时最重要的安全考量是？",
+    options: ["代码的运行速度", "沙箱隔离防止危险命令", "代码注释是否完整规范", "选择何种编程语言来执行代码"],
+    correctAnswer: 1,
+    explanation: "Agent 生成的代码必须在受控沙箱运行，防止越权访问文件系统或执行危险命令。",
     difficulty: "medium",
     topics: ["代码执行", "安全沙箱"]
   },
   {
-    id: "mc_049",
-    question: "以下哪种情况最适合使用 Single Agent 而非 Multi-agent？",
-    options: ["需要并行处理多个独立子任务", "任务流程清晰且复杂度可控的单链条任务", "需要多个专业领域知识协作", "任务规模超出单模型上下文窗口"],
+    id: "mc_a12",
+    question: "Agentic 系统中幂等性设计的意义是？",
+    options: ["让Agent每次给出不同答案", "重复执行不产生额外副作用", "让工具调用速度倍增提升效率", "减少Agent在执行期间的内存占用"],
+    correctAnswer: 1,
+    explanation: "幂等设计确保网络重试或重复执行时不会造成数据重复写入、重复支付等问题。",
+    difficulty: "hard",
+    topics: ["系统设计", "幂等性"]
+  },
+  {
+    id: "mc_a13",
+    question: "Agent Planning（规划）能力主要解决什么问题？",
+    options: ["减少模型推理时间", "将目标分解为有序步骤", "自动生成用户界面布局", "压缩对话历史至更少的token数量"],
+    correctAnswer: 1,
+    explanation: "规划让 Agent 在行动前制定方案，避免盲目执行导致资源浪费和错误积累。",
+    difficulty: "medium",
+    topics: ["规划能力", "任务分解"]
+  },
+  {
+    id: "mc_a14",
+    question: "以下哪种任务最适合 Single Agent 处理？",
+    options: ["需要多个领域专家协作的任务", "流程清晰的单链条任务", "需要同时并行处理多个独立子任务", "任务规模远超单模型上下文窗口限制"],
     correctAnswer: 1,
     explanation: "单链条、可控复杂度的任务用单 Agent 更高效，多 Agent 会引入不必要的协调开销。",
     difficulty: "medium",
     topics: ["架构选择", "单Agent"]
   },
   {
-    id: "mc_050",
-    question: "Agentic 系统中 'idempotency'（幂等性）设计的意义是：",
-    options: ["让 Agent 每次给出不同的答案", "确保相同操作重复执行不会产生额外副作用", "让工具调用速度翻倍", "减少 Agent 的记忆占用"],
+    id: "mc_a15",
+    question: "Agent 的 Observation 步骤在 ReAct 中指的是？",
+    options: ["Agent向用户提问", "获取工具执行的返回结果", "模型输出最终答案给用户", "用户对Agent回答进行满意度评分"],
     correctAnswer: 1,
-    explanation: "幂等设计确保网络重试或重复执行时不会造成数据重复写入、重复支付等问题。",
+    explanation: "Observation 将工具调用的实际执行结果返回给模型，作为下一步推理的输入。",
+    difficulty: "medium",
+    topics: ["ReAct", "Agent循环"]
+  },
+  {
+    id: "mc_a16",
+    question: "以下哪种工具最适合 Agent 获取实时数据？",
+    options: ["静态知识库查询", "实时API或Web搜索", "本地文件系统读取", "历史对话记录的检索回放（不影响"],
+    correctAnswer: 1,
+    explanation: "实时数据需通过搜索引擎或实时 API 获取，静态知识库无法覆盖最新信息。",
+    difficulty: "easy",
+    topics: ["工具选择", "实时数据"]
+  },
+  {
+    id: "mc_a17",
+    question: "Agent 系统中 'self-reflection'（自我反思）的作用是？",
+    options: ["让Agent展示自我意识", "检查输出并修正错误后重试", "增加Agent对话的趣味性内容", "让Agent自动向用户道歉并请求帮助"],
+    correctAnswer: 1,
+    explanation: "自我反思让 Agent 在行动后评估结果是否符合目标，不符合则调整策略重试。",
     difficulty: "hard",
-    topics: ["系统设计", "幂等性"]
+    topics: ["自我反思", "错误处理"]
+  },
+  {
+    id: "mc_a18",
+    question: "Agent 可观测性（Observability）主要包含什么？",
+    options: ["用户界面的可视化设计", "追踪推理链路和工具调用日志", "监控服务器CPU和内存使用率", "记录每个用户的操作行为和偏好"],
+    correctAnswer: 1,
+    explanation: "可观测性包括推理链追踪、工具调用记录、中间状态日志，用于调试和性能优化。",
+    difficulty: "medium",
+    topics: ["可观测性", "Agent评估"]
+  },
+  {
+    id: "mc_a19",
+    question: "以下哪种场景最体现 Agent 相比普通 RAG 的优势？",
+    options: ["简单文档问答", "需要多轮搜索并汇总的复杂研究", "单次知识库检索返回结果", "静态内容的格式化转换处理（不影响核心"],
+    correctAnswer: 1,
+    explanation: "复杂研究需要多轮迭代、中间决策和不同工具组合，这正是 Agent 循环规划的优势所在。",
+    difficulty: "medium",
+    topics: ["Agent能力", "Agent产品"]
+  },
+  {
+    id: "mc_a20",
+    question: "Agent 中 'tool use'（工具使用）的关键设计原则是？",
+    options: ["工具越多越好", "工具职责单一边界清晰", "所有工具应共享同一个接口格式", "工具应该能够自主修改系统的核心配置"],
+    correctAnswer: 1,
+    explanation: "每个工具应有清晰的职责边界，避免功能重叠，便于模型准确选择合适的工具。",
+    difficulty: "medium",
+    topics: ["工具调用", "工具选择"]
+  },
+  {
+    id: "mc_a21",
+    question: "以下哪个指标最适合评估 Agent 的任务完成能力？",
+    options: ["对话轮次数量", "任务成功率（Task Success Rate）", "每次工具调用的平均耗时", "Agent在每轮输出的平均token数量（不影响核心结论"],
+    correctAnswer: 1,
+    explanation: "任务成功率直接衡量 Agent 能否完成目标任务，是最核心的能力评估指标。",
+    difficulty: "medium",
+    topics: ["Agent评估", "可观测性"]
+  },
+  {
+    id: "mc_a22",
+    question: "长期记忆（Long-term memory）在 Agent 中通常如何实现？",
+    options: ["扩大上下文窗口", "写入外部存储并检索", "增加模型参数量", "在系统提示中硬编码所有历史信息"],
+    correctAnswer: 1,
+    explanation: "长期记忆通过向量数据库或键值存储持久化，需要时检索注入上下文，突破窗口限制。",
+    difficulty: "medium",
+    topics: ["Agent记忆", "状态管理"]
+  },
+  {
+    id: "mc_a23",
+    question: "Agent 中 'context window management' 的核心挑战是？",
+    options: ["窗口尺寸影响模型价格", "随步骤增加内容超出上限", "窗口内容需要加密存储", "每轮对话都需要重新初始化窗口"],
+    correctAnswer: 1,
+    explanation: "多步执行中工具输出不断积累，需要摘要压缩或滑动窗口等策略防止超出限制。",
+    difficulty: "medium",
+    topics: ["上下文管理", "Agent框架"]
+  },
+  {
+    id: "mc_a24",
+    question: "以下哪种方法最能提升 Agent 的工具选择准确性？",
+    options: ["增加工具总数量", "提供清晰的工具描述和使用示例", "让模型随机尝试所有工具", "减少系统提示的长度来节省token"],
+    correctAnswer: 1,
+    explanation: "清晰的工具描述和示例帮助模型理解每个工具的适用场景，减少错误调用。",
+    difficulty: "medium",
+    topics: ["工具调用", "工具选择"]
+  },
+  {
+    id: "mc_a25",
+    question: "Agent 的 'parallel tool calling'（并行工具调用）的优势是？",
+    options: ["降低工具调用的错误率", "同时执行独立工具节省时间", "让每个工具获得更多计算资源", "避免工具之间产生数据依赖冲突"],
+    correctAnswer: 1,
+    explanation: "对无依赖关系的工具并行调用，可大幅缩短总执行时间，提升 Agent 效率。",
+    difficulty: "medium",
+    topics: ["并行工具调用", "效率优化"]
+  },
+  {
+    id: "mc_a26",
+    question: "在 Agent 产品设计中 'escalation'（升级）机制是指？",
+    options: ["提升Agent的模型规模", "在Agent无法处理时转人工", "扩大Agent的工具调用权限范围", "让Agent主动向用户推销更高级的服务"],
+    correctAnswer: 1,
+    explanation: "升级机制确保 Agent 遇到超出能力的情况时平滑转接人工，保障用户体验。",
+    difficulty: "medium",
+    topics: ["Agent产品", "人机协作"]
+  },
+  {
+    id: "mc_a27",
+    question: "Skill（技能）在 Agent 系统中通常指什么？",
+    options: ["模型的微调数据", "封装特定能力的可复用工具模块", "Agent的系统提示模板文件", "用于评估Agent的标准化测试集合"],
+    correctAnswer: 1,
+    explanation: "Skill 是封装了特定能力（如发邮件、查日历）的可复用模块，Agent 按需调用。",
+    difficulty: "medium",
+    topics: ["工具调用", "Agent能力"]
+  },
+  {
+    id: "mc_a28",
+    question: "以下哪种场景最需要 Agent 具备 'error recovery'（错误恢复）能力？",
+    options: ["简单问答任务", "多步骤自动化流程", "单次文本生成任务", "固定模板的内容格式化处理"],
+    correctAnswer: 1,
+    explanation: "多步骤自动化中任何一步失败都可能导致整体失败，错误恢复能力至关重要。",
+    difficulty: "medium",
+    topics: ["错误处理", "Agent框架"]
+  },
+  {
+    id: "mc_a29",
+    question: "Agent 与 Copilot 的主要区别是？",
+    options: ["使用的模型不同", "Agent自主执行，Copilot辅助人决策", "Copilot比Agent消耗更少的API费用", "Agent只能处理代码而Copilot处理文本"],
+    correctAnswer: 1,
+    explanation: "Agent 自主决策并执行行动，Copilot 提供建议但最终决策仍由人类做出。",
+    difficulty: "easy",
+    topics: ["Agent基础", "Agent产品"]
+  },
+  {
+    id: "mc_a30",
+    question: "以下哪种工具组合让 Agent 具备完整的信息处理能力？",
+    options: ["搜索工具", "搜索+计算+记忆+代码执行", "搜索+文本生成", "代码执行+数据库读取工具（不影响核"],
+    correctAnswer: 1,
+    explanation: "完整的信息处理需要实时检索、精确计算、状态记忆和代码执行的综合工具支持。",
+    difficulty: "medium",
+    topics: ["工具选择", "Agent能力"]
+  },
+  {
+    id: "mc_a31",
+    question: "以下哪种行为最能体现 Agent 的'自主性'？",
+    options: ["自动补全用户输入", "独立判断下一步并执行", "提供多个选项供用户选择", "根据预定脚本按顺序执行固定步骤"],
+    correctAnswer: 1,
+    explanation: "自主性的核心是 Agent 能根据环境状态独立做出决策并执行，而非被动响应。",
+    difficulty: "easy",
+    topics: ["自主性设计", "Agent基础"]
+  },
+  {
+    id: "mc_a32",
+    question: "在多 Agent 系统中，消息路由（Message Routing）的主要作用是？",
+    options: ["加密Agent间通信", "将任务分发给合适的Agent", "记录所有消息日志供审计", "限制Agent之间的通信频率上限"],
+    correctAnswer: 1,
+    explanation: "消息路由根据任务类型或内容将请求分发到最合适的专业 Agent 处理。",
+    difficulty: "medium",
+    topics: ["消息路由", "多Agent架构"]
+  },
+  {
+    id: "mc_a33",
+    question: "Agent 系统中'幻觉级联'（Hallucination Cascade）指的是？",
+    options: ["模型在多个任务中都表现良好", "一步的幻觉被后续步骤放大传递", "Agent调用工具时产生的随机错误", "多个Agent同时产生相同幻觉的情况"],
+    correctAnswer: 1,
+    explanation: "多步 Agent 中，前一步的幻觉输出作为后一步的输入，错误会逐步放大最终失控。",
+    difficulty: "hard",
+    topics: ["幻觉级联", "Agent局限"]
+  },
+  {
+    id: "mc_a34",
+    question: "触发词设计（Trigger Word Design）在 Agent 系统中的作用是？",
+    options: ["防止用户滥用Agent", "让Agent识别何时调用特定Skill", "加密Agent的系统提示内容（不影响核心结论）", "限制用户可以输入的词汇范围"],
+    correctAnswer: 1,
+    explanation: "触发词帮助 Agent 或路由层识别用户意图，决定激活哪个 Skill 或工具。",
+    difficulty: "medium",
+    topics: ["触发词设计", "Skill路由"]
+  },
+  {
+    id: "mc_a35",
+    question: "以下哪个设计能最有效防止 Agent 执行破坏性不可逆操作？",
+    options: ["增加系统提示的长度", "执行前需人工确认的审批流程", "使用更大参数量的底层模型", "记录所有操作日志以便事后追溯"],
+    correctAnswer: 1,
+    explanation: "不可逆操作（如删除数据）执行前引入人工确认是防止 Agent 误操作的最有效手段。",
+    difficulty: "medium",
+    topics: ["Human-in-the-Loop", "安全执行"]
+  },
+  {
+    id: "mc_a36",
+    question: "Agent 系统中的'工具链'（Tool Chain）是指？",
+    options: ["工具的安全调用权限", "多个工具按顺序协作完成任务", "工具的版本管理系统", "记录工具调用历史的数据结构（不影响"],
+    correctAnswer: 1,
+    explanation: "工具链是多个工具按依赖顺序串联，前一工具的输出作为后一工具的输入。",
+    difficulty: "medium",
+    topics: ["工具链", "工具调用"]
+  },
+  {
+    id: "mc_a37",
+    question: "Agentic Loop（智能体循环）的终止条件通常是？",
+    options: ["固定执行10步后停止", "达成目标或超出最大步数限制", "用户发送停止命令才会终止", "工具调用失败超过3次后自动停止"],
+    correctAnswer: 1,
+    explanation: "循环在完成目标时正常终止，或在超出预设最大步数（防无限循环）时强制中断。",
+    difficulty: "medium",
+    topics: ["Agentic Loop", "Agent框架"]
+  },
+  {
+    id: "mc_a38",
+    question: "以下哪种方法最能减少 Agent 的 token 消耗？",
+    options: ["增加系统提示的详细程度", "压缩中间步骤只保留关键信息", "关闭所有工具调用功能", "让Agent每步都请求用户确认"],
+    correctAnswer: 1,
+    explanation: "对中间推理和工具输出做摘要压缩，保留关键信息舍弃冗余，是降低 token 消耗的核心方法。",
+    difficulty: "medium",
+    topics: ["上下文管理", "效率优化"]
+  },
+  {
+    id: "mc_a39",
+    question: "以下哪种场景 Agent 相比人工有明显优势？",
+    options: ["需要情感判断的复杂对话", "24小时高频率重复性操作", "需要创造性突破的产品设计", "需要法律责任归属的重要决策"],
+    correctAnswer: 1,
+    explanation: "高频率、重复性、规则明确的操作是 Agent 的最佳场景，人工效率低且易出错。",
+    difficulty: "easy",
+    topics: ["Agent产品", "自主性设计"]
+  },
+  {
+    id: "mc_a40",
+    question: "以下哪个描述最准确地定义了 AI Agent？",
+    options: ["能回答问题的聊天机器人", "感知环境并自主行动以达成目标的系统", "只能执行预编程脚本的自动化工具（不影响核心", "内置了联网功能的大型语言模型"],
+    correctAnswer: 1,
+    explanation: "Agent 的本质是感知-决策-行动的循环系统，具备自主性和目标导向性。",
+    difficulty: "easy",
+    topics: ["Agent基础", "Agent能力"]
   },
 
-  // --- 大模型能力与局限 (12道) ---
+  // ══════════════════════════════════════
+  // Prompt 工程（10道）
+  // ══════════════════════════════════════
+
   {
-    id: "mc_051",
-    question: "大语言模型（LLM）的 'knowledge cutoff' 意味着：",
-    options: ["模型只能处理短文本", "模型不了解训练数据截止日期之后发生的事件", "模型无法回答专业问题", "模型每次回答都会变化"],
+    id: "mc_p01",
+    question: "Temperature=0 时模型输出特征是？",
+    options: ["完全随机输出", "趋于确定的最高概率token", "拒绝所有请求", "输出长度变为零字符（不影响核心结论）"],
+    correctAnswer: 1,
+    explanation: "Temperature=0 做贪心解码，每次选概率最高的 token，结果趋于固定可复现。",
+    difficulty: "easy",
+    topics: ["参数调优", "Prompt工程"]
+  },
+  {
+    id: "mc_p02",
+    question: "Chain-of-Thought 相比 Standard Prompt 的最大优势是？",
+    options: ["减少token消耗", "提升推理任务准确率", "让输出更简短精炼", "降低API调用延迟时间"],
+    correctAnswer: 1,
+    explanation: "CoT 让模型逐步展示推理过程，显著提升复杂推理和数学类任务的准确率。",
+    difficulty: "easy",
+    topics: ["CoT", "Prompt工程"]
+  },
+  {
+    id: "mc_p03",
+    question: "Prompt 中出现指令冲突时，模型通常怎么处理？",
+    options: ["报错并拒绝执行", "优先遵循后出现的指令或折中", "随机选择一条指令", "忽略所有指令只输出空内容（不影响核"],
+    correctAnswer: 1,
+    explanation: "模型通常优先遵循更靠后的指令，或尝试折中处理，不同模型行为略有差异。",
+    difficulty: "medium",
+    topics: ["Prompt设计", "Prompt工程"]
+  },
+  {
+    id: "mc_p04",
+    question: "以下哪种方式最能减少模型对 Prompt 的歧义理解？",
+    options: ["使用简短模糊的描述", "提供格式示例和约束条件", "让模型自由发挥输出", "大量修饰词增加描述丰富度"],
+    correctAnswer: 1,
+    explanation: "明确格式要求、示例和约束能有效减少模型的多种解读可能性，输出更可控。",
+    difficulty: "easy",
+    topics: ["Prompt设计", "Prompt工程"]
+  },
+  {
+    i,
+  {
+    id: "mc_p05",
+    question: "Prompt Injection 攻击的本质是？",
+    options: ["注入恶意代码到服务器", "构造输入让模型忽略原有指令", "暴力破解API密钥", "向模型输入超长文本导致崩溃（不影响"],
+    correctAnswer: 1,
+    explanation: "Prompt injection 通过精心构造的输入，覆盖或绕过 system prompt 中的安全指令。",
+    difficulty: "medium",
+    topics: ["安全", "Prompt工程"]
+  },
+  {
+    id: "mc_p06",
+    question: "以下哪种 Prompt 技巧最适合复杂多步推理？",
+    options: ["Zero-shot直接询问", "让模型先列假设再逐步推导", "要求模型直接给最终答案", "增加无关背景信息"],
+    correctAnswer: 1,
+    explanation: "显式要求列举前提和逐步推导，可减少跳步导致的逻辑错误，提升推理质量。",
+    difficulty: "medium",
+    topics: ["推理", "Prompt工程"]
+  },
+  {
+    id: "mc_p07",
+    question: "强制模型输出合法 JSON 最可靠的方法是？",
+    options: ["在Prompt中说请输出JSON（不影响核心结", "使用response_format参数", "增大temperature参数值", "减少max_tokens参数限制"],
+    correctAnswer: 1,
+    explanation: "response_format 参数在底层强制保证输出合法 JSON，比仅靠 Prompt 指令更可靠。",
+    difficulty: "medium",
+    topics: ["输出格式", "Prompt工程"]
+  },
+  {
+    id: "mc_p08",
+    question: "Few-shot 示例质量不高时最可能导致什么？",
+    options: ["模型完全无法运行", "模型学到错误输出模式质量下降", "模型自动忽略所有示例（不影响核心结论", "模型输出速度明显加快"],
+    correctAnswer: 1,
+    explanation: "低质量示例会误导模型学习错误格式或答案，有时反而比 Zero-shot 效果更差。",
+    difficulty: "medium",
+    topics: ["Few-shot", "Prompt工程"]
+  },
+  {
+    id: "mc_p09",
+    question: "Negative Prompting（负面提示）的主要用途是？",
+    options: ["让模型输出负面情绪（不影响核心结", "明确告知模型不应该做什么", "降低模型回复质量", "减少输出长度"],
+    correctAnswer: 1,
+    explanation: "通过明确禁止行为来约束模型输出，如'不要提供医疗建议''不要使用专业术语'。",
+    difficulty: "medium",
+    topics: ["Prompt设计", "Prompt工程"]
+  },
+  {
+    id: "mc_p10",
+    question: "Self-consistency 技术的核心思路是？",
+    options: ["让模型只回答一次", "多次采样后取多数投票结果", "让多个不同模型同时回答（不影响核", "检查模型语法错误后修正"],
+    correctAnswer: 1,
+    explanation: "Self-consistency 多次用 CoT 采样，取多数一致的答案，显著提升推理准确率。",
+    difficulty: "hard",
+    topics: ["Self-consistency", "Prompt工程"]
+  },
+
+  // ══════════════════════════════════════
+  // RAG（10道）
+  // ══════════════════════════════════════
+
+  {
+    id: "mc_r01",
+    question: "RAG 系统减少幻觉的核心机制是？",
+    options: ["微调模型参数", "将外部知识注入Prompt供模型参考", "增加模型参数规模", "让模型自动爬取互联网内容（不影响核心结论）"],
+    correctAnswer: 1,
+    explanation: "RAG 检索相关文档注入 Prompt，让模型基于事实回答，而非完全依赖参数记忆。",
+    difficulty: "easy",
+    topics: ["RAG基础", "RAG"]
+  },
+  {
+    id: "mc_r02",
+    question: "向量数据库在 RAG 中的核心作用是？",
+    options: ["存储模型权重", "支持语义相似度快速检索", "替代关系型数据库", "训练Embedding模型"],
+    correctAnswer: 1,
+    explanation: "向量数据库将文档转为向量，支持高效相似度搜索，是 RAG 的核心检索组件。",
+    difficulty: "easy",
+    topics: ["向量数据库", "RAG"]
+  },
+  {
+    id: "mc_r03",
+    question: "Chunk size 过大会导致 RAG 出现什么问题？",
+    options: ["检索速度加快", "召回内容含过多无关信息", "减少存储空间占用", "Embedding模型无法正常工作"],
+    correctAnswer: 1,
+    explanation: "chunk 过大会让每块包含多个话题，检索时引入噪音，模型难以聚焦关键信息。",
+    difficulty: "medium",
+    topics: ["分块策略", "RAG"]
+  },
+  {
+    id: "mc_r04",
+    question: "Hybrid Search（混合搜索）结合了哪两种检索方式？",
+    options: ["多个向量库结果", "语义向量和关键词精确匹配", "多种嵌入模型输出", "向量检索和图数据库（不影响核心结"],
+    correctAnswer: 1,
+    explanation: "混合搜索结合语义相似度（dense）和 BM25 关键词匹配（sparse），互补提升召回质量。",
+    difficulty: "medium",
+    topics: ["检索策略", "RAG"]
+  },
+  {
+    id: "mc_r05",
+    question: "Re-ranking 在 RAG 中的作用是？",
+    options: ["重新建立文档索引（不影响核心结论）", "对粗召回结果精细打分提升精度", "加快向量检索速度", "减少文档分块数量"],
+    correctAnswer: 1,
+    explanation: "Re-ranker 对粗检索候选文档精确打分，筛选出质量更高的内容传给生成模型。",
+    difficulty: "hard",
+    topics: ["Re-ranking", "RAG"]
+  },
+  {
+    id: "mc_r06",
+    question: "RAG 中 'context stuffing' 过多会造成什么后果？",
+    options: ["模型回答速度加快", "关键信息被稀释准确率下降", "提高检索召回率", "触发向量数据库更新（不影响核心结"],
+    correctAnswer: 1,
+    explanation: "塞入过多检索结果会出现'lost in the middle'，模型难以聚焦正确答案，准确率下降。",
+    difficulty: "hard",
+    topics: ["RAG优化", "RAG"]
+  },
+  {
+    id: "mc_r07",
+    question: "RAG 评估中 'faithfulness' 衡量的是？",
+    options: ["模型回答速度", "生成内容是否基于检索文档", "向量检索准确率（不影响核心结论）", "用户满意度评分"],
+    correctAnswer: 1,
+    explanation: "faithfulness 衡量模型输出是否有文档依据，高分说明模型没有凭空编造内容。",
+    difficulty: "hard",
+    topics: ["RAG评估", "RAG"]
+  },
+  {
+    id: "mc_r08",
+    question: "知识库文档更新后 RAG 系统最需要做什么？",
+    options: ["重新训练生成模型", "更新向量索引保持检索准确", "重新设计Prompt模板（不影响", "更换向量数据库类型"],
+    correctAnswer: 1,
+    explanation: "文档更新后需重新嵌入并更新索引，否则检索到旧版内容，影响回答时效性。",
+    difficulty: "medium",
+    topics: ["知识更新", "RAG"]
+  },
+  {
+    id: "mc_r09",
+    question: "Query Expansion（查询扩展）主要解决什么问题？",
+    options: ["减少向量库存储占用", "弥补查询词与文档词汇的差异", "加快模型生成速度", "降低Embedding成本（不影响"],
+    correctAnswer: 1,
+    explanation: "用户查询词与文档用词不一致时，通过扩展同义词或多查询变体来提升召回率。",
+    difficulty: "hard",
+    topics: ["查询优化", "RAG"]
+  },
+  {
+    id: "mc_r10",
+    question: "Parent Document Retriever 策略的核心思想是？",
+    options: ["用父类模型替代标准模型（不影响核心", "检索小块但将父文档传给模型", "只索引文档的父级目录", "将多个小块合并成大块"],
+    correctAnswer: 1,
+    explanation: "小块便于精准检索，大块提供完整上下文，Parent Retriever 兼顾精准度和完整性。",
+    difficulty: "hard",
+    topics: ["检索策略", "RAG"]
+  },
+
+  // ══════════════════════════════════════
+  // 大模型能力边界（10道）
+  // ══════════════════════════════════════
+
+  {
+    id: "mc_m01",
+    question: "大模型 knowledge cutoff 意味着什么？",
+    options: ["模型只处理短文本", "训练截止后的事件模型不了解", "模型无法回答专业问题（不影响核心结", "模型每次回答都不同"],
     correctAnswer: 1,
     explanation: "知识截止日期后发生的事件不在训练数据中，模型无法可靠回答，需 RAG 或工具补充。",
     difficulty: "easy",
-    topics: ["模型局限", "知识截止"]
+    topics: ["模型局限", "大模型能力边界"]
   },
   {
-    id: "mc_052",
-    question: "以下哪种任务大模型天然表现较差？",
-    options: ["文本摘要", "精确的数值计算", "创意写作", "多语言翻译"],
+    id: "mc_m02",
+    question: "大模型天然表现最差的任务类型是？",
+    options: ["文本摘要", "精确数值计算", "创意写作", "多语言翻译（不影响核"],
     correctAnswer: 1,
-    explanation: "LLM 是概率模型，不擅长精确计算，需借助 code interpreter 或计算器工具完成。",
+    explanation: "LLM 是概率模型，不擅长精确计算，需借助 code interpreter 或计算器工具。",
     difficulty: "easy",
-    topics: ["模型局限", "能力边界"]
+    topics: ["模型局限", "大模型能力边界"]
   },
   {
-    id: "mc_053",
-    question: "大模型'涌现能力'（emergent abilities）的特点是：",
-    options: ["在小模型上充分展现", "在模型规模达到某阈值后突然出现的新能力", "通过专项微调获得的技能", "只在特定语言任务中表现"],
+    id: "mc_m03",
+    question: "'涌现能力'（Emergent Abilities）的特点是？",
+    options: ["在小模型上充分展现", "规模达到阈值后突然出现", "通过微调获得", "只在特定语言任务中表现（不影响"],
     correctAnswer: 1,
-    explanation: "涌现能力是指在模型规模达到一定量级后突然具备的能力，如多步推理，小模型上几乎不存在。",
+    explanation: "涌现能力是在模型规模达到一定量级后突然具备的新能力，小模型几乎不存在。",
     difficulty: "medium",
-    topics: ["涌现能力", "模型规模"]
+    topics: ["涌现能力", "大模型能力边界"]
   },
   {
-    id: "mc_054",
-    question: "在大模型评估中，'benchmark saturation' 指的是：",
-    options: ["模型训练数据用完", "模型在常用基准测试上达到接近满分，区分度下降", "评估服务器过载", "基准测试题目太简单"],
+    id: "mc_m04",
+    question: "大模型 'positional bias' 偏差是指？",
+    options: ["模型偏向某种政治立场", "对输入列表特定位置内容权重过高", "模型只关注正面内容", "模型偏好处理更长的文本（不影响核心结论"],
     correctAnswer: 1,
-    explanation: "随模型能力提升，旧基准测试趋于饱和失去区分度，需要更难的新基准来衡量真实能力差距。",
+    explanation: "模型倾向关注列表的首尾位置内容，中间内容容易被忽视（lost in the middle）。",
     difficulty: "hard",
-    topics: ["评估", "基准测试"]
+    topics: ["模型偏差", "大模型能力边界"]
   },
   {
-    id: "mc_055",
-    question: "大模型的 'positional bias' 偏差是指：",
-    options: ["模型偏向某种政治立场", "模型对输入列表中特定位置的内容给予过高权重", "模型只关注正面内容", "模型偏好更长的文本"],
+    id: "mc_m05",
+    question: "RLHF 的目标是？",
+    options: ["加速模型训练", "让输出更符合人类偏好", "减少模型参数量（不影响核心结", "提升数学能力"],
     correctAnswer: 1,
-    explanation: "研究发现模型倾向于关注列表的首尾位置内容，中间内容容易被忽视（lost in the middle）。",
+    explanation: "RLHF 通过人类偏好数据训练奖励模型，再用强化学习引导 LLM 向人类偏好对齐。",
+    difficulty: "medium",
+    topics: ["RLHF", "大模型能力边界"]
+  },
+  {
+    id: "mc_m06",
+    question: "'Needle in a Haystack' 问题描述的是？",
+    options: ["文档含敏感信息", "超长文本中模型难以利用关键细节", "文档格式不兼容", "模型处理时间过长（不影响核心结论）"],
+    correctAnswer: 1,
+    explanation: "在极长上下文中，模型倾向忽视中间的关键信息，无法有效检索'针'（关键细节）。",
     difficulty: "hard",
-    topics: ["模型偏差", "注意力机制"]
+    topics: ["长上下文", "大模型能力边界"]
   },
   {
-    id: "mc_056",
-    question: "Transformer 架构中 'attention mechanism' 的核心作用是：",
-    options: ["减少模型参数数量", "动态计算序列中各 token 之间的关联权重", "加快文本生成速度", "过滤停用词"],
+    id: "mc_m07",
+    question: "大模型 'sycophancy'（奉承）问题是指？",
+    options: ["模型输出过于简短", "模型迎合用户观点而非客观正确", "模型回答速度过慢", "模型拒绝回答争议问题（不影响核心结论"],
     correctAnswer: 1,
-    explanation: "注意力机制让模型在处理每个 token 时，动态关注序列中其他相关位置，捕获长距离依赖。",
+    explanation: "RLHF 训练可能导致模型学会迎合而非纠正用户，影响回答的客观准确性。",
     difficulty: "medium",
-    topics: ["Transformer", "注意力机制"]
+    topics: ["模型偏差", "大模型能力边界"]
   },
   {
-    id: "mc_057",
-    question: "RLHF（人类反馈强化学习）的目标是：",
-    options: ["加速模型训练收敛", "让模型输出更符合人类偏好和价值观", "减少模型参数量", "提升模型数学能力"],
+    id: "mc_m08",
+    question: "量化（Quantization）对模型的主要影响是？",
+    options: ["提升数学任务能力（不影响核心结", "减少内存占用和推理延迟", "增加训练数据量", "提高输出多样性"],
     correctAnswer: 1,
-    explanation: "RLHF 通过收集人类偏好数据训练奖励模型，再用强化学习引导 LLM 向人类偏好对齐。",
+    explanation: "量化将权重从 FP32 压缩到 INT8/INT4，显著减少显存需求，加快推理速度。",
     difficulty: "medium",
-    topics: ["RLHF", "对齐技术"]
+    topics: ["量化", "大模型能力边界"]
   },
   {
-    id: "mc_058",
-    question: "大模型在处理长文档时出现'needle in a haystack'问题，指的是：",
-    options: ["文档包含敏感信息", "模型难以从超长文本中找到和利用关键细节", "文档格式不兼容", "模型处理时间过长"],
+    id: "mc_m09",
+    question: "Multimodal LLM 相比纯文本模型的核心扩展是？",
+    options: ["支持更多编程语言（不影响核心结论）", "能理解和处理图像音频等非文本", "参数量翻倍", "支持更长的上下文"],
     correctAnswer: 1,
-    explanation: "在极长上下文中，模型倾向忽视中间位置的关键信息，无法有效检索'针'（关键细节）。",
-    difficulty: "hard",
-    topics: ["长上下文", "注意力局限"]
-  },
-  {
-    id: "mc_059",
-    question: "以下哪种方法最有效地减少大模型的幻觉？",
-    options: ["增大 temperature 参数", "引入知识检索并要求模型给出来源引用", "减少 Prompt 的长度", "提高模型推理温度"],
-    correctAnswer: 1,
-    explanation: "RAG+引用要求让模型基于可验证来源作答，比单纯依赖模型参数记忆更能减少幻觉。",
-    difficulty: "medium",
-    topics: ["幻觉减少", "可靠性"]
-  },
-  {
-    id: "mc_060",
-    question: "大模型的 'sycophancy'（奉承/讨好）问题是指：",
-    options: ["模型输出过于简短", "模型倾向于迎合用户观点而非给出客观正确答案", "模型回答速度过慢", "模型拒绝回答争议性问题"],
-    correctAnswer: 1,
-    explanation: "RLHF 训练时人类偏好反馈可能导致模型学会迎合而非纠正用户，影响回答准确性。",
-    difficulty: "medium",
-    topics: ["模型偏差", "对齐问题"]
-  },
-  {
-    id: "mc_061",
-    question: "Multimodal LLM（多模态大模型）相比纯文本模型的核心扩展是：",
-    options: ["支持更多编程语言", "能够理解和生成图像、音频等非文本内容", "参数量翻倍", "支持更长的上下文窗口"],
-    correctAnswer: 1,
-    explanation: "多模态模型通过统一编码器处理图文音视频等不同模态，实现跨模态理解和生成。",
+    explanation: "多模态模型通过统一编码器处理图文音视频，实现跨模态理解和生成。",
     difficulty: "easy",
-    topics: ["多模态", "模型能力"]
+    topics: ["多模态", "大模型能力边界"]
   },
   {
-    id: "mc_062",
-    question: "大模型输出的不确定性（uncertainty）最适合通过哪种方式量化？",
-    options: ["统计输出字数", "多次采样并分析答案分布的一致性", "检查语法错误数量", "测量 API 响应时间"],
+    id: "mc_m10",
+    question: "减少大模型幻觉最有效的方法是？",
+    options: ["增大temperature参数", "引入知识检索并要求给出来源", "减少Prompt长度", "提高模型推理温度"],
     correctAnswer: 1,
-    explanation: "多次采样后若结果高度一致说明置信度高，结果分散则说明模型对该问题不确定。",
-    difficulty: "hard",
-    topics: ["不确定性", "可靠性评估"]
+    explanation: "RAG+引用要求让模型基于可验证来源作答，比单纯依赖参数记忆更能减少幻觉。",
+    difficulty: "medium",
+    topics: ["幻觉", "大模型能力边界"]
   },
 
-  // --- AI产品设计 (12道) ---
+  // ══════════════════════════════════════
+  // AI 产品设计（10道）
+  // ══════════════════════════════════════
+
   {
-    id: "mc_063",
-    question: "在 AI 产品设计中，'graceful degradation'（优雅降级）指的是：",
-    options: ["逐步减少产品功能", "当 AI 能力不足时自动回退到可靠的备选方案", "降低产品的视觉质量", "减少 AI 的响应频率"],
+    id: "mc_d01",
+    question: "'Graceful degradation'（优雅降级）在 AI 产品中指的是？",
+    options: ["逐步减少功能", "AI不足时回退到可靠备选方案", "降低产品视觉质量（不影响核心结论）", "减少AI响应频率"],
     correctAnswer: 1,
-    explanation: "优雅降级确保 AI 失败时产品仍可用，如模型超时时显示缓存答案或提示人工介入。",
+    explanation: "优雅降级确保 AI 失败时产品仍可用，如超时时显示缓存答案或提示人工介入。",
     difficulty: "medium",
-    topics: ["产品设计", "容错机制"]
+    topics: ["产品设计", "AI产品设计"]
   },
   {
-    id: "mc_064",
-    question: "以下哪种场景最需要在 AI 产品中加入人工审核环节？",
-    options: ["生成表情包", "影响用户权益的决策，如贷款评估或医疗建议", "自动补全搜索词", "生成产品描述文案"],
+    id: "mc_d02",
+    question: "最需要在 AI 产品中加入人工审核的场景是？",
+    options: ["生成表情包", "影响用户权益的高风险决策", "自动补全搜索词", "生成产品描述文案（不影响核心结论"],
     correctAnswer: 1,
     explanation: "高风险决策涉及用户权益，AI 错误代价极高，必须加入人工审核保障准确性和合规性。",
     difficulty: "medium",
-    topics: ["人机协作", "高风险场景"]
+    topics: ["人机协作", "AI产品设计"]
   },
   {
-    id: "mc_065",
-    question: "在 AI 客服产品设计中，'intent recognition'（意图识别）准确率低会直接导致：",
-    options: ["客服响应速度变慢", "用户被分配到错误的解决流程，满意度下降", "系统的 API 调用增多", "知识库更新频率变高"],
+    id: "mc_d03",
+    question: "AI 客服中 intent recognition 准确率低直接导致？",
+    options: ["响应速度变慢", "用户进入错误解决流程满意度下降", "API调用次数增多（不影响核心结论）", "知识库更新频率变高"],
     correctAnswer: 1,
-    explanation: "意图识别错误会让用户进入错误的对话分支，无法解决实际问题，是客服体验的核心痛点。",
+    explanation: "意图识别错误让用户进入错误的对话分支，无法解决实际问题，是客服体验的核心痛点。",
     difficulty: "medium",
-    topics: ["AI客服", "意图识别"]
+    topics: ["AI客服", "AI产品设计"]
   },
   {
-    id: "mc_066",
-    question: "AI 产品中 'streaming output'（流式输出）的用户体验优势是：",
-    options: ["减少服务器计算量", "让用户即时看到内容输出过程，感知等待时间更短", "提高输出内容准确性", "降低 API 调用费用"],
+    id: "mc_d04",
+    question: "Streaming output（流式输出）的用户体验优势是？",
+    options: ["减少服务器计算量", "让用户即时看到输出感知等待更短", "提高输出准确性", "降低API调用费用（不影响核心结论）"],
     correctAnswer: 1,
-    explanation: "流式输出让用户看到 token 逐步生成，相比等待全部完成再显示，主观感受响应更快。",
+    explanation: "流式输出让用户看到 token 逐步生成，相比等待完整结果，主观感受响应更快。",
     difficulty: "easy",
-    topics: ["用户体验", "流式输出"]
+    topics: ["用户体验", "AI产品设计"]
   },
   {
-    id: "mc_067",
-    question: "以下哪个指标最能直接衡量 AI 客服的替代人工效果？",
-    options: ["API 调用成功率", "AI 自主解决率（无需转人工的比例）", "对话轮次数量", "系统平均响应时间"],
+    id: "mc_d05",
+    question: "衡量 AI 客服替代人工效果的最直接指标是？",
+    options: ["API调用成功率（不影响核心结论）", "AI自主解决率（无需转人工比例）", "对话轮次数量", "系统平均响应时间"],
     correctAnswer: 1,
     explanation: "自主解决率（containment rate）直接反映 AI 多大程度替代了人工，是核心业务指标。",
     difficulty: "medium",
-    topics: ["AI客服指标", "替代率"]
+    topics: ["AI客服指标", "AI产品设计"]
   },
   {
-    id: "mc_068",
-    question: "在设计 AI 写作助手时，'user control' 原则要求：",
-    options: ["让 AI 完全替代用户写作", "保留用户修改、拒绝和撤销 AI 建议的能力", "限制用户输入内容", "让 AI 自动发布内容"],
+    id: "mc_d06",
+    question: "AI 产品 'cold start problem'（冷启动问题）主要指？",
+    options: ["服务器启动时间过长", "新用户缺乏数据导致AI效果差", "API接口调用失败", "模型在低温下性能下降（不影响核心结论"],
     correctAnswer: 1,
-    explanation: "用户控制原则确保人类始终是最终决策者，AI 是辅助工具，不强制替代人类判断。",
-    difficulty: "easy",
-    topics: ["产品设计", "用户控制"]
-  },
-  {
-    id: "mc_069",
-    question: "AI 产品的 'cold start problem'（冷启动问题）主要指：",
-    options: ["服务器启动时间过长", "新用户或新场景缺乏数据导致 AI 效果差", "API 接口调用失败", "模型在低温环境下性能下降"],
-    correctAnswer: 1,
-    explanation: "AI 产品依赖历史数据做个性化，新用户无历史数据时效果基础差，需设计冷启动策略。",
+    explanation: "AI 产品依赖历史数据做个性化，新用户无历史数据时效果差，需设计冷启动策略。",
     difficulty: "medium",
-    topics: ["冷启动", "个性化"]
+    topics: ["冷启动", "AI产品设计"]
   },
   {
-    id: "mc_070",
-    question: "在 AI 产品的 A/B 测试中，最常见的误区是：",
-    options: ["测试周期过长", "过早停止测试（样本量不足时就宣布胜出）", "测试指标太多", "未记录实验参数"],
+    id: "mc_d07",
+    question: "A/B 测试中最常见的误区是？",
+    options: ["测试周期过长", "样本量不足时过早宣布结果", "测试指标过多", "未记录实验参数（不影响核心结论）"],
     correctAnswer: 1,
-    explanation: "过早停止测试会受到'窥视问题'影响，样本量不足时的显著差异很可能是随机误差。",
+    explanation: "过早停止测试受'窥视问题'影响，样本不足时的显著差异很可能是随机误差。",
     difficulty: "hard",
-    topics: ["A/B测试", "实验设计"]
+    topics: ["A/B测试", "AI产品设计"]
   },
   {
-    id: "mc_071",
-    question: "AI 产品的 'explainability'（可解释性）最重要的应用场景是：",
-    options: ["娱乐类应用", "需要用户或监管方理解 AI 决策依据的高风险场景", "内部开发调试", "提高系统性能"],
+    id: "mc_d08",
+    question: "AI 产品设计 'user control' 原则要求？",
+    options: ["让AI完全替代用户（不影响核心结论）", "保留用户修改和拒绝AI建议的能力", "限制用户输入内容", "让AI自动发布内容"],
     correctAnswer: 1,
-    explanation: "金融、医疗、司法等高风险决策场景必须提供可解释的依据，满足合规要求和用户信任。",
-    difficulty: "medium",
-    topics: ["可解释性", "高风险AI"]
+    explanation: "用户控制原则确保人类始终是最终决策者，AI 是辅助工具不强制替代人类判断。",
+    difficulty: "easy",
+    topics: ["用户控制", "AI产品设计"]
   },
   {
-    id: "mc_072",
-    question: "在 AI 产品的 onboarding 设计中，以下哪种方式最能帮助用户快速建立正确的 AI 使用心智模型？",
-    options: ["展示大量技术参数", "通过具体示例展示 AI 能做什么、不能做什么", "只提供文字说明文档", "让用户自行探索功能"],
+    id: "mc_d09",
+    question: "AI 产品 onboarding 中最能帮助用户建立正确心智模型的方式是？",
+    options: ["展示大量技术参数", "具体示例展示能做什么不能做什么", "只提供文字说明文档（不影响核心结论）", "让用户自行探索功能"],
     correctAnswer: 1,
     explanation: "具体示例帮助用户快速校准对 AI 的预期，避免过度依赖或误解 AI 能力边界。",
     difficulty: "medium",
-    topics: ["产品设计", "用户引导"]
+    topics: ["用户引导", "AI产品设计"]
   },
   {
-    id: "mc_073",
-    question: "AI 产品中 'feedback loop'（反馈循环）设计的主要目的是：",
-    options: ["增加用户停留时长", "收集用户行为数据持续改进模型和产品体验", "提高页面加载速度", "减少服务器资源消耗"],
-    correctAnswer: 1,
-    explanation: "用户点赞/踩、修改记录等反馈数据是持续优化模型和产品的核心数据来源。",
-    difficulty: "medium",
-    topics: ["反馈机制", "持续优化"]
-  },
-  {
-    id: "mc_074",
-    question: "当 AI 产品出现输出质量问题时，最科学的定位方法是：",
-    options: ["立即更换底层模型", "通过错误案例分析系统性地找到根本原因", "增加人工客服补充", "扩大训练数据量"],
+    id: "mc_d10",
+    question: "AI 产品出现输出质量问题时最科学的定位方法是？",
+    options: ["立即更换底层模型（不影响核心结论）", "通过错误案例系统分析根本原因", "增加人工客服", "扩大训练数据量"],
     correctAnswer: 1,
     explanation: "系统性错误分析（案例归因、错误分类）才能识别是 Prompt、数据、模型还是工程问题。",
     difficulty: "medium",
-    topics: ["问题定位", "质量改进"]
+    topics: ["质量改进", "AI产品设计"]
   },
 
-  // --- AI评估与指标 (10道) ---
+  // ══════════════════════════════════════
+  // AI 安全与伦理（10道）
+  // ══════════════════════════════════════
+
   {
-    id: "mc_075",
-    question: "BLEU 分数在 AI 评估中的局限性主要是：",
-    options: ["计算速度太慢", "只衡量词汇重叠，无法捕捉语义等价的表达", "只适用于图像评估", "需要大量人工标注"],
+    id: "mc_s01",
+    question: "'Algorithmic bias'（算法偏见）最可能源于？",
+    options: ["服务器硬件故障", "训练数据中的历史偏见被放大", "模型参数设置不当（不影响核心结论）", "用户界面设计缺陷"],
     correctAnswer: 1,
-    explanation: "BLEU 基于 n-gram 匹配，语义相同但词汇不同的表达得分低，对摘要和对话评估不够准确。",
+    explanation: "训练数据反映现实偏见（种族、性别等），模型学习后可能在决策中复制和放大。",
     difficulty: "medium",
-    topics: ["评估指标", "NLP指标"]
+    topics: ["算法偏见", "AI安全与伦理"]
   },
   {
-    id: "mc_076",
-    question: "LLM-as-judge（用大模型评估大模型）方法的主要风险是：",
-    options: ["评估速度太慢", "评估模型可能存在与被评估模型相似的系统性偏差", "成本比人工更高", "无法处理中文评估"],
+    id: "mc_s02",
+    question: "GDPR 对 AI 产品的核心合规要求是？",
+    options: ["必须使用开源模型", "用户数据收集需告知同意并支持删除", "AI必须由人类监督所有决策（不影响核心结", "产品必须在欧盟境内托管服务"],
     correctAnswer: 1,
-    explanation: "同族模型可能共享相同偏见，导致评估失去客观性，最好搭配不同系列的模型交叉评估。",
+    explanation: "GDPR 核心要求：明确告知数据用途、获取同意、支持访问/更正/删除权，数据最小化。",
+    difficulty: "medium",
+    topics: ["GDPR", "AI安全与伦理"]
+  },
+  {
+    id: "mc_s03",
+    question: "AI 系统对用户不利决策最重要的设计原则是？",
+    options: ["让模型输出更自信", "提供可解释理由并设申诉渠道", "加快决策处理速度", "降低模型置信度阈值（不影响核心结论"],
+    correctAnswer: 1,
+    explanation: "高风险自动化决策必须可解释，用户有权了解原因并提出异议，这是程序公正的基本要求。",
+    difficulty: "medium",
+    topics: ["AI伦理", "AI安全与伦理"]
+  },
+  {
+    id: "mc_s04",
+    question: "AI 公平性最难解决的挑战是？",
+    options: ["计算公平性指标成本高", "不同公平性定义之间数学上不可兼得", "公平性只适用于分类任务（不影响核心结论）", "公平性与用户体验无关"],
+    correctAnswer: 1,
+    explanation: "个体公平与群体公平等不同定义数学上无法同时满足，需根据场景做权衡取舍。",
     difficulty: "hard",
-    topics: ["LLM评估", "评估偏差"]
+    topics: ["AI公平性", "AI安全与伦理"]
   },
   {
-    id: "mc_077",
-    question: "在 AI 客服产品中，'首次解决率'（FCR）的含义是：",
-    options: ["第一次登录就解决的问题比例", "用户第一次接触时问题被一次性解决的比例", "AI 首次回答正确的概率", "首次上线时的解决率"],
+    id: "mc_s05",
+    question: "Deepfake 对 AI 伦理的主要挑战是？",
+    options: ["生成成本过高", "使伪造媒体变易威胁信任安全", "只影响娱乐行业", "技术难度高普通人无法使用（不影响核"],
     correctAnswer: 1,
-    explanation: "FCR 是指用户无需重复联系或转人工，在一次对话中就解决问题的比例，越高越好。",
+    explanation: "Deepfake 让身份伪造、虚假信息传播门槛大幅降低，威胁政治、金融和个人隐私。",
     difficulty: "easy",
-    topics: ["客服指标", "FCR"]
+    topics: ["Deepfake", "AI安全与伦理"]
   },
   {
-    id: "mc_078",
-    question: "在 AI 产品评估中，'precision' 和 'recall' 需要平衡，原因是：",
-    options: ["两者计算公式相同", "提高精确率通常会降低召回率，反之亦然", "两者只能同时提高", "只有分类任务需要考虑"],
-    correctAnswer: 1,
-    explanation: "精确率提高意味着更保守的判断，会漏掉更多正例（召回率降），需根据业务代价权衡取舍。",
-    difficulty: "medium",
-    topics: ["评估指标", "精确率召回率"]
-  },
-  {
-    id: "mc_079",
-    question: "Perplexity（困惑度）作为语言模型的评估指标，值越低意味着：",
-    options: ["模型越难以预测下一个词", "模型对测试文本的预测能力越强", "模型参数量越少", "模型训练时间越短"],
-    correctAnswer: 1,
-    explanation: "困惑度衡量模型对文本的不确定性，值越低说明模型越能准确预测，语言建模能力越强。",
-    difficulty: "medium",
-    topics: ["困惑度", "语言模型评估"]
-  },
-  {
-    id: "mc_080",
-    question: "人工评估 AI 输出质量时，最常见的标注一致性挑战是：",
-    options: ["硬件设备故障", "不同标注员对相同输出的质量判断存在主观差异", "数据存储格式问题", "标注工具界面不友好"],
-    correctAnswer: 1,
-    explanation: "主观性任务（如'有帮助''准确'）标注员间一致性（inter-annotator agreement）通常较低，需明确标准。",
-    difficulty: "medium",
-    topics: ["人工评估", "标注一致性"]
-  },
-  {
-    id: "mc_081",
-    question: "在生成式 AI 评估中，'Groundedness'（有据性）指标衡量的是：",
-    options: ["回答是否足够简短", "回答内容是否能被提供的文档支持和验证", "回答是否包含专业词汇", "回答速度是否足够快"],
-    correctAnswer: 1,
-    explanation: "Groundedness 评估模型声明是否有明确的文档依据，是 RAG 系统质量评估的核心指标之一。",
-    difficulty: "medium",
-    topics: ["RAG评估", "有据性"]
-  },
-  {
-    id: "mc_082",
-    question: "Shadow testing（影子测试）在 AI 系统部署中的作用是：",
-    options: ["在夜间对服务器进行测试", "将新模型与现有模型并行运行，对比差异但不影响用户", "测试 AI 的暗黑模式配色", "在测试环境模拟生产流量"],
-    correctAnswer: 1,
-    explanation: "影子测试让新模型接收真实流量但不返回给用户，安全地评估线上真实场景的性能差异。",
-    difficulty: "hard",
-    topics: ["部署策略", "影子测试"]
-  },
-  {
-    id: "mc_083",
-    question: "以下哪个评估框架专门用于评估 RAG 系统的端到端质量？",
-    options: ["BLEU / ROUGE", "RAGAS（RAG Assessment）", "ImageNet Benchmark", "HumanEval"],
-    correctAnswer: 1,
-    explanation: "RAGAS 提供 faithfulness、answer relevancy、context precision 等专门针对 RAG 的综合评估指标。",
-    difficulty: "hard",
-    topics: ["RAGAS", "RAG评估框架"]
-  },
-  {
-    id: "mc_084",
-    question: "Online evaluation（在线评估）相比 offline evaluation 的核心优势是：",
-    options: ["评估成本更低", "反映真实用户行为，捕捉离线数据无法体现的问题", "评估速度更快", "不需要任何人工参与"],
-    correctAnswer: 1,
-    explanation: "在线评估通过真实用户行为（点击、转化、留存）验证模型，比离线指标更贴近业务真实效果。",
-    difficulty: "medium",
-    topics: ["在线评估", "评估方法"]
-  },
-
-  // --- 模型微调与部署 (8道) ---
-  {
-    id: "mc_085",
-    question: "LoRA（低秩适配）微调相比全参数微调的主要优势是：",
-    options: ["准确率更高", "只训练少量低秩矩阵，显著减少计算和存储成本", "支持更多任务类型", "训练数据需求更少"],
-    correctAnswer: 1,
-    explanation: "LoRA 冻结原模型权重，只训练插入的低秩分解矩阵，参数量大幅减少，适合资源受限场景。",
-    difficulty: "medium",
-    topics: ["LoRA", "参数高效微调"]
-  },
-  {
-    id: "mc_086",
-    question: "在决定是否对 LLM 进行微调时，首先应该考虑的是：",
-    options: ["微调所需的 GPU 数量", "是否能通过优化 Prompt 或 RAG 满足需求", "模型的参数规模大小", "微调数据的存储格式"],
-    correctAnswer: 1,
-    explanation: "微调成本高且可能过拟合，应优先尝试 Prompt 工程和 RAG，仅在确有必要时才微调。",
-    difficulty: "medium",
-    topics: ["微调决策", "方案选择"]
-  },
-  {
-    id: "mc_087",
-    question: "模型量化（Quantization）的主要目的是：",
-    options: ["提升模型在数学任务上的能力", "降低模型精度以减少内存占用和推理延迟", "增加模型的训练数据量", "提高模型的输出多样性"],
-    correctAnswer: 1,
-    explanation: "量化将模型权重从 FP32/FP16 压缩到 INT8/INT4，显著减少显存需求，加快推理速度。",
-    difficulty: "medium",
-    topics: ["量化", "模型压缩"]
-  },
-  {
-    id: "mc_088",
-    question: "在微调数据集准备中，'data contamination'（数据污染）指的是：",
-    options: ["训练数据中包含脏数据", "评估集数据泄露到训练集，导致评估分数虚高", "数据存储介质损坏", "不同来源的数据混合"],
-    correctAnswer: 1,
-    explanation: "测试集数据流入训练集会导致模型'背题'，评估结果不能反映真实泛化能力。",
-    difficulty: "medium",
-    topics: ["数据污染", "微调注意事项"]
-  },
-  {
-    id: "mc_089",
-    question: "PEFT（参数高效微调）技术的核心思路是：",
-    options: ["使用更多参数提升效果", "冻结大部分预训练参数，只调整少量新增参数", "完全替换预训练权重", "减少训练数据量"],
-    correctAnswer: 1,
-    explanation: "PEFT 方法（LoRA、Adapter、Prefix tuning 等）只训练小比例参数，保留通用知识同时适应新任务。",
-    difficulty: "medium",
-    topics: ["PEFT", "高效微调"]
-  },
-  {
-    id: "mc_090",
-    question: "模型部署中 'latency vs throughput' 的权衡指的是：",
-    options: ["模型大小和精度的权衡", "单请求响应速度和单位时间处理请求数量的取舍", "训练速度和推理速度的取舍", "成本和可用性的权衡"],
-    correctAnswer: 1,
-    explanation: "低延迟需要快速处理单个请求，高吞吐需要批量处理，两者优化方向往往相互冲突。",
-    difficulty: "hard",
-    topics: ["模型部署", "性能权衡"]
-  },
-  {
-    id: "mc_091",
-    question: "Instruction tuning（指令微调）与 RLHF 的主要区别是：",
-    options: ["前者需要更多计算资源", "前者用监督学习拟合示范数据，后者用强化学习优化人类偏好", "前者只适用于英文模型", "两者没有本质差异"],
-    correctAnswer: 1,
-    explanation: "指令微调通过监督示例让模型学会遵循指令，RLHF 进一步用人类偏好信号做强化学习对齐。",
-    difficulty: "hard",
-    topics: ["微调方法", "指令微调"]
-  },
-  {
-    id: "mc_092",
-    question: "在生产环境部署 LLM 时，'model serving' 框架的核心功能是：",
-    options: ["训练新的模型版本", "高效管理并发请求、批处理和 GPU 资源调度", "为模型收集训练数据", "自动优化模型超参数"],
-    correctAnswer: 1,
-    explanation: "vLLM、TGI 等 serving 框架解决并发请求调度、KV Cache 管理、动态批处理等生产问题。",
-    difficulty: "hard",
-    topics: ["模型部署", "Serving框架"]
-  },
-
-  // --- AI安全与伦理 (8道) ---
-  {
-    id: "mc_093",
-    question: "AI 系统中 'algorithmic bias'（算法偏见）最可能源于：",
-    options: ["服务器硬件故障", "训练数据中存在的历史偏见被模型学习和放大", "模型参数设置不当", "用户界面设计缺陷"],
-    correctAnswer: 1,
-    explanation: "训练数据反映现实中的历史偏见（种族、性别等），模型学习后可能在决策中复制和放大这些偏见。",
-    difficulty: "medium",
-    topics: ["算法偏见", "AI伦理"]
-  },
-  {
-    id: "mc_094",
-    question: "GDPR 对 AI 产品的主要合规要求包括：",
-    options: ["必须使用开源模型", "用户数据的收集需告知同意，并支持数据删除权", "AI 必须由人类监督所有决策", "产品必须在欧盟境内托管"],
-    correctAnswer: 1,
-    explanation: "GDPR 核心要求包括：明确告知数据用途、获取同意、支持访问/更正/删除权，以及数据最小化原则。",
-    difficulty: "medium",
-    topics: ["GDPR", "数据合规"]
-  },
-  {
-    id: "mc_095",
-    question: "AI 产品设计中 'fairness'（公平性）最难解决的挑战是：",
-    options: ["计算公平性指标的成本高", "不同公平性定义之间存在数学上的不可兼得性", "公平性只适用于分类任务", "公平性与用户体验无关"],
-    correctAnswer: 1,
-    explanation: "个体公平（相似案例相似对待）与群体公平（各群体结果相近）等定义数学上无法同时满足。",
-    difficulty: "hard",
-    topics: ["AI公平性", "伦理"]
-  },
-  {
-    id: "mc_096",
-    question: "当 AI 系统对用户的重要决策（如贷款审批）产生不利影响时，最重要的设计原则是：",
-    options: ["让模型输出更加自信", "提供可解释的拒绝理由并设置申诉渠道", "加快决策处理速度", "降低模型的置信度阈值"],
-    correctAnswer: 1,
-    explanation: "高风险自动化决策必须可解释，用户有权了解原因并提出异议，这是基本的程序公正要求。",
-    difficulty: "medium",
-    topics: ["AI伦理", "申诉机制"]
-  },
-  {
-    id: "mc_097",
-    question: "Deepfake 技术对 AI 伦理的主要挑战是：",
-    options: ["生成成本过高", "使伪造真实媒体内容变得容易，威胁信任和信息安全", "只在娱乐行业有影响", "技术难度高普通人无法使用"],
-    correctAnswer: 1,
-    explanation: "Deepfake 让身份伪造、虚假信息传播的门槛大幅降低，对政治、金融安全和个人隐私构成威胁。",
-    difficulty: "easy",
-    topics: ["Deepfake", "信息安全"]
-  },
-  {
-    id: "mc_098",
-    question: "AI 系统的 'transparency'（透明度）主要体现在：",
-    options: ["开放模型全部源代码", "清晰告知用户 AI 的决策依据、局限性和使用数据", "公开所有用户数据", "将所有算法细节对外发布"],
-    correctAnswer: 1,
-    explanation: "透明度包括：AI 系统如何工作、哪些数据被使用、决策依据是什么，而非要求全部开源。",
-    difficulty: "medium",
-    topics: ["透明度", "AI治理"]
-  },
-  {
-    id: "mc_099",
-    question: "在 AI 产品中应对 'prompt injection' 攻击的最有效防御是：",
-    options: ["增加 API 调用频率限制", "输入验证、权限分离和输出内容过滤的组合防御", "关闭用户自定义输入功能", "使用更大参数量的模型"],
+    id: "mc_s06",
+    question: "防御 Prompt Injection 攻击最有效的方式是？",
+    options: ["增加API调用频率限制（不影响核心结论）", "输入验证+权限分离+输出过滤组合", "关闭用户自定义输入", "使用更大参数量的模型"],
     correctAnswer: 1,
     explanation: "单一防御难以应对多样攻击，需要输入清洗、权限隔离、输出监控等多层防御策略。",
     difficulty: "hard",
-    topics: ["安全防御", "Prompt注入"]
+    topics: ["安全防御", "AI安全与伦理"]
   },
   {
-    id: "mc_100",
-    question: "以下哪个原则最能描述负责任的 AI 开发（Responsible AI）的核心思路？",
-    options: ["先部署后修复", "在设计阶段就将安全、公平和透明融入产品，而非事后补救", "只考虑用户便利性", "尽量减少人类对 AI 的干预"],
+    id: "mc_s07",
+    question: "Responsible AI（负责任AI）的核心思路是？",
+    options: ["先部署后修复", "设计阶段就融入安全公平透明", "只考虑用户便利性", "减少人类对AI的干预（不影响核心结"],
     correctAnswer: 1,
-    explanation: "负责任 AI 要求将伦理和安全考虑前置到设计阶段（by design），而非出现问题后打补丁。",
+    explanation: "负责任 AI 要求将伦理和安全前置到设计阶段（by design），而非出现问题后打补丁。",
     difficulty: "medium",
-    topics: ["负责任AI", "AI治理"]
+    topics: ["负责任AI", "AI安全与伦理"]
+  },
+  {
+    id: "mc_s08",
+    question: "AI 系统 'transparency'（透明度）主要体现在？",
+    options: ["开放模型全部源代码", "清晰告知决策依据局限性和数据", "公开所有用户数据", "将所有算法细节对外发布（不影响核心结"],
+    correctAnswer: 1,
+    explanation: "透明度包括：AI 如何工作、哪些数据被使用、决策依据是什么，而非要求全部开源。",
+    difficulty: "medium",
+    topics: ["透明度", "AI安全与伦理"]
+  },
+  {
+    id: "mc_s09",
+    question: "以下哪种 AI 应用风险最高，最需要伦理审查？",
+    options: ["生成营销文案", "刑事司法风险评估系统", "自动翻译邮件内容（不影响核心", "智能家居设备控制"],
+    correctAnswer: 1,
+    explanation: "刑事司法决策影响人身自由，AI 偏见或错误的代价极高，必须经过严格的伦理审查。",
+    difficulty: "medium",
+    topics: ["高风险AI", "AI安全与伦理"]
+  },
+  {
+    id: "mc_s10",
+    question: "AI 系统的 'auditability'（可审计性）对企业最重要的意义是？",
+    options: ["提高模型训练速度", "在出错时能追溯决策过程和责任", "减少AI产品开发周期（不影响核心结论", "帮助模型自动优化参数"],
+    correctAnswer: 1,
+    explanation: "可审计性让组织能在 AI 出错时还原决策路径，满足监管要求并明确责任归属。",
+    difficulty: "medium",
+    topics: ["AI治理", "AI安全与伦理"]
+  },
+
+  // ══════════════════════════════════════
+  // 模型评估（10道）
+  // ══════════════════════════════════════
+
+  {
+    id: "mc_e01",
+    question: "BLEU 分数的主要局限性是？",
+    options: ["计算速度太慢", "只衡量词汇重叠忽略语义等价", "只适用于图像评估（不影响核心结论）", "需要大量人工标注"],
+    correctAnswer: 1,
+    explanation: "BLEU 基于 n-gram 匹配，语义相同但词汇不同的表达得分低，对摘要评估不够准确。",
+    difficulty: "medium",
+    topics: ["评估指标", "模型评估"]
+  },
+  {
+    id: "mc_e02",
+    question: "LLM-as-judge 方法的主要风险是？",
+    options: ["评估速度太慢效率低下", "评估模型可能与被评估模型有相同偏差", "成本比人工更高且需要额外的平台配置工作", "无法处理中文及多语言场景下的评估任务"],
+    correctAnswer: 1,
+    explanation: "同族模型可能共享相同偏见，导致评估失去客观性，最好用不同系列模型交叉评估。",
+    difficulty: "hard",
+    topics: ["LLM评估", "模型评估"]
+  },
+  {
+    id: "mc_e03",
+    question: "Perplexity（困惑度）值越低意味着？",
+    options: ["模型越难预测下一个词", "模型预测能力越强", "模型参数量越少", "模型训练时间越短"],
+    correctAnswer: 1,
+    explanation: "困惑度衡量模型对文本的不确定性，值越低说明模型越能准确预测，语言建模能力越强。",
+    difficulty: "medium",
+    topics: ["困惑度", "模型评估"]
+  },
+  {
+    id: "mc_e04",
+    question: "'Benchmark saturation'（基准饱和）指的是？",
+    options: ["训练数据用完", "模型在旧基准接近满分区分度下降", "评估服务器过载（不影响核心结论）", "测试题目太简单"],
+    correctAnswer: 1,
+    explanation: "随模型能力提升，旧基准趋于饱和失去区分度，需要更难的新基准衡量真实能力差距。",
+    difficulty: "hard",
+    topics: ["基准测试", "模型评估"]
+  },
+  {
+    id: "mc_e05",
+    question: "精确率（Precision）和召回率（Recall）需要平衡的原因是？",
+    options: ["两者计算公式相同", "提高精确率通常会降低召回率", "两者只能同时提高", "只有分类任务需要考虑（不影响核心结"],
+    correctAnswer: 1,
+    explanation: "精确率提高意味着更保守的判断，会漏掉更多正例（召回率降），需根据业务代价权衡。",
+    difficulty: "medium",
+    topics: ["精确率召回率", "模型评估"]
+  },
+  {
+    id: "mc_e06",
+    question: "Shadow testing（影子测试）的作用是？",
+    options: ["在夜间对服务器进行安全性和性能检查确保稳定", "新模型并行运行对比差异但不影响用户", "测试产品暗色主题模式下的界面显示效果", "用线上真实流量模拟对新版本进行全链路压测"],
+    correctAnswer: 1,
+    explanation: "影子测试让新模型接收真实流量但不返回给用户，安全评估线上真实场景性能差异。",
+    difficulty: "hard",
+    topics: ["部署策略", "模型评估"]
+  },
+  {
+    id: "mc_e07",
+    question: "RAGAS 框架专门用于评估什么？",
+    options: ["图像生成质量", "RAG系统端到端质量", "代码生成准确率（不影响核心结", "多语言翻译效果"],
+    correctAnswer: 1,
+    explanation: "RAGAS 提供 faithfulness、answer relevancy、context precision 等专门针对 RAG 的评估指标。",
+    difficulty: "hard",
+    topics: ["RAGAS", "模型评估"]
+  },
+  {
+    id: "mc_e08",
+    question: "Online evaluation 相比 offline evaluation 的核心优势是？",
+    options: ["评估成本更低且计算资源消耗少", "反映真实用户行为捕捉离线无法体现的问题", "评估速度更快且支持大批量自动处理", "完全不需要任何人工参与介入就能完成全部评估"],
+    correctAnswer: 1,
+    explanation: "在线评估通过真实用户行为（点击、转化、留存）验证模型，比离线指标更贴近业务效果。",
+    difficulty: "medium",
+    topics: ["在线评估", "模型评估"]
+  },
+  {
+    id: "mc_e09",
+    question: "人工评估 AI 输出时最常见的标注挑战是？",
+    options: ["硬件设备故障", "不同标注员对相同输出判断存在差异", "数据存储格式问题", "标注工具界面不友好（不影响核心结论）"],
+    correctAnswer: 1,
+    explanation: "主观性任务标注员间一致性（inter-annotator agreement）通常较低，需明确评分标准。",
+    difficulty: "medium",
+    topics: ["人工评估", "模型评估"]
+  },
+  {
+    id: "mc_e10",
+    question: "'Groundedness'（有据性）指标在 RAG 评估中衡量什么？",
+    options: ["回答是否够简短", "回答内容是否能被文档支持验证", "回答是否包含专业词汇（不影响核心结论", "回答速度是否够快"],
+    correctAnswer: 1,
+    explanation: "Groundedness 评估模型声明是否有明确文档依据，是 RAG 质量评估的核心指标之一。",
+    difficulty: "medium",
+    topics: ["有据性", "模型评估"]
   }
 ];
+
 
 
 // ===== 问答题（30道）=====
