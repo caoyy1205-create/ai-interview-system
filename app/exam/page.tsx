@@ -53,8 +53,8 @@ const SESSION_KEY_PREFIX = "examSession_v5";
 const sessionKey = (id: string) => `${SESSION_KEY_PREFIX}_${id}`;
 const MC_LIMIT = 5 * 60;
 const ESSAY_LIMIT = 5 * 60;
-const PART1_LIMIT = 30 * 60;  // 第一部分总计时 30 分钟
-const PART2_LIMIT = 5 * 60;
+const PART1_LIMIT = 20 * 60;  // 第一部分总计时 20 分钟
+const PART2_LIMIT = 10 * 60;
 const MAX_AI_TURNS = 10;
 
 function formatTime(s: number) {
@@ -431,7 +431,7 @@ export default function ExamPage() {
     return (
       <div>
         <div style={S.sectionTitle}>第一部分：基础认知</div>
-        <div style={S.sectionSub}>{part1.questions.length} 题 · 禁止使用 AI 工具 · 限时 30 分钟</div>
+        <div style={S.sectionSub}>{part1.questions.length} 题 · 禁止使用 AI 工具 · 限时 20 分钟</div>
         {!part1Submitted && (
           <Part1Timer
             limitSeconds={PART1_LIMIT}
@@ -455,7 +455,7 @@ export default function ExamPage() {
         <div style={{ ...S.card, background: "#fffbeb", borderColor: "#fde68a" }}>
           <span style={S.badge("yellow")}>⚠️ 禁止 AI</span>
           <span style={{ fontSize: "13px", color: "#92400e", marginLeft: "10px" }}>
-            注意顶部倒计时 · 30分钟内完成所有题目
+            注意顶部倒计时 · 20分钟内完成所有题目
           </span>
         </div>
 
