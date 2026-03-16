@@ -49,7 +49,7 @@ type IntegrityEvent = {
 };
 
 const TOTAL_SECONDS = 6 * 60 * 60;
-const SESSION_KEY_PREFIX = "examSession_v5";
+const SESSION_KEY_PREFIX = "examSession_v6";
 const sessionKey = (id: string) => `${SESSION_KEY_PREFIX}_${id}`;
 const MC_LIMIT = 5 * 60;      // 选择题组限时 5 分钟
 const ESSAY_LIMIT = 10 * 60;  // 问答题组限时 10 分钟
@@ -96,13 +96,18 @@ function SectionTimer({ label, limitSeconds, savedLeft, onExpire, onTick, locked
 }) {
   const [left, setLeft] = useState(savedLeft ?? limitSeconds);
   const calledRef = useRef(false);
+  // 用 ref 稳定 callbacks，避免 useEffect 依赖变化导致 setTimeout 被反复清除
+  const onExpireRef = useRef(onExpire);
+  const onTickRef = useRef(onTick);
+  useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
+  useEffect(() => { onTickRef.current = onTick; }, [onTick]);
 
   useEffect(() => {
     if (locked) return;
-    if (left <= 0) { if (!calledRef.current) { calledRef.current = true; onExpire(); } return; }
-    const t = setTimeout(() => { const n = left - 1; setLeft(n); onTick?.(n); }, 1000);
+    if (left <= 0) { if (!calledRef.current) { calledRef.current = true; onExpireRef.current(); } return; }
+    const t = setTimeout(() => { const n = left - 1; setLeft(n); onTickRef.current?.(n); }, 1000);
     return () => clearTimeout(t);
-  }, [left, locked, onExpire, onTick]);
+  }, [left, locked]);
 
   if (locked) {
     if (mode === "inline") return <span style={{ fontSize: "12px", color: "#888" }}>⏱ 时间已结束</span>;
