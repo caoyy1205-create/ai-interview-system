@@ -173,12 +173,12 @@ export default function ExamPage() {
 
   const [lockedQuestions, setLockedQuestions] = useState<{ [id: string]: boolean }>({});
   const [questionTimerLeft, setQuestionTimerLeft] = useState<{ [id: string]: number }>({});
-  // Part1 两阶段计时
-  const [part1Phase, setPart1Phase] = useState<"mc" | "essay">("mc"); // mc=选择题阶段, essay=问答题阶段
+  // Part1 两段独立计时
   const [mcTimerLeft, setMcTimerLeft] = useState(MC_LIMIT);
   const [essayTimerLeft, setEssayTimerLeft] = useState(ESSAY_LIMIT);
-  const [mcLocked, setMcLocked] = useState(false);   // 选择题阶段结束（锁住选择题）
-  const [essayLocked, setEssayLocked] = useState(false); // 问答题阶段结束（锁住问答题）
+  const [mcLocked, setMcLocked] = useState(false);       // 选择题 5 分钟到期
+  const [essayLocked, setEssayLocked] = useState(false); // 问答题 10 分钟到期
+  const [essayStarted, setEssayStarted] = useState(false); // 问答题是否已开始计时
   const [part2TimerLeft, setPart2TimerLeft] = useState(PART2_LIMIT);
   const [part2TimeLocked, setPart2TimeLocked] = useState(false);
   const [finalSolution, setFinalSolution] = useState("");
@@ -208,8 +208,8 @@ export default function ExamPage() {
               part1Answers: {}, repoUrl: "", notes: "",
               part1Submitted: false, part2Submitted: false,
               lockedQuestions: {}, questionTimerLeft: {},
-              part1Phase: "mc", mcTimerLeft: MC_LIMIT, essayTimerLeft: ESSAY_LIMIT,
-              mcLocked: false, essayLocked: false,
+              mcTimerLeft: MC_LIMIT, essayTimerLeft: ESSAY_LIMIT,
+              mcLocked: false, essayLocked: false, essayStarted: false,
               part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
               finalSolution: "", integrityEvents: [],
             };
@@ -236,8 +236,8 @@ export default function ExamPage() {
         part1Answers: {}, repoUrl: "", notes: "",
         part1Submitted: false, part2Submitted: false,
         lockedQuestions: {}, questionTimerLeft: {},
-        part1Phase: "mc", mcTimerLeft: MC_LIMIT, essayTimerLeft: ESSAY_LIMIT,
-        mcLocked: false, essayLocked: false,
+        mcTimerLeft: MC_LIMIT, essayTimerLeft: ESSAY_LIMIT,
+        mcLocked: false, essayLocked: false, essayStarted: false,
         part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
         finalSolution: "", integrityEvents: [],
       };
@@ -264,11 +264,11 @@ export default function ExamPage() {
     setPart2Submitted(state.part2Submitted ?? false);
     setLockedQuestions(state.lockedQuestions ?? {});
     setQuestionTimerLeft(state.questionTimerLeft ?? {});
-    setPart1Phase(state.part1Phase ?? "mc");
     setMcTimerLeft(state.mcTimerLeft ?? MC_LIMIT);
     setEssayTimerLeft(state.essayTimerLeft ?? ESSAY_LIMIT);
     setMcLocked(state.mcLocked ?? false);
     setEssayLocked(state.essayLocked ?? false);
+    setEssayStarted(state.essayStarted ?? false);
     setPart2TimerLeft(state.part2TimerLeft ?? PART2_LIMIT);
     setPart2TimeLocked(state.part2TimeLocked ?? false);
     setFinalSolution(state.finalSolution ?? "");
@@ -356,10 +356,9 @@ export default function ExamPage() {
   }, []);
 
   const handleMcExpire = useCallback(() => {
-    // 选择题时间到：锁住所有选择题，切换到问答题阶段
+    // 选择题时间到：锁住所有选择题（问答题计时器不受影响）
     setMcLocked(true);
-    setPart1Phase("essay");
-    persistState({ mcLocked: true, part1Phase: "essay" });
+    persistState({ mcLocked: true });
   }, []);
 
   // 问答题阶段 tick/expire
@@ -439,27 +438,33 @@ export default function ExamPage() {
       <div>
         <div style={S.sectionTitle}>第一部分：基础认知</div>
         <div style={S.sectionSub}>{part1.questions.length} 题 · 禁止使用 AI 工具</div>
-        {!part1Submitted && part1Phase === "mc" && (
-          <SectionTimer
-            label="选择题剩余时间"
-            limitSeconds={MC_LIMIT}
-            savedLeft={mcTimerLeft}
-            onExpire={handleMcExpire}
-            onTick={handleMcTick}
-            locked={mcLocked}
-            mode="bar"
-          />
-        )}
-        {!part1Submitted && part1Phase === "essay" && (
-          <SectionTimer
-            label="问答题剩余时间"
-            limitSeconds={ESSAY_LIMIT}
-            savedLeft={essayTimerLeft}
-            onExpire={handleEssayExpire}
-            onTick={handleEssayTick}
-            locked={essayLocked}
-            mode="bar"
-          />
+        {!part1Submitted && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "4px" }}>
+            <SectionTimer
+              label="选择题剩余时间"
+              limitSeconds={MC_LIMIT}
+              savedLeft={mcTimerLeft}
+              onExpire={handleMcExpire}
+              onTick={handleMcTick}
+              locked={mcLocked}
+              mode="bar"
+            />
+            {essayStarted ? (
+              <SectionTimer
+                label="问答题剩余时间"
+                limitSeconds={ESSAY_LIMIT}
+                savedLeft={essayTimerLeft}
+                onExpire={handleEssayExpire}
+                onTick={handleEssayTick}
+                locked={essayLocked}
+                mode="bar"
+              />
+            ) : (
+              <div style={{ padding: "10px 20px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", fontSize: "13px", color: "#888" }}>
+                ⏱ 问答题计时：<strong>开始作答时启动</strong>（10 分钟）
+              </div>
+            )}
+          </div>
         )}
         {part1Submitted && (
           <div style={{ ...S.card, background: "#f0fdf4", borderColor: "#bbf7d0" }}>
@@ -475,7 +480,7 @@ export default function ExamPage() {
         <div style={{ ...S.card, background: "#fffbeb", borderColor: "#fde68a" }}>
           <span style={S.badge("yellow")}>⚠️ 禁止 AI</span>
           <span style={{ fontSize: "13px", color: "#92400e", marginLeft: "10px" }}>
-            选择题 5 分钟 · 问答题 10 分钟 · 各阶段计时分开
+            选择题 5 分钟（独立计时） · 问答题 10 分钟（作答时开始计时）
           </span>
         </div>
 
@@ -484,8 +489,6 @@ export default function ExamPage() {
             (q.type === "multipleChoice" && mcLocked) ||
             (q.type === "essay" && essayLocked) ||
             !!lockedQuestions[q.id];
-          // 问答题只在essay阶段才显示（选择题阶段隐藏）
-          if (q.type === "essay" && part1Phase === "mc" && !part1Submitted) return null;
           if (q.type === "essay") currentEssayQId.current = q.id;
 
           return (
@@ -520,6 +523,11 @@ export default function ExamPage() {
                     if (isLocked) return;
                     const val = e.target.value;
                     const now = Date.now();
+                    // 第一次输入问答题：启动问答题计时器
+                    if (!essayStarted && val.length > 0) {
+                      setEssayStarted(true);
+                      persistState({ essayStarted: true });
+                    }
                     const prevLen = lastInputLen.current[q.id] ?? 0;
                     const prevTime = lastInputTime.current[q.id] ?? now;
                     const delta = val.length - prevLen;
