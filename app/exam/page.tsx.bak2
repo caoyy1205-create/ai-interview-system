@@ -51,8 +51,9 @@ type IntegrityEvent = {
 const TOTAL_SECONDS = 6 * 60 * 60;
 const SESSION_KEY_PREFIX = "examSession_v5";
 const sessionKey = (id: string) => `${SESSION_KEY_PREFIX}_${id}`;
-const MC_LIMIT = 5 * 60;      // 选择题组限时 5 分钟
-const ESSAY_LIMIT = 10 * 60;  // 问答题组限时 10 分钟
+const MC_LIMIT = 5 * 60;
+const ESSAY_LIMIT = 5 * 60;
+const PART1_LIMIT = 20 * 60;  // 第一部分总计时 20 分钟
 const PART2_LIMIT = 10 * 60;
 const MAX_AI_TURNS = 10;
 
@@ -85,13 +86,46 @@ const S = {
   statusBar: { position: "fixed" as const, bottom: 0, left: 0, right: 0, background: "#fff", borderTop: "1px solid #f0f0f0", padding: "10px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px", color: "#888" },
 };
 
-// ─── 统一倒计时组件 SectionTimer ─────────────────────────────────────────────
-// label: 显示文字（如"选择题"、"问答题"、"AI协作"）
-// mode: "bar"=独立卡片(Part1用), "inline"=嵌入式小组件(Part2用)
-function SectionTimer({ label, limitSeconds, savedLeft, onExpire, onTick, locked, mode = "bar" }: {
-  label: string; limitSeconds: number; savedLeft?: number;
-  onExpire: () => void; onTick?: (left: number) => void;
-  locked: boolean; mode?: "bar" | "inline";
+// ─── 单题倒计时 ───────────────────────────────────────────────────────────────
+function QuestionTimer({ questionId, limitSeconds, savedLeft, onExpire, onTick, locked }: {
+  questionId: string; limitSeconds: number; savedLeft?: number;
+  onExpire: (id: string) => void; onTick: (id: string, left: number) => void; locked: boolean;
+}) {
+  const [left, setLeft] = useState(savedLeft ?? limitSeconds);
+  const calledRef = useRef(false);
+
+  useEffect(() => { setLeft(savedLeft ?? limitSeconds); calledRef.current = false; }, [questionId, limitSeconds, savedLeft]);
+
+  useEffect(() => {
+    if (locked) return;
+    if (left <= 0) { if (!calledRef.current) { calledRef.current = true; onExpire(questionId); } return; }
+    const t = setTimeout(() => { const n = left - 1; setLeft(n); onTick(questionId, n); }, 1000);
+    return () => clearTimeout(t);
+  }, [left, locked, questionId, onExpire, onTick]);
+
+  const pct = left / limitSeconds;
+  const urgent = pct < 0.25;
+  const barColor = urgent ? "#dc2626" : pct < 0.5 ? "#f59e0b" : "#16a34a";
+
+  if (locked) return <div style={{ fontSize: "11px", color: "#888", marginBottom: "14px" }}>⏱ 已锁定</div>;
+
+  return (
+    <div style={{ marginBottom: "14px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+        <span style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>剩余时间</span>
+        <span style={{ fontFamily: "monospace", fontSize: "13px", fontWeight: 700, color: urgent ? "#dc2626" : "#555" }}>{formatTime(left)}</span>
+      </div>
+      <div style={{ height: "3px", background: "#f0f0f0", borderRadius: "2px", overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${pct * 100}%`, background: barColor, borderRadius: "2px", transition: "width 1s linear, background 0.3s" }} />
+      </div>
+      {urgent && left > 0 && <div style={{ fontSize: "11px", color: "#dc2626", marginTop: "4px", fontWeight: 500 }}>⚠️ 即将锁定，请尽快作答！</div>}
+    </div>
+  );
+}
+
+// ─── 第一部分总倒计时 ───────────────────────────────────────────────────────────
+function Part1Timer({ limitSeconds, savedLeft, onExpire, onTick, locked }: {
+  limitSeconds: number; savedLeft?: number; onExpire: () => void; onTick?: (left: number) => void; locked: boolean;
 }) {
   const [left, setLeft] = useState(savedLeft ?? limitSeconds);
   const calledRef = useRef(false);
@@ -103,48 +137,45 @@ function SectionTimer({ label, limitSeconds, savedLeft, onExpire, onTick, locked
     return () => clearTimeout(t);
   }, [left, locked, onExpire, onTick]);
 
-  if (locked) {
-    if (mode === "inline") return <span style={{ fontSize: "12px", color: "#888" }}>⏱ 时间已结束</span>;
-    return null;
-  }
+  if (locked) return null;
 
   const pct = left / limitSeconds;
   const urgent = pct < 0.2;
-  const critical = left <= 60; // 最后60秒
-  const barColor = critical ? "#dc2626" : urgent ? "#f59e0b" : "#16a34a";
-
-  if (mode === "inline") {
-    return (
-      <span style={{ fontSize: "12px", color: critical ? "#dc2626" : urgent ? "#d97706" : "#888", fontWeight: (urgent || critical) ? 700 : 400 }}>
-        ⏱ {label}剩余 <span style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "13px" }}>{formatTime(left)}</span>
-        {critical && " ⚠️ 即将锁定！"}
-      </span>
-    );
-  }
-
-  // mode === "bar"：醒目的固定横条
   return (
-    <div style={{
-      position: "sticky", top: "104px", zIndex: 98,
-      background: critical ? "#fef2f2" : urgent ? "#fffbeb" : "#f9fafb",
-      border: `1px solid ${critical ? "#fca5a5" : urgent ? "#fde68a" : "#e5e7eb"}`,
-      borderRadius: "8px", padding: "12px 20px", marginBottom: "20px",
-      display: "flex", alignItems: "center", gap: "16px",
-      boxShadow: (urgent || critical) ? "0 2px 8px rgba(220,38,38,0.12)" : "none",
-      animation: critical ? "timerPulse 1s ease-in-out infinite" : "none",
-    }}>
-      <span style={{ fontSize: "13px", color: critical ? "#dc2626" : urgent ? "#92400e" : "#555", fontWeight: 600, whiteSpace: "nowrap" }}>
-        ⏱ {label}
-      </span>
-      <span style={{ fontFamily: "monospace", fontSize: "22px", fontWeight: 800, color: critical ? "#dc2626" : urgent ? "#b45309" : "#111", letterSpacing: "0.05em" }}>
-        {formatTime(left)}
-      </span>
-      <div style={{ flex: 1, height: "6px", background: "#e5e7eb", borderRadius: "3px", overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${pct * 100}%`, background: barColor, borderRadius: "3px", transition: "width 1s linear, background 0.5s" }} />
+    <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 16px", background: urgent ? "#fef2f2" : "#f9fafb", borderRadius: "8px", border: `1px solid ${urgent ? "#fecaca" : "#f0f0f0"}`, marginBottom: "20px" }}>
+      <span style={{ fontSize: "12px", color: urgent ? "#dc2626" : "#888", fontWeight: 500 }}>⏱ 第一部分剩余时间</span>
+      <span style={{ fontFamily: "monospace", fontSize: "15px", fontWeight: 700, color: urgent ? "#dc2626" : "#111" }}>{formatTime(left)}</span>
+      {urgent && <span style={{ fontSize: "11px", color: "#dc2626", fontWeight: 600 }}>⚠️ 时间即将结束！</span>}
+      <div style={{ flex: 1, height: "3px", background: "#f0f0f0", borderRadius: "2px", overflow: "hidden", marginLeft: "4px" }}>
+        <div style={{ height: "100%", width: `${pct * 100}%`, background: urgent ? "#dc2626" : pct < 0.5 ? "#f59e0b" : "#16a34a", borderRadius: "2px", transition: "width 1s linear" }} />
       </div>
-      {critical && <span style={{ fontSize: "12px", color: "#dc2626", fontWeight: 700, whiteSpace: "nowrap" }}>⚠️ 即将结束！</span>}
-      {urgent && !critical && <span style={{ fontSize: "12px", color: "#b45309", fontWeight: 600, whiteSpace: "nowrap" }}>请抓紧时间</span>}
     </div>
+  );
+}
+
+// ─── 第二部分倒计时 ───────────────────────────────────────────────────────────
+function Part2Timer({ limitSeconds, savedLeft, onExpire, locked }: {
+  limitSeconds: number; savedLeft?: number; onExpire: () => void; locked: boolean;
+}) {
+  const [left, setLeft] = useState(savedLeft ?? limitSeconds);
+  const calledRef = useRef(false);
+
+  useEffect(() => {
+    if (locked) return;
+    if (left <= 0) { if (!calledRef.current) { calledRef.current = true; onExpire(); } return; }
+    const t = setTimeout(() => setLeft(p => p - 1), 1000);
+    return () => clearTimeout(t);
+  }, [left, locked, onExpire]);
+
+  if (locked) return <span style={{ fontSize: "12px", color: "#888" }}>⏱ AI协作时间已结束</span>;
+
+  const pct = left / limitSeconds;
+  const urgent = pct < 0.25;
+  return (
+    <span style={{ fontSize: "12px", color: urgent ? "#dc2626" : "#888", fontWeight: urgent ? 600 : 400 }}>
+      ⏱ AI协作剩余 <span style={{ fontFamily: "monospace", fontWeight: 700 }}>{formatTime(left)}</span>
+      {urgent && " ⚠️ 即将锁定！"}
+    </span>
   );
 }
 
@@ -173,12 +204,7 @@ export default function ExamPage() {
 
   const [lockedQuestions, setLockedQuestions] = useState<{ [id: string]: boolean }>({});
   const [questionTimerLeft, setQuestionTimerLeft] = useState<{ [id: string]: number }>({});
-  // Part1 两阶段计时
-  const [part1Phase, setPart1Phase] = useState<"mc" | "essay">("mc"); // mc=选择题阶段, essay=问答题阶段
-  const [mcTimerLeft, setMcTimerLeft] = useState(MC_LIMIT);
-  const [essayTimerLeft, setEssayTimerLeft] = useState(ESSAY_LIMIT);
-  const [mcLocked, setMcLocked] = useState(false);   // 选择题阶段结束（锁住选择题）
-  const [essayLocked, setEssayLocked] = useState(false); // 问答题阶段结束（锁住问答题）
+  const [part1TimerLeft, setPart1TimerLeft] = useState(PART1_LIMIT);
   const [part2TimerLeft, setPart2TimerLeft] = useState(PART2_LIMIT);
   const [part2TimeLocked, setPart2TimeLocked] = useState(false);
   const [finalSolution, setFinalSolution] = useState("");
@@ -208,8 +234,7 @@ export default function ExamPage() {
               part1Answers: {}, repoUrl: "", notes: "",
               part1Submitted: false, part2Submitted: false,
               lockedQuestions: {}, questionTimerLeft: {},
-              part1Phase: "mc", mcTimerLeft: MC_LIMIT, essayTimerLeft: ESSAY_LIMIT,
-              mcLocked: false, essayLocked: false,
+              part1TimerLeft: PART1_LIMIT,
               part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
               finalSolution: "", integrityEvents: [],
             };
@@ -236,8 +261,7 @@ export default function ExamPage() {
         part1Answers: {}, repoUrl: "", notes: "",
         part1Submitted: false, part2Submitted: false,
         lockedQuestions: {}, questionTimerLeft: {},
-        part1Phase: "mc", mcTimerLeft: MC_LIMIT, essayTimerLeft: ESSAY_LIMIT,
-        mcLocked: false, essayLocked: false,
+        part1TimerLeft: PART1_LIMIT,
         part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
         finalSolution: "", integrityEvents: [],
       };
@@ -264,11 +288,7 @@ export default function ExamPage() {
     setPart2Submitted(state.part2Submitted ?? false);
     setLockedQuestions(state.lockedQuestions ?? {});
     setQuestionTimerLeft(state.questionTimerLeft ?? {});
-    setPart1Phase(state.part1Phase ?? "mc");
-    setMcTimerLeft(state.mcTimerLeft ?? MC_LIMIT);
-    setEssayTimerLeft(state.essayTimerLeft ?? ESSAY_LIMIT);
-    setMcLocked(state.mcLocked ?? false);
-    setEssayLocked(state.essayLocked ?? false);
+    setPart1TimerLeft(state.part1TimerLeft ?? PART1_LIMIT);
     setPart2TimerLeft(state.part2TimerLeft ?? PART2_LIMIT);
     setPart2TimeLocked(state.part2TimeLocked ?? false);
     setFinalSolution(state.finalSolution ?? "");
@@ -284,17 +304,6 @@ export default function ExamPage() {
       localStorage.setItem(sessionKey(id), JSON.stringify({ ...current, ...patch }));
     } catch {}
   }
-
-  // 注入倒计时紧急提示动画
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const id = "section-timer-style";
-    if (document.getElementById(id)) return;
-    const style = document.createElement("style");
-    style.id = id;
-    style.textContent = `@keyframes timerPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.7;transform:scale(1.03)} }`;
-    document.head.appendChild(style);
-  }, []);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -349,29 +358,13 @@ export default function ExamPage() {
     setQuestionTimerLeft(prev => { const next = { ...prev, [questionId]: left }; persistState({ questionTimerLeft: next }); return next; });
   }, []);
 
-  // 选择题阶段 tick/expire
-  const handleMcTick = useCallback((left: number) => {
-    setMcTimerLeft(left);
-    persistState({ mcTimerLeft: left });
+  const handlePart1Tick = useCallback((left: number) => {
+    setPart1TimerLeft(left);
+    persistState({ part1TimerLeft: left });
   }, []);
 
-  const handleMcExpire = useCallback(() => {
-    // 选择题时间到：锁住所有选择题，切换到问答题阶段
-    setMcLocked(true);
-    setPart1Phase("essay");
-    persistState({ mcLocked: true, part1Phase: "essay" });
-  }, []);
-
-  // 问答题阶段 tick/expire
-  const handleEssayTick = useCallback((left: number) => {
-    setEssayTimerLeft(left);
-    persistState({ essayTimerLeft: left });
-  }, []);
-
-  const handleEssayExpire = useCallback(() => {
-    // 问答题时间到：锁住问答题，自动提交 Part1
-    setEssayLocked(true);
-    persistState({ essayLocked: true });
+  const handlePart1Expire = useCallback(() => {
+    // 整体计时到期：触发自动提交
     if (!part1Submitted) {
       submitPart("part1", { answers: part1AnswersRef.current, completedAt: Date.now(), autoSubmit: true, integrityEvents: integrityEventsRef.current }, "part2");
     }
@@ -438,27 +431,14 @@ export default function ExamPage() {
     return (
       <div>
         <div style={S.sectionTitle}>第一部分：基础认知</div>
-        <div style={S.sectionSub}>{part1.questions.length} 题 · 禁止使用 AI 工具</div>
-        {!part1Submitted && part1Phase === "mc" && (
-          <SectionTimer
-            label="选择题剩余时间"
-            limitSeconds={MC_LIMIT}
-            savedLeft={mcTimerLeft}
-            onExpire={handleMcExpire}
-            onTick={handleMcTick}
-            locked={mcLocked}
-            mode="bar"
-          />
-        )}
-        {!part1Submitted && part1Phase === "essay" && (
-          <SectionTimer
-            label="问答题剩余时间"
-            limitSeconds={ESSAY_LIMIT}
-            savedLeft={essayTimerLeft}
-            onExpire={handleEssayExpire}
-            onTick={handleEssayTick}
-            locked={essayLocked}
-            mode="bar"
+        <div style={S.sectionSub}>{part1.questions.length} 题 · 禁止使用 AI 工具 · 限时 20 分钟</div>
+        {!part1Submitted && (
+          <Part1Timer
+            limitSeconds={PART1_LIMIT}
+            savedLeft={part1TimerLeft}
+            onExpire={handlePart1Expire}
+            onTick={handlePart1Tick}
+            locked={part1Submitted}
           />
         )}
         {part1Submitted && (
@@ -475,17 +455,12 @@ export default function ExamPage() {
         <div style={{ ...S.card, background: "#fffbeb", borderColor: "#fde68a" }}>
           <span style={S.badge("yellow")}>⚠️ 禁止 AI</span>
           <span style={{ fontSize: "13px", color: "#92400e", marginLeft: "10px" }}>
-            选择题 5 分钟 · 问答题 10 分钟 · 各阶段计时分开
+            注意顶部倒计时 · 20分钟内完成所有题目
           </span>
         </div>
 
         {part1.questions.map((q, idx) => {
-          const isLocked = part1Submitted ||
-            (q.type === "multipleChoice" && mcLocked) ||
-            (q.type === "essay" && essayLocked) ||
-            !!lockedQuestions[q.id];
-          // 问答题只在essay阶段才显示（选择题阶段隐藏）
-          if (q.type === "essay" && part1Phase === "mc" && !part1Submitted) return null;
+          const isLocked = part1Submitted || !!lockedQuestions[q.id];
           if (q.type === "essay") currentEssayQId.current = q.id;
 
           return (
@@ -600,15 +575,7 @@ export default function ExamPage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
               <span style={{ fontSize: "13px", fontWeight: 600 }}>AI 对话</span>
               {!part2Submitted && (
-                <SectionTimer
-                  label="AI协作"
-                  limitSeconds={PART2_LIMIT}
-                  savedLeft={part2TimerLeft}
-                  onExpire={handlePart2Expire}
-                  onTick={(left) => { setPart2TimerLeft(left); persistState({ part2TimerLeft: left }); }}
-                  locked={part2TimeLocked}
-                  mode="inline"
-                />
+                <Part2Timer limitSeconds={PART2_LIMIT} savedLeft={part2TimerLeft} onExpire={handlePart2Expire} locked={part2TimeLocked} />
               )}
             </div>
             <div style={{ fontSize: "11px", color: aiCount >= MAX_AI_TURNS ? "#dc2626" : "#888", fontWeight: aiCount >= MAX_AI_TURNS ? 600 : 400 }}>
