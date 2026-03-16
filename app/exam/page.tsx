@@ -54,6 +54,7 @@ const sessionKey = (id: string) => `${SESSION_KEY_PREFIX}_${id}`;
 const MC_LIMIT = 5 * 60;      // 选择题组限时 5 分钟
 const ESSAY_LIMIT = 10 * 60;  // 问答题组限时 10 分钟
 const PART2_LIMIT = 10 * 60;
+const PART3_LIMIT = 60 * 60;  // 第三部分限时 60 分钟
 const MAX_AI_TURNS = 10;
 
 function formatTime(s: number) {
@@ -180,6 +181,8 @@ export default function ExamPage() {
   const [essayLocked, setEssayLocked] = useState(false); // 问答题 10 分钟到期
   const [essayStarted, setEssayStarted] = useState(false); // 问答题是否已开始计时
   const [part2TimerLeft, setPart2TimerLeft] = useState(PART2_LIMIT);
+  const [part3TimerLeft, setPart3TimerLeft] = useState(PART3_LIMIT);
+  const [part3TimeLocked, setPart3TimeLocked] = useState(false);
   const [part2TimeLocked, setPart2TimeLocked] = useState(false);
   const [finalSolution, setFinalSolution] = useState("");
   const [integrityEvents, setIntegrityEvents] = useState<IntegrityEvent[]>([]);
@@ -211,6 +214,7 @@ export default function ExamPage() {
               mcTimerLeft: MC_LIMIT, essayTimerLeft: ESSAY_LIMIT,
               mcLocked: false, essayLocked: false, essayStarted: false,
               part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
+              part3TimerLeft: PART3_LIMIT, part3TimeLocked: false,
               finalSolution: "", integrityEvents: [],
             };
             try { localStorage.setItem(sessionKey(parsed.sessionId), JSON.stringify(state)); } catch {}
@@ -239,6 +243,7 @@ export default function ExamPage() {
         mcTimerLeft: MC_LIMIT, essayTimerLeft: ESSAY_LIMIT,
         mcLocked: false, essayLocked: false, essayStarted: false,
         part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
+        part3TimerLeft: PART3_LIMIT, part3TimeLocked: false,
         finalSolution: "", integrityEvents: [],
       };
       try { localStorage.setItem(sessionKey(sessionId), JSON.stringify(state)); } catch {}
@@ -270,6 +275,8 @@ export default function ExamPage() {
     setEssayLocked(state.essayLocked ?? false);
     setEssayStarted(state.essayStarted ?? false);
     setPart2TimerLeft(state.part2TimerLeft ?? PART2_LIMIT);
+    setPart3TimerLeft(state.part3TimerLeft ?? PART3_LIMIT);
+    setPart3TimeLocked(state.part3TimeLocked ?? false);
     setPart2TimeLocked(state.part2TimeLocked ?? false);
     setFinalSolution(state.finalSolution ?? "");
     setIntegrityEvents(state.integrityEvents ?? []);
@@ -439,32 +446,15 @@ export default function ExamPage() {
         <div style={S.sectionTitle}>第一部分：基础认知</div>
         <div style={S.sectionSub}>{part1.questions.length} 题 · 禁止使用 AI 工具</div>
         {!part1Submitted && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "4px" }}>
-            <SectionTimer
-              label="选择题剩余时间"
-              limitSeconds={MC_LIMIT}
-              savedLeft={mcTimerLeft}
-              onExpire={handleMcExpire}
-              onTick={handleMcTick}
-              locked={mcLocked}
-              mode="bar"
-            />
-            {essayStarted ? (
-              <SectionTimer
-                label="问答题剩余时间"
-                limitSeconds={ESSAY_LIMIT}
-                savedLeft={essayTimerLeft}
-                onExpire={handleEssayExpire}
-                onTick={handleEssayTick}
-                locked={essayLocked}
-                mode="bar"
-              />
-            ) : (
-              <div style={{ padding: "10px 20px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", fontSize: "13px", color: "#888" }}>
-                ⏱ 问答题计时：<strong>开始作答时启动</strong>（10 分钟）
-              </div>
-            )}
-          </div>
+          <SectionTimer
+            label="选择题剩余时间"
+            limitSeconds={MC_LIMIT}
+            savedLeft={mcTimerLeft}
+            onExpire={handleMcExpire}
+            onTick={handleMcTick}
+            locked={mcLocked}
+            mode="bar"
+          />
         )}
         {part1Submitted && (
           <div style={{ ...S.card, background: "#f0fdf4", borderColor: "#bbf7d0" }}>
@@ -492,58 +482,75 @@ export default function ExamPage() {
           if (q.type === "essay") currentEssayQId.current = q.id;
 
           return (
-            <div key={q.id} style={{ ...S.card, borderColor: isLocked && !part1Submitted ? "#fde68a" : "#f0f0f0", background: isLocked && !part1Submitted ? "#fffbeb" : "#fff" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                <span style={S.badge(q.type === "multipleChoice" ? "blue" : "green")}>
-                  {q.type === "multipleChoice" ? `选择题 ${idx + 1}` : "问答题"}
-                </span>
-                {q.difficulty && <span style={{ fontSize: "11px", color: "#aaa" }}>{q.difficulty}</span>}
-                {isLocked && !part1Submitted && <span style={{ fontSize: "11px", color: "#b45309", fontWeight: 600, marginLeft: "auto" }}>🔒 已超时锁定</span>}
-              </div>
-
-
-              <div style={{ fontSize: "14px", fontWeight: 500, marginBottom: "16px", lineHeight: "1.6" }}>{q.question}</div>
-
-              {q.type === "multipleChoice" && q.options?.map((opt, i) => (
-                <label key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "10px 12px", border: `1px solid ${part1Answers[q.id] === i ? "#111" : "#e5e5e5"}`, borderRadius: "6px", marginBottom: "8px", cursor: isLocked ? "not-allowed" : "pointer", fontSize: "13px", background: part1Answers[q.id] === i ? "#f9f9f9" : "#fff", opacity: isLocked && part1Answers[q.id] !== i ? 0.5 : 1 }}>
-                  <input type="radio" name={q.id} checked={part1Answers[q.id] === i} onChange={() => { if (isLocked) return; setPart1Answers(p => ({ ...p, [q.id]: i })); persistState({ part1Answers: { ...part1Answers, [q.id]: i } }); }} disabled={isLocked} />
-                  <span style={{ flex: 1, whiteSpace: "normal", wordBreak: "break-word" }}>{opt}</span>
-                </label>
-              ))}
-
-              {q.type === "essay" && (
-                <textarea
-                  style={{ ...S.textarea, background: isLocked ? "#fafafa" : "#fff", color: isLocked ? "#888" : "#111" }}
-                  value={(part1Answers[q.id] as string) || ""}
-                  onFocus={() => { currentEssayQId.current = q.id; }}
-                  onPaste={() => {
-                    if (!isLocked) addIntegrityEvent({ type: "paste", questionId: q.id, timestamp: Date.now() });
-                  }}
-                  onChange={e => {
-                    if (isLocked) return;
-                    const val = e.target.value;
-                    const now = Date.now();
-                    // 第一次输入问答题：启动问答题计时器
-                    if (!essayStarted && val.length > 0) {
-                      setEssayStarted(true);
-                      persistState({ essayStarted: true });
-                    }
-                    const prevLen = lastInputLen.current[q.id] ?? 0;
-                    const prevTime = lastInputTime.current[q.id] ?? now;
-                    const delta = val.length - prevLen;
-                    const elapsed = now - prevTime;
-                    if (delta > 20 && elapsed < 500) {
-                      addIntegrityEvent({ type: "fast_input", questionId: q.id, timestamp: now, detail: `+${delta}字/${elapsed}ms` });
-                    }
-                    lastInputLen.current[q.id] = val.length;
-                    lastInputTime.current[q.id] = now;
-                    setPart1Answers(p => ({ ...p, [q.id]: val }));
-                    persistState({ part1Answers: { ...part1Answers, [q.id]: val } });
-                  }}
-                  placeholder={isLocked ? "已超时锁定" : "请输入你的回答（建议 300-500 字）..."}
-                  disabled={isLocked}
-                />
+            <div key={q.id}>
+              {/* 问答题计时器：插在第一道问答题上方 */}
+              {q.type === "essay" && !part1Submitted && (
+                <div style={{ marginBottom: "8px" }}>
+                  {essayStarted ? (
+                    <SectionTimer
+                      label="问答题剩余时间"
+                      limitSeconds={ESSAY_LIMIT}
+                      savedLeft={essayTimerLeft}
+                      onExpire={handleEssayExpire}
+                      onTick={handleEssayTick}
+                      locked={essayLocked}
+                      mode="bar"
+                    />
+                  ) : (
+                    <div style={{ padding: "12px 20px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", fontSize: "13px", color: "#888" }}>
+                      ⏱ 问答题计时：<strong style={{ color: "#555" }}>开始作答时自动启动</strong>（10 分钟）
+                    </div>
+                  )}
+                </div>
               )}
+              <div style={{ ...S.card, borderColor: isLocked && !part1Submitted ? "#fde68a" : "#f0f0f0", background: isLocked && !part1Submitted ? "#fffbeb" : "#fff" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                  <span style={S.badge(q.type === "multipleChoice" ? "blue" : "green")}>
+                    {q.type === "multipleChoice" ? `选择题 ${idx + 1}` : "问答题"}
+                  </span>
+                  {q.difficulty && <span style={{ fontSize: "11px", color: "#aaa" }}>{q.difficulty}</span>}
+                  {isLocked && !part1Submitted && <span style={{ fontSize: "11px", color: "#b45309", fontWeight: 600, marginLeft: "auto" }}>🔒 已超时锁定</span>}
+                </div>
+                <div style={{ fontSize: "14px", fontWeight: 500, marginBottom: "16px", lineHeight: "1.6" }}>{q.question}</div>
+                {q.type === "multipleChoice" && q.options?.map((opt, i) => (
+                  <label key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "10px 12px", border: `1px solid ${part1Answers[q.id] === i ? "#111" : "#e5e5e5"}`, borderRadius: "6px", marginBottom: "8px", cursor: isLocked ? "not-allowed" : "pointer", fontSize: "13px", background: part1Answers[q.id] === i ? "#f9f9f9" : "#fff", opacity: isLocked && part1Answers[q.id] !== i ? 0.5 : 1 }}>
+                    <input type="radio" name={q.id} checked={part1Answers[q.id] === i} onChange={() => { if (isLocked) return; setPart1Answers(p => ({ ...p, [q.id]: i })); persistState({ part1Answers: { ...part1Answers, [q.id]: i } }); }} disabled={isLocked} />
+                    <span style={{ flex: 1, whiteSpace: "normal", wordBreak: "break-word" }}>{opt}</span>
+                  </label>
+                ))}
+                {q.type === "essay" && (
+                  <textarea
+                    style={{ ...S.textarea, background: isLocked ? "#fafafa" : "#fff", color: isLocked ? "#888" : "#111" }}
+                    value={(part1Answers[q.id] as string) || ""}
+                    onFocus={() => { currentEssayQId.current = q.id; }}
+                    onPaste={() => {
+                      if (!isLocked) addIntegrityEvent({ type: "paste", questionId: q.id, timestamp: Date.now() });
+                    }}
+                    onChange={e => {
+                      if (isLocked) return;
+                      const val = e.target.value;
+                      const now = Date.now();
+                      if (!essayStarted && val.length > 0) {
+                        setEssayStarted(true);
+                        persistState({ essayStarted: true });
+                      }
+                      const prevLen = lastInputLen.current[q.id] ?? 0;
+                      const prevTime = lastInputTime.current[q.id] ?? now;
+                      const delta = val.length - prevLen;
+                      const elapsed = now - prevTime;
+                      if (delta > 20 && elapsed < 500) {
+                        addIntegrityEvent({ type: "fast_input", questionId: q.id, timestamp: now, detail: `+${delta}字/${elapsed}ms` });
+                      }
+                      lastInputLen.current[q.id] = val.length;
+                      lastInputTime.current[q.id] = now;
+                      setPart1Answers(p => ({ ...p, [q.id]: val }));
+                      persistState({ part1Answers: { ...part1Answers, [q.id]: val } });
+                    }}
+                    placeholder={isLocked ? "已超时锁定" : "请输入你的回答（建议 300-500 字）..."}
+                    disabled={isLocked}
+                  />
+                )}
+              </div>
             </div>
           );
         })}
@@ -602,22 +609,24 @@ export default function ExamPage() {
           )}
         </div>
 
+        {/* Part2 倒计时 bar */}
+        {!part2Submitted && (
+          <SectionTimer
+            label="AI协作剩余时间"
+            limitSeconds={PART2_LIMIT}
+            savedLeft={part2TimerLeft}
+            onExpire={handlePart2Expire}
+            onTick={(left) => { setPart2TimerLeft(left); persistState({ part2TimerLeft: left }); }}
+            locked={part2TimeLocked}
+            mode="bar"
+          />
+        )}
+
         {/* 对话区 */}
         <div style={{ ...S.card, padding: "0" }}>
           <div style={{ padding: "12px 20px", borderBottom: "1px solid #f0f0f0" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
               <span style={{ fontSize: "13px", fontWeight: 600 }}>AI 对话</span>
-              {!part2Submitted && (
-                <SectionTimer
-                  label="AI协作"
-                  limitSeconds={PART2_LIMIT}
-                  savedLeft={part2TimerLeft}
-                  onExpire={handlePart2Expire}
-                  onTick={(left) => { setPart2TimerLeft(left); persistState({ part2TimerLeft: left }); }}
-                  locked={part2TimeLocked}
-                  mode="inline"
-                />
-              )}
             </div>
             <div style={{ fontSize: "11px", color: aiCount >= MAX_AI_TURNS ? "#dc2626" : "#888", fontWeight: aiCount >= MAX_AI_TURNS ? 600 : 400 }}>
               {aiCount >= MAX_AI_TURNS
@@ -695,7 +704,16 @@ export default function ExamPage() {
     return (
       <div>
         <div style={S.sectionTitle}>第三部分：项目实战</div>
-        <div style={S.sectionSub}>不限工具，提交可运行的项目仓库</div>
+        <div style={S.sectionSub}>不限工具，提交可运行的项目仓库 · 限时 60 分钟</div>
+        <SectionTimer
+          label="第三部分剩余时间"
+          limitSeconds={PART3_LIMIT}
+          savedLeft={part3TimerLeft}
+          onExpire={() => { setPart3TimeLocked(true); persistState({ part3TimeLocked: true }); }}
+          onTick={(left) => { setPart3TimerLeft(left); persistState({ part3TimerLeft: left }); }}
+          locked={part3TimeLocked}
+          mode="bar"
+        />
         <div style={S.card}>
           <div style={{ fontSize: "15px", fontWeight: 700, marginBottom: "16px" }}>{part3.task.title}</div>
           <div style={{ fontSize: "12px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>背景</div>
