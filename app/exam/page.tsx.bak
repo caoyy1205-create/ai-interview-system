@@ -48,11 +48,10 @@ type IntegrityEvent = {
 };
 
 const TOTAL_SECONDS = 6 * 60 * 60;
-const SESSION_KEY_PREFIX = "examSession_v5";
+const SESSION_KEY_PREFIX = "examSession_v4";
 const sessionKey = (id: string) => `${SESSION_KEY_PREFIX}_${id}`;
 const MC_LIMIT = 5 * 60;
 const ESSAY_LIMIT = 5 * 60;
-const PART1_LIMIT = 30 * 60;  // 第一部分总计时 30 分钟
 const PART2_LIMIT = 5 * 60;
 const MAX_AI_TURNS = 10;
 
@@ -67,10 +66,10 @@ function formatTime(s: number) {
 
 const S = {
   page: { minHeight: "100vh", background: "#fff", color: "#111", fontFamily: "'Inter', -apple-system, sans-serif" } as React.CSSProperties,
-  topbar: { borderBottom: "1px solid #f0f0f0", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "56px", position: "sticky" as const, top: 0, zIndex: 100, background: "#fff" } as React.CSSProperties,
+  topbar: { borderBottom: "1px solid #f0f0f0", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "56px" } as React.CSSProperties,
   logo: { fontWeight: 700, fontSize: "15px", letterSpacing: "-0.01em" } as React.CSSProperties,
   timer: (urgent: boolean): React.CSSProperties => ({ fontFamily: "monospace", fontSize: "15px", fontWeight: 600, color: urgent ? "#dc2626" : "#111" }),
-  tabs: { borderBottom: "1px solid #f0f0f0", padding: "0 32px", display: "flex", position: "sticky" as const, top: "56px", zIndex: 99, background: "#fff" } as React.CSSProperties,
+  tabs: { borderBottom: "1px solid #f0f0f0", padding: "0 32px", display: "flex" } as React.CSSProperties,
   tab: (active: boolean): React.CSSProperties => ({ padding: "14px 20px", fontSize: "13px", fontWeight: active ? 600 : 400, color: active ? "#111" : "#888", borderBottom: "2px solid " + (active ? "#111" : "transparent"), cursor: "pointer", background: "none", border: "none", borderBottomWidth: "2px", borderBottomStyle: "solid", borderBottomColor: active ? "#111" : "transparent" }),
   body: { maxWidth: "760px", margin: "0 auto", padding: "40px 32px 80px" } as React.CSSProperties,
   badge: (color: string): React.CSSProperties => ({ display: "inline-block", fontSize: "11px", fontWeight: 500, padding: "2px 8px", borderRadius: "4px", background: color === "yellow" ? "#fefce8" : color === "blue" ? "#eff6ff" : color === "green" ? "#f0fdf4" : color === "red" ? "#fef2f2" : "#f9fafb", color: color === "yellow" ? "#854d0e" : color === "blue" ? "#1d4ed8" : color === "green" ? "#15803d" : color === "red" ? "#dc2626" : "#444", border: `1px solid ${color === "yellow" ? "#fef08a" : color === "blue" ? "#bfdbfe" : color === "green" ? "#bbf7d0" : color === "red" ? "#fecaca" : "#e5e7eb"}` }),
@@ -118,36 +117,6 @@ function QuestionTimer({ questionId, limitSeconds, savedLeft, onExpire, onTick, 
         <div style={{ height: "100%", width: `${pct * 100}%`, background: barColor, borderRadius: "2px", transition: "width 1s linear, background 0.3s" }} />
       </div>
       {urgent && left > 0 && <div style={{ fontSize: "11px", color: "#dc2626", marginTop: "4px", fontWeight: 500 }}>⚠️ 即将锁定，请尽快作答！</div>}
-    </div>
-  );
-}
-
-// ─── 第一部分总倒计时 ───────────────────────────────────────────────────────────
-function Part1Timer({ limitSeconds, savedLeft, onExpire, onTick, locked }: {
-  limitSeconds: number; savedLeft?: number; onExpire: () => void; onTick?: (left: number) => void; locked: boolean;
-}) {
-  const [left, setLeft] = useState(savedLeft ?? limitSeconds);
-  const calledRef = useRef(false);
-
-  useEffect(() => {
-    if (locked) return;
-    if (left <= 0) { if (!calledRef.current) { calledRef.current = true; onExpire(); } return; }
-    const t = setTimeout(() => { const n = left - 1; setLeft(n); onTick?.(n); }, 1000);
-    return () => clearTimeout(t);
-  }, [left, locked, onExpire, onTick]);
-
-  if (locked) return null;
-
-  const pct = left / limitSeconds;
-  const urgent = pct < 0.2;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 16px", background: urgent ? "#fef2f2" : "#f9fafb", borderRadius: "8px", border: `1px solid ${urgent ? "#fecaca" : "#f0f0f0"}`, marginBottom: "20px" }}>
-      <span style={{ fontSize: "12px", color: urgent ? "#dc2626" : "#888", fontWeight: 500 }}>⏱ 第一部分剩余时间</span>
-      <span style={{ fontFamily: "monospace", fontSize: "15px", fontWeight: 700, color: urgent ? "#dc2626" : "#111" }}>{formatTime(left)}</span>
-      {urgent && <span style={{ fontSize: "11px", color: "#dc2626", fontWeight: 600 }}>⚠️ 时间即将结束！</span>}
-      <div style={{ flex: 1, height: "3px", background: "#f0f0f0", borderRadius: "2px", overflow: "hidden", marginLeft: "4px" }}>
-        <div style={{ height: "100%", width: `${pct * 100}%`, background: urgent ? "#dc2626" : pct < 0.5 ? "#f59e0b" : "#16a34a", borderRadius: "2px", transition: "width 1s linear" }} />
-      </div>
     </div>
   );
 }
@@ -203,7 +172,6 @@ export default function ExamPage() {
 
   const [lockedQuestions, setLockedQuestions] = useState<{ [id: string]: boolean }>({});
   const [questionTimerLeft, setQuestionTimerLeft] = useState<{ [id: string]: number }>({});
-  const [part1TimerLeft, setPart1TimerLeft] = useState(PART1_LIMIT);
   const [part2TimerLeft, setPart2TimerLeft] = useState(PART2_LIMIT);
   const [part2TimeLocked, setPart2TimeLocked] = useState(false);
   const [finalSolution, setFinalSolution] = useState("");
@@ -219,31 +187,17 @@ export default function ExamPage() {
   useEffect(() => {
     let cancelled = false;
     async function init() {
-      // 优先读首页传过来的 pendingSession（已包含 sessionId 和 examSet）
       try {
-        const pending = localStorage.getItem("pendingSession");
-        if (pending) {
-          const parsed = JSON.parse(pending);
-          if (parsed.sessionId && parsed.examSet) {
-            localStorage.removeItem("pendingSession"); // 消费后立即清除
-            const state = {
-              sessionId: parsed.sessionId,
-              examSet: parsed.examSet,
-              leftSeconds: TOTAL_SECONDS, messages: [], aiCount: 0,
-              part1Answers: {}, repoUrl: "", notes: "",
-              part1Submitted: false, part2Submitted: false,
-              lockedQuestions: {}, questionTimerLeft: {},
-              part1TimerLeft: PART1_LIMIT,
-              part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
-              finalSolution: "", integrityEvents: [],
-            };
-            try { localStorage.setItem(sessionKey(parsed.sessionId), JSON.stringify(state)); } catch {}
-            if (!cancelled) restoreSession(state);
+        const lastId = localStorage.getItem("examSession_v4_lastId") || "";
+        const saved = lastId ? localStorage.getItem(sessionKey(lastId)) : null;
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.sessionId && parsed.examSet && parsed.leftSeconds > 0) {
+            if (!cancelled) restoreSession(parsed);
             return;
           }
         }
       } catch {}
-      // 没有 pendingSession 才兜底发起新 session
       const candidateName = localStorage.getItem("candidateName") || "";
       const candidateEmail = localStorage.getItem("candidateEmail") || "";
       const res = await fetch("/api/session/start", {
@@ -260,11 +214,13 @@ export default function ExamPage() {
         part1Answers: {}, repoUrl: "", notes: "",
         part1Submitted: false, part2Submitted: false,
         lockedQuestions: {}, questionTimerLeft: {},
-        part1TimerLeft: PART1_LIMIT,
         part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
         finalSolution: "", integrityEvents: [],
       };
-      try { localStorage.setItem(sessionKey(sessionId), JSON.stringify(state)); } catch {}
+      try {
+        localStorage.setItem(sessionKey(sessionId), JSON.stringify(state));
+        localStorage.setItem("examSession_v4_lastId", sessionId);
+      } catch {}
       restoreSession(state);
     }
     init();
@@ -287,7 +243,6 @@ export default function ExamPage() {
     setPart2Submitted(state.part2Submitted ?? false);
     setLockedQuestions(state.lockedQuestions ?? {});
     setQuestionTimerLeft(state.questionTimerLeft ?? {});
-    setPart1TimerLeft(state.part1TimerLeft ?? PART1_LIMIT);
     setPart2TimerLeft(state.part2TimerLeft ?? PART2_LIMIT);
     setPart2TimeLocked(state.part2TimeLocked ?? false);
     setFinalSolution(state.finalSolution ?? "");
@@ -296,7 +251,7 @@ export default function ExamPage() {
 
   function persistState(patch: object) {
     try {
-      const id = sessionId;
+      const id = sessionId || localStorage.getItem("examSession_v4_lastId") || "";
       if (!id) return;
       const saved = localStorage.getItem(sessionKey(id));
       const current = saved ? JSON.parse(saved) : {};
@@ -357,18 +312,6 @@ export default function ExamPage() {
     setQuestionTimerLeft(prev => { const next = { ...prev, [questionId]: left }; persistState({ questionTimerLeft: next }); return next; });
   }, []);
 
-  const handlePart1Tick = useCallback((left: number) => {
-    setPart1TimerLeft(left);
-    persistState({ part1TimerLeft: left });
-  }, []);
-
-  const handlePart1Expire = useCallback(() => {
-    // 整体计时到期：触发自动提交
-    if (!part1Submitted) {
-      submitPart("part1", { answers: part1AnswersRef.current, completedAt: Date.now(), autoSubmit: true, integrityEvents: integrityEventsRef.current }, "part2");
-    }
-  }, [part1Submitted]);
-
   const handlePart2Expire = useCallback(() => {
     setPart2TimeLocked(true);
     persistState({ part2TimeLocked: true });
@@ -415,7 +358,7 @@ export default function ExamPage() {
         if (part === "part1") { setPart1Submitted(true); persistState({ part1Submitted: true }); }
         if (part === "part2") { setPart2Submitted(true); persistState({ part2Submitted: true }); }
         if (next) { setTimeout(() => { setSubmitStatus("idle"); setActivePart(next); }, 800); }
-        else { try { localStorage.removeItem(sessionKey(sessionId)); } catch {} window.location.href = "/report?sessionId=" + sessionId; }
+        else { try { localStorage.removeItem(sessionKey(sessionId)); localStorage.removeItem("examSession_v4_lastId"); } catch {} window.location.href = "/report?sessionId=" + sessionId; }
       } else { setSubmitStatus("error"); }
     } catch { setSubmitStatus("error"); }
   };
@@ -430,16 +373,7 @@ export default function ExamPage() {
     return (
       <div>
         <div style={S.sectionTitle}>第一部分：基础认知</div>
-        <div style={S.sectionSub}>{part1.questions.length} 题 · 禁止使用 AI 工具 · 限时 30 分钟</div>
-        {!part1Submitted && (
-          <Part1Timer
-            limitSeconds={PART1_LIMIT}
-            savedLeft={part1TimerLeft}
-            onExpire={handlePart1Expire}
-            onTick={handlePart1Tick}
-            locked={part1Submitted}
-          />
-        )}
+        <div style={S.sectionSub}>{part1.questions.length} 题 · 禁止使用 AI 工具</div>
         {part1Submitted && (
           <div style={{ ...S.card, background: "#f0fdf4", borderColor: "#bbf7d0" }}>
             <div style={{ fontSize: "13px", color: "#15803d", fontWeight: 600, marginBottom: tabCount + pasteCount + fastCount > 0 ? "12px" : "0" }}>✓ 已提交，可切换到第二部分</div>
@@ -454,12 +388,14 @@ export default function ExamPage() {
         <div style={{ ...S.card, background: "#fffbeb", borderColor: "#fde68a" }}>
           <span style={S.badge("yellow")}>⚠️ 禁止 AI</span>
           <span style={{ fontSize: "13px", color: "#92400e", marginLeft: "10px" }}>
-            注意顶部倒计时 · 30分钟内完成所有题目
+            注意题目上方的倒计时 · 超时自动锁定
           </span>
         </div>
 
         {part1.questions.map((q, idx) => {
           const isLocked = part1Submitted || !!lockedQuestions[q.id];
+          const limit = q.type === "multipleChoice" ? MC_LIMIT : ESSAY_LIMIT;
+          const savedLeft = questionTimerLeft[q.id];
           if (q.type === "essay") currentEssayQId.current = q.id;
 
           return (
@@ -472,6 +408,7 @@ export default function ExamPage() {
                 {isLocked && !part1Submitted && <span style={{ fontSize: "11px", color: "#b45309", fontWeight: 600, marginLeft: "auto" }}>🔒 已超时锁定</span>}
               </div>
 
+              <QuestionTimer questionId={q.id} limitSeconds={limit} savedLeft={savedLeft} onExpire={handleQuestionExpire} onTick={handleQuestionTick} locked={isLocked} />
 
               <div style={{ fontSize: "14px", fontWeight: 500, marginBottom: "16px", lineHeight: "1.6" }}>{q.question}</div>
 

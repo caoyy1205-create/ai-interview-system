@@ -80,7 +80,7 @@ export const multipleChoicePool = [
   {
     id: "mc_a08",
     question: "Tool schema 在工具调用中的作用是？",
-    options: ["加密工具的API密钥", "描述工具名称和参数供模型调用", "记录工具的历史调用日志信息", "限制工具每秒钟的最大调用频率（不影响"],
+    options: ["加密工具的API密钥", "描述工具名称和参数供模型调用", "记录工具的历史调用日志信息", "限制工具每秒钟可执行的最大调用频率"],
     correctAnswer: 1,
     explanation: "Tool schema 是工具的接口文档，模型根据 schema 生成正确格式的调用参数。",
     difficulty: "medium",
@@ -152,7 +152,7 @@ export const multipleChoicePool = [
   {
     id: "mc_a16",
     question: "以下哪种工具最适合 Agent 获取实时数据？",
-    options: ["静态知识库查询", "实时API或Web搜索", "本地文件系统读取", "历史对话记录的检索回放（不影响"],
+    options: ["静态知识库查询", "实时API或Web搜索", "本地文件系统读取", "历史对话记录的离线检索回放"],
     correctAnswer: 1,
     explanation: "实时数据需通过搜索引擎或实时 API 获取，静态知识库无法覆盖最新信息。",
     difficulty: "easy",
@@ -179,7 +179,7 @@ export const multipleChoicePool = [
   {
     id: "mc_a19",
     question: "以下哪种场景最体现 Agent 相比普通 RAG 的优势？",
-    options: ["简单文档问答", "需要多轮搜索并汇总的复杂研究", "单次知识库检索返回结果", "静态内容的格式化转换处理（不影响核心"],
+    options: ["简单文档问答", "需要多轮搜索并汇总的复杂研究", "单次知识库检索返回结果", "对固定格式文档的批量内容提取"],
     correctAnswer: 1,
     explanation: "复杂研究需要多轮迭代、中间决策和不同工具组合，这正是 Agent 循环规划的优势所在。",
     difficulty: "medium",
@@ -197,7 +197,7 @@ export const multipleChoicePool = [
   {
     id: "mc_a21",
     question: "以下哪个指标最适合评估 Agent 的任务完成能力？",
-    options: ["对话轮次数量", "任务成功率（Task Success Rate）", "每次工具调用的平均耗时", "Agent在每轮输出的平均token数量（不影响核心结论"],
+    options: ["对话轮次数量", "任务成功率（Task Success Rate）", "每次工具调用的平均耗时", "Agent每轮平均输出的token数量"],
     correctAnswer: 1,
     explanation: "任务成功率直接衡量 Agent 能否完成目标任务，是最核心的能力评估指标。",
     difficulty: "medium",
@@ -278,7 +278,7 @@ export const multipleChoicePool = [
   {
     id: "mc_a30",
     question: "以下哪种工具组合让 Agent 具备完整的信息处理能力？",
-    options: ["搜索工具", "搜索+计算+记忆+代码执行", "搜索+文本生成", "代码执行+数据库读取工具（不影响核"],
+    options: ["搜索工具", "搜索+计算+记忆+代码执行", "搜索+文本生成", "网络搜索+文本摘要工具"],
     correctAnswer: 1,
     explanation: "完整的信息处理需要实时检索、精确计算、状态记忆和代码执行的综合工具支持。",
     difficulty: "medium",
@@ -332,7 +332,7 @@ export const multipleChoicePool = [
   {
     id: "mc_a36",
     question: "Agent 系统中的'工具链'（Tool Chain）是指？",
-    options: ["工具的安全调用权限", "多个工具按顺序协作完成任务", "工具的版本管理系统", "记录工具调用历史的数据结构（不影响"],
+    options: ["工具的安全调用权限", "多个工具按顺序协作完成任务", "工具的版本管理系统", "存储工具调用日志的持久化数据结构"],
     correctAnswer: 1,
     explanation: "工具链是多个工具按依赖顺序串联，前一工具的输出作为后一工具的输入。",
     difficulty: "medium",
@@ -368,7 +368,7 @@ export const multipleChoicePool = [
   {
     id: "mc_a40",
     question: "以下哪个描述最准确地定义了 AI Agent？",
-    options: ["能回答问题的聊天机器人", "感知环境并自主行动以达成目标的系统", "只能执行预编程脚本的自动化工具（不影响核心", "内置了联网功能的大型语言模型"],
+    options: ["能回答问题的聊天机器人", "感知环境并自主行动以达成目标的系统", "只能按预设脚本顺序执行任务的自动化程序", "内置了联网功能的大型语言模型"],
     correctAnswer: 1,
     explanation: "Agent 的本质是感知-决策-行动的循环系统，具备自主性和目标导向性。",
     difficulty: "easy",
@@ -400,7 +400,7 @@ export const multipleChoicePool = [
   {
     id: "mc_p03",
     question: "Prompt 中出现指令冲突时，模型通常怎么处理？",
-    options: ["报错并拒绝执行", "优先遵循后出现的指令或折中", "随机选择一条指令", "忽略所有指令只输出空内容（不影响核"],
+    options: ["报错并拒绝执行", "优先遵循后出现的指令或折中", "随机选择一条指令", "随机选择其中一条指令严格执行"],
     correctAnswer: 1,
     explanation: "模型通常优先遵循更靠后的指令，或尝试折中处理，不同模型行为略有差异。",
     difficulty: "medium",
@@ -418,7 +418,7 @@ export const multipleChoicePool = [
   {
     id: "mc_p05",
     question: "Prompt Injection 攻击的本质是？",
-    options: ["注入恶意代码到服务器", "构造输入让模型忽略原有指令", "暴力破解API密钥", "向模型输入超长文本导致崩溃（不影响"],
+    options: ["注入恶意代码到服务器", "构造输入让模型忽略原有指令", "暴力破解API密钥", "通过构造超长输入耗尽模型上下文窗口"],
     correctAnswer: 1,
     explanation: "Prompt injection 通过精心构造的输入，覆盖或绕过 system prompt 中的安全指令。",
     difficulty: "medium",
@@ -436,7 +436,7 @@ export const multipleChoicePool = [
   {
     id: "mc_p07",
     question: "强制模型输出合法 JSON 最可靠的方法是？",
-    options: ["在Prompt中说请输出JSON（不影响核心结", "使用response_format参数", "增大temperature参数值", "减少max_tokens参数限制"],
+    options: ["在Prompt里写明请严格按JSON格式输出", "使用response_format参数", "增大temperature参数值", "减少max_tokens参数限制"],
     correctAnswer: 1,
     explanation: "response_format 参数在底层强制保证输出合法 JSON，比仅靠 Prompt 指令更可靠。",
     difficulty: "medium",
@@ -445,7 +445,7 @@ export const multipleChoicePool = [
   {
     id: "mc_p08",
     question: "Few-shot 示例质量不高时最可能导致什么？",
-    options: ["模型完全无法运行", "模型学到错误输出模式质量下降", "模型自动忽略所有示例（不影响核心结论", "模型输出速度明显加快"],
+    options: ["模型完全无法运行", "模型学到错误输出模式质量下降", "模型对所有示例一视同仁不加区分", "模型输出速度明显加快"],
     correctAnswer: 1,
     explanation: "低质量示例会误导模型学习错误格式或答案，有时反而比 Zero-shot 效果更差。",
     difficulty: "medium",
@@ -454,7 +454,7 @@ export const multipleChoicePool = [
   {
     id: "mc_p09",
     question: "Negative Prompting（负面提示）的主要用途是？",
-    options: ["让模型输出负面情绪（不影响核心结", "明确告知模型不应该做什么", "降低模型回复质量", "减少输出长度"],
+    options: ["引导模型主动表达负面情绪内容", "明确告知模型不应该做什么", "降低模型回复质量", "减少输出长度"],
     correctAnswer: 1,
     explanation: "通过明确禁止行为来约束模型输出，如'不要提供医疗建议''不要使用专业术语'。",
     difficulty: "medium",
@@ -463,7 +463,7 @@ export const multipleChoicePool = [
   {
     id: "mc_p10",
     question: "Self-consistency 技术的核心思路是？",
-    options: ["让模型只回答一次", "多次采样后取多数投票结果", "让多个不同模型同时回答（不影响核", "检查模型语法错误后修正"],
+    options: ["让模型只回答一次", "多次采样后取多数投票结果", "使用多个参数不同的模型并行推理", "检查模型语法错误后修正"],
     correctAnswer: 1,
     explanation: "Self-consistency 多次用 CoT 采样，取多数一致的答案，显著提升推理准确率。",
     difficulty: "hard",
@@ -504,7 +504,7 @@ export const multipleChoicePool = [
   {
     id: "mc_r04",
     question: "Hybrid Search（混合搜索）结合了哪两种检索方式？",
-    options: ["多个向量库结果", "语义向量和关键词精确匹配", "多种嵌入模型输出", "向量检索和图数据库（不影响核心结"],
+    options: ["多个向量库结果", "语义向量和关键词精确匹配", "多种嵌入模型输出", "向量检索与知识图谱的联合查询"],
     correctAnswer: 1,
     explanation: "混合搜索结合语义相似度（dense）和 BM25 关键词匹配（sparse），互补提升召回质量。",
     difficulty: "medium",
@@ -522,7 +522,7 @@ export const multipleChoicePool = [
   {
     id: "mc_r06",
     question: "RAG 中 'context stuffing' 过多会造成什么后果？",
-    options: ["模型回答速度加快", "关键信息被稀释准确率下降", "提高检索召回率", "触发向量数据库更新（不影响核心结"],
+    options: ["模型回答速度加快", "关键信息被稀释准确率下降", "提高检索召回率", "自动触发向量数据库的全量重建"],
     correctAnswer: 1,
     explanation: "塞入过多检索结果会出现'lost in the middle'，模型难以聚焦正确答案，准确率下降。",
     difficulty: "hard",
@@ -540,7 +540,7 @@ export const multipleChoicePool = [
   {
     id: "mc_r08",
     question: "知识库文档更新后 RAG 系统最需要做什么？",
-    options: ["重新训练生成模型", "更新向量索引保持检索准确", "重新设计Prompt模板（不影响", "更换向量数据库类型"],
+    options: ["重新训练生成模型", "更新向量索引保持检索准确", "重新调整系统Prompt的指令模板", "更换向量数据库类型"],
     correctAnswer: 1,
     explanation: "文档更新后需重新嵌入并更新索引，否则检索到旧版内容，影响回答时效性。",
     difficulty: "medium",
@@ -549,7 +549,7 @@ export const multipleChoicePool = [
   {
     id: "mc_r09",
     question: "Query Expansion（查询扩展）主要解决什么问题？",
-    options: ["减少向量库存储占用", "弥补查询词与文档词汇的差异", "加快模型生成速度", "降低Embedding成本（不影响"],
+    options: ["减少向量库存储占用", "弥补查询词与文档词汇的差异", "加快模型生成速度", "压缩向量化操作所消耗的计算成本"],
     correctAnswer: 1,
     explanation: "用户查询词与文档用词不一致时，通过扩展同义词或多查询变体来提升召回率。",
     difficulty: "hard",
@@ -558,7 +558,7 @@ export const multipleChoicePool = [
   {
     id: "mc_r10",
     question: "Parent Document Retriever 策略的核心思想是？",
-    options: ["用父类模型替代标准模型（不影响核心", "检索小块但将父文档传给模型", "只索引文档的父级目录", "将多个小块合并成大块"],
+    options: ["用更大的父类模型替换标准检索模型", "检索小块但将父文档传给模型", "只索引文档的父级目录", "将多个小块合并成大块"],
     correctAnswer: 1,
     explanation: "小块便于精准检索，大块提供完整上下文，Parent Retriever 兼顾精准度和完整性。",
     difficulty: "hard",
@@ -572,7 +572,7 @@ export const multipleChoicePool = [
   {
     id: "mc_m01",
     question: "大模型 knowledge cutoff 意味着什么？",
-    options: ["模型只处理短文本", "训练截止后的事件模型不了解", "模型无法回答专业问题（不影响核心结", "模型每次回答都不同"],
+    options: ["模型只处理短文本", "训练截止后的事件模型不了解", "模型对所有专业领域问题回答能力受限", "模型每次回答都不同"],
     correctAnswer: 1,
     explanation: "知识截止日期后发生的事件不在训练数据中，模型无法可靠回答，需 RAG 或工具补充。",
     difficulty: "easy",
@@ -581,7 +581,7 @@ export const multipleChoicePool = [
   {
     id: "mc_m02",
     question: "大模型天然表现最差的任务类型是？",
-    options: ["文本摘要", "精确数值计算", "创意写作", "多语言翻译（不影响核"],
+    options: ["文本摘要", "精确数值计算", "创意写作", "在多种语言之间进行文本互译"],
     correctAnswer: 1,
     explanation: "LLM 是概率模型，不擅长精确计算，需借助 code interpreter 或计算器工具。",
     difficulty: "easy",
@@ -590,7 +590,7 @@ export const multipleChoicePool = [
   {
     id: "mc_m03",
     question: "'涌现能力'（Emergent Abilities）的特点是？",
-    options: ["在小模型上充分展现", "规模达到阈值后突然出现", "通过微调获得", "只在特定语言任务中表现（不影响"],
+    options: ["在小模型上充分展现", "规模达到阈值后突然出现", "通过微调获得", "仅在特定自然语言处理任务中出现"],
     correctAnswer: 1,
     explanation: "涌现能力是在模型规模达到一定量级后突然具备的新能力，小模型几乎不存在。",
     difficulty: "medium",
@@ -599,7 +599,7 @@ export const multipleChoicePool = [
   {
     id: "mc_m04",
     question: "大模型 'positional bias' 偏差是指？",
-    options: ["模型偏向某种政治立场", "对输入列表特定位置内容权重过高", "模型只关注正面内容", "模型偏好处理更长的文本（不影响核心结论"],
+    options: ["模型偏向某种政治立场", "对输入列表特定位置内容权重过高", "模型只关注正面内容", "模型偏好处理字数更多的输入文本"],
     correctAnswer: 1,
     explanation: "模型倾向关注列表的首尾位置内容，中间内容容易被忽视（lost in the middle）。",
     difficulty: "hard",
@@ -608,7 +608,7 @@ export const multipleChoicePool = [
   {
     id: "mc_m05",
     question: "RLHF 的目标是？",
-    options: ["加速模型训练", "让输出更符合人类偏好", "减少模型参数量（不影响核心结", "提升数学能力"],
+    options: ["加速模型训练", "让输出更符合人类偏好", "通过剪枝减少模型参数规模", "提升数学能力"],
     correctAnswer: 1,
     explanation: "RLHF 通过人类偏好数据训练奖励模型，再用强化学习引导 LLM 向人类偏好对齐。",
     difficulty: "medium",
@@ -626,7 +626,7 @@ export const multipleChoicePool = [
   {
     id: "mc_m07",
     question: "大模型 'sycophancy'（奉承）问题是指？",
-    options: ["模型输出过于简短", "模型迎合用户观点而非客观正确", "模型回答速度过慢", "模型拒绝回答争议问题（不影响核心结论"],
+    options: ["模型输出过于简短", "模型迎合用户观点而非客观正确", "模型回答速度过慢", "模型倾向拒绝回答任何有争议的问题"],
     correctAnswer: 1,
     explanation: "RLHF 训练可能导致模型学会迎合而非纠正用户，影响回答的客观准确性。",
     difficulty: "medium",
@@ -635,7 +635,7 @@ export const multipleChoicePool = [
   {
     id: "mc_m08",
     question: "量化（Quantization）对模型的主要影响是？",
-    options: ["提升数学任务能力（不影响核心结", "减少内存占用和推理延迟", "增加训练数据量", "提高输出多样性"],
+    options: ["显著提升模型的数学推理准确率", "减少内存占用和推理延迟", "增加训练数据量", "提高输出多样性"],
     correctAnswer: 1,
     explanation: "量化将权重从 FP32 压缩到 INT8/INT4，显著减少显存需求，加快推理速度。",
     difficulty: "medium",
@@ -676,7 +676,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d02",
     question: "最需要在 AI 产品中加入人工审核的场景是？",
-    options: ["生成表情包", "影响用户权益的高风险决策", "自动补全搜索词", "生成产品描述文案（不影响核心结论"],
+    options: ["生成表情包", "影响用户权益的高风险决策", "自动补全搜索词", "生成用于A/B测试的广告文案"],
     correctAnswer: 1,
     explanation: "高风险决策涉及用户权益，AI 错误代价极高，必须加入人工审核保障准确性和合规性。",
     difficulty: "medium",
@@ -712,7 +712,7 @@ export const multipleChoicePool = [
   {
     id: "mc_d06",
     question: "AI 产品 'cold start problem'（冷启动问题）主要指？",
-    options: ["服务器启动时间过长", "新用户缺乏数据导致AI效果差", "API接口调用失败", "模型在低温下性能下降（不影响核心结论"],
+    options: ["服务器启动时间过长", "新用户缺乏数据导致AI效果差", "API接口调用失败", "模型推理时temperature设置过低导致输出单一"],
     correctAnswer: 1,
     explanation: "AI 产品依赖历史数据做个性化，新用户无历史数据时效果差，需设计冷启动策略。",
     difficulty: "medium",
@@ -771,7 +771,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s02",
     question: "GDPR 对 AI 产品的核心合规要求是？",
-    options: ["必须使用开源模型", "用户数据收集需告知同意并支持删除", "AI必须由人类监督所有决策（不影响核心结", "产品必须在欧盟境内托管服务"],
+    options: ["必须使用开源模型", "用户数据收集需告知同意并支持删除", "AI系统所有决策均须经人工实时复核", "产品必须在欧盟境内托管服务"],
     correctAnswer: 1,
     explanation: "GDPR 核心要求：明确告知数据用途、获取同意、支持访问/更正/删除权，数据最小化。",
     difficulty: "medium",
@@ -780,7 +780,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s03",
     question: "AI 系统对用户不利决策最重要的设计原则是？",
-    options: ["让模型输出更自信", "提供可解释理由并设申诉渠道", "加快决策处理速度", "降低模型置信度阈值（不影响核心结论"],
+    options: ["让模型输出更自信", "提供可解释理由并设申诉渠道", "加快决策处理速度", "降低模型输出的置信度阈值以减少拒答"],
     correctAnswer: 1,
     explanation: "高风险自动化决策必须可解释，用户有权了解原因并提出异议，这是程序公正的基本要求。",
     difficulty: "medium",
@@ -798,7 +798,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s05",
     question: "Deepfake 对 AI 伦理的主要挑战是？",
-    options: ["生成成本过高", "使伪造媒体变易威胁信任安全", "只影响娱乐行业", "技术难度高普通人无法使用（不影响核"],
+    options: ["生成成本过高", "使伪造媒体变易威胁信任安全", "只影响娱乐行业", "技术门槛高导致普通用户完全无法使用"],
     correctAnswer: 1,
     explanation: "Deepfake 让身份伪造、虚假信息传播门槛大幅降低，威胁政治、金融和个人隐私。",
     difficulty: "easy",
@@ -816,7 +816,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s07",
     question: "Responsible AI（负责任AI）的核心思路是？",
-    options: ["先部署后修复", "设计阶段就融入安全公平透明", "只考虑用户便利性", "减少人类对AI的干预（不影响核心结"],
+    options: ["先部署后修复", "设计阶段就融入安全公平透明", "只考虑用户便利性", "最大化减少人类对AI决策过程的干预"],
     correctAnswer: 1,
     explanation: "负责任 AI 要求将伦理和安全前置到设计阶段（by design），而非出现问题后打补丁。",
     difficulty: "medium",
@@ -825,7 +825,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s08",
     question: "AI 系统 'transparency'（透明度）主要体现在？",
-    options: ["开放模型全部源代码", "清晰告知决策依据局限性和数据", "公开所有用户数据", "将所有算法细节对外发布（不影响核心结"],
+    options: ["开放模型全部源代码", "清晰告知决策依据局限性和数据", "公开所有用户数据", "将模型全部源代码和权重对外完全公开"],
     correctAnswer: 1,
     explanation: "透明度包括：AI 如何工作、哪些数据被使用、决策依据是什么，而非要求全部开源。",
     difficulty: "medium",
@@ -834,7 +834,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s09",
     question: "以下哪种 AI 应用风险最高，最需要伦理审查？",
-    options: ["生成营销文案", "刑事司法风险评估系统", "自动翻译邮件内容（不影响核心", "智能家居设备控制"],
+    options: ["生成营销文案", "刑事司法风险评估系统", "自动对用户邮件进行实时语言翻译", "智能家居设备控制"],
     correctAnswer: 1,
     explanation: "刑事司法决策影响人身自由，AI 偏见或错误的代价极高，必须经过严格的伦理审查。",
     difficulty: "medium",
@@ -843,7 +843,7 @@ export const multipleChoicePool = [
   {
     id: "mc_s10",
     question: "AI 系统的 'auditability'（可审计性）对企业最重要的意义是？",
-    options: ["提高模型训练速度", "在出错时能追溯决策过程和责任", "减少AI产品开发周期（不影响核心结论", "帮助模型自动优化参数"],
+    options: ["提高模型训练速度", "在出错时能追溯决策过程和责任", "缩短AI产品从立项到上线的开发周期", "帮助模型自动优化参数"],
     correctAnswer: 1,
     explanation: "可审计性让组织能在 AI 出错时还原决策路径，满足监管要求并明确责任归属。",
     difficulty: "medium",
@@ -893,7 +893,7 @@ export const multipleChoicePool = [
   {
     id: "mc_e05",
     question: "精确率（Precision）和召回率（Recall）需要平衡的原因是？",
-    options: ["两者计算公式相同", "提高精确率通常会降低召回率", "两者只能同时提高", "只有分类任务需要考虑（不影响核心结"],
+    options: ["两者计算公式相同", "提高精确率通常会降低召回率", "两者只能同时提高", "只有二分类任务才需要关注这两个指标"],
     correctAnswer: 1,
     explanation: "精确率提高意味着更保守的判断，会漏掉更多正例（召回率降），需根据业务代价权衡。",
     difficulty: "medium",
@@ -902,7 +902,7 @@ export const multipleChoicePool = [
   {
     id: "mc_e06",
     question: "Shadow testing（影子测试）的作用是？",
-    options: ["在夜间对服务器进行安全性和性能检查确保稳定", "新模型并行运行对比差异但不影响用户", "测试产品暗色主题模式下的界面显示效果", "用线上真实流量模拟对新版本进行全链路压测"],
+    options: ["在夜间对服务器进行安全性和性能检查确保稳定", "新旧模型并行运行以对比输出差异但不影响实际用户", "测试产品暗色主题模式下的界面显示效果", "用线上真实流量模拟对新版本进行全链路压测"],
     correctAnswer: 1,
     explanation: "影子测试让新模型接收真实流量但不返回给用户，安全评估线上真实场景性能差异。",
     difficulty: "hard",
@@ -911,7 +911,7 @@ export const multipleChoicePool = [
   {
     id: "mc_e07",
     question: "RAGAS 框架专门用于评估什么？",
-    options: ["图像生成质量", "RAG系统端到端质量", "代码生成准确率（不影响核心结", "多语言翻译效果"],
+    options: ["图像生成质量", "RAG系统端到端质量", "代码生成任务的语法和功能正确率", "多语言翻译效果"],
     correctAnswer: 1,
     explanation: "RAGAS 提供 faithfulness、answer relevancy、context precision 等专门针对 RAG 的评估指标。",
     difficulty: "hard",
@@ -938,7 +938,7 @@ export const multipleChoicePool = [
   {
     id: "mc_e10",
     question: "'Groundedness'（有据性）指标在 RAG 评估中衡量什么？",
-    options: ["回答是否够简短", "回答内容是否能被文档支持验证", "回答是否包含专业词汇（不影响核心结论", "回答速度是否够快"],
+    options: ["回答是否够简短", "回答内容是否能被文档支持验证", "回答中是否使用了规范的领域专业术语", "回答速度是否够快"],
     correctAnswer: 1,
     explanation: "Groundedness 评估模型声明是否有明确文档依据，是 RAG 质量评估的核心指标之一。",
     difficulty: "medium",
