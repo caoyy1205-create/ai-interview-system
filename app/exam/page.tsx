@@ -54,7 +54,7 @@ const sessionKey = (id: string) => `${SESSION_KEY_PREFIX}_${id}`;
 const MC_LIMIT = 5 * 60;      // 选择题组限时 5 分钟
 const ESSAY_LIMIT = 10 * 60;  // 问答题组限时 10 分钟
 const PART2_LIMIT = 10 * 60;
-const PART3_LIMIT = 60 * 60;  // 第三部分限时 60 分钟
+const PART3_LIMIT = 5 * 60 * 60;  // 第三部分限时 5 小时
 const MAX_AI_TURNS = 10;
 
 function formatTime(s: number) {
@@ -188,6 +188,8 @@ export default function ExamPage() {
   const [part2TimerLeft, setPart2TimerLeft] = useState(PART2_LIMIT);
   const [part3TimerLeft, setPart3TimerLeft] = useState(PART3_LIMIT);
   const [part3TimeLocked, setPart3TimeLocked] = useState(false);
+  const [part2TimerStarted, setPart2TimerStarted] = useState(false);
+  const [part3TimerStarted, setPart3TimerStarted] = useState(false);
   const [part2TimeLocked, setPart2TimeLocked] = useState(false);
   const [finalSolution, setFinalSolution] = useState("");
   const [integrityEvents, setIntegrityEvents] = useState<IntegrityEvent[]>([]);
@@ -220,6 +222,7 @@ export default function ExamPage() {
               mcLocked: false, essayLocked: false, essayStarted: false,
               part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
               part3TimerLeft: PART3_LIMIT, part3TimeLocked: false,
+              part2TimerStarted: false, part3TimerStarted: false,
               finalSolution: "", integrityEvents: [],
             };
             try { localStorage.setItem(sessionKey(parsed.sessionId), JSON.stringify(state)); } catch {}
@@ -249,6 +252,7 @@ export default function ExamPage() {
         mcLocked: false, essayLocked: false, essayStarted: false,
         part2TimerLeft: PART2_LIMIT, part2TimeLocked: false,
         part3TimerLeft: PART3_LIMIT, part3TimeLocked: false,
+        part2TimerStarted: false, part3TimerStarted: false,
         finalSolution: "", integrityEvents: [],
       };
       try { localStorage.setItem(sessionKey(sessionId), JSON.stringify(state)); } catch {}
@@ -282,6 +286,8 @@ export default function ExamPage() {
     setPart2TimerLeft(state.part2TimerLeft ?? PART2_LIMIT);
     setPart3TimerLeft(state.part3TimerLeft ?? PART3_LIMIT);
     setPart3TimeLocked(state.part3TimeLocked ?? false);
+    setPart2TimerStarted(state.part2TimerStarted ?? false);
+    setPart3TimerStarted(state.part3TimerStarted ?? false);
     setPart2TimeLocked(state.part2TimeLocked ?? false);
     setFinalSolution(state.finalSolution ?? "");
     setIntegrityEvents(state.integrityEvents ?? []);
@@ -433,7 +439,11 @@ export default function ExamPage() {
         setSubmitStatus("success");
         if (part === "part1") { setPart1Submitted(true); persistState({ part1Submitted: true }); }
         if (part === "part2") { setPart2Submitted(true); persistState({ part2Submitted: true }); }
-        if (next) { setTimeout(() => { setSubmitStatus("idle"); setActivePart(next); }, 800); }
+        if (next) { setTimeout(() => {
+          setSubmitStatus("idle"); setActivePart(next);
+          if (next === "part2" && !part2TimerStarted) { setPart2TimerStarted(true); persistState({ part2TimerStarted: true }); }
+          if (next === "part3" && !part3TimerStarted) { setPart3TimerStarted(true); persistState({ part3TimerStarted: true }); }
+        }, 800); }
         else { try { localStorage.removeItem(sessionKey(sessionId)); } catch {} window.location.href = "/report?sessionId=" + sessionId; }
       } else { setSubmitStatus("error"); }
     } catch { setSubmitStatus("error"); }
@@ -615,7 +625,7 @@ export default function ExamPage() {
         </div>
 
         {/* Part2 倒计时 bar */}
-        {!part2Submitted && (
+        {!part2Submitted && part2TimerStarted && (
           <SectionTimer
             label="AI协作剩余时间"
             limitSeconds={PART2_LIMIT}
@@ -625,6 +635,11 @@ export default function ExamPage() {
             locked={part2TimeLocked}
             mode="bar"
           />
+        )}
+        {!part2Submitted && !part2TimerStarted && (
+          <div style={{ padding: "12px 20px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", fontSize: "13px", color: "#888", marginBottom: "20px" }}>
+            ⏱ AI协作计时将在此页面打开时自动启动
+          </div>
         )}
 
         {/* 对话区 */}
@@ -709,16 +724,18 @@ export default function ExamPage() {
     return (
       <div>
         <div style={S.sectionTitle}>第三部分：项目实战</div>
-        <div style={S.sectionSub}>不限工具，提交可运行的项目仓库 · 限时 60 分钟</div>
-        <SectionTimer
-          label="第三部分剩余时间"
-          limitSeconds={PART3_LIMIT}
-          savedLeft={part3TimerLeft}
-          onExpire={() => { setPart3TimeLocked(true); persistState({ part3TimeLocked: true }); }}
-          onTick={(left) => { setPart3TimerLeft(left); persistState({ part3TimerLeft: left }); }}
-          locked={part3TimeLocked}
-          mode="bar"
-        />
+        <div style={S.sectionSub}>不限工具，提交可运行的项目仓库 · 限时 5 小时</div>
+        {part3TimerStarted && (
+          <SectionTimer
+            label="第三部分剩余时间"
+            limitSeconds={PART3_LIMIT}
+            savedLeft={part3TimerLeft}
+            onExpire={() => { setPart3TimeLocked(true); persistState({ part3TimeLocked: true }); }}
+            onTick={(left) => { setPart3TimerLeft(left); persistState({ part3TimerLeft: left }); }}
+            locked={part3TimeLocked}
+            mode="bar"
+          />
+        )}
         <div style={S.card}>
           <div style={{ fontSize: "15px", fontWeight: 700, marginBottom: "16px" }}>{part3.task.title}</div>
           <div style={{ fontSize: "12px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>背景</div>
@@ -764,7 +781,13 @@ export default function ExamPage() {
             <button
               key={p}
               style={{ ...S.tab(activePart === p), opacity: isDisabled ? 0.35 : 1, cursor: isDisabled ? "not-allowed" : "pointer" }}
-              onClick={() => { if (!isDisabled) setActivePart(p); }}
+              onClick={() => {
+                if (!isDisabled) {
+                  setActivePart(p);
+                  if (p === "part2" && !part2TimerStarted) { setPart2TimerStarted(true); persistState({ part2TimerStarted: true }); }
+                  if (p === "part3" && !part3TimerStarted) { setPart3TimerStarted(true); persistState({ part3TimerStarted: true }); }
+                }
+              }}
               title={isDisabled ? "请先完成并提交前一部分" : undefined}
             >
               {["第一部分 基础认知", "第二部分 AI 协作", "第三部分 项目实战"][i]}
