@@ -49,11 +49,11 @@ type IntegrityEvent = {
 };
 
 const TOTAL_SECONDS = 6 * 60 * 60;
-const SESSION_KEY_PREFIX = "examSession_v6";
+const SESSION_KEY_PREFIX = "examSession_v7";
 const sessionKey = (id: string) => `${SESSION_KEY_PREFIX}_${id}`;
 const MC_LIMIT = 5 * 60;      // 选择题组限时 5 分钟
 const ESSAY_LIMIT = 10 * 60;  // 问答题组限时 10 分钟
-const PART2_LIMIT = 10 * 60;
+const PART2_LIMIT = 15 * 60;
 const PART3_LIMIT = 5 * 60 * 60;  // 第三部分限时 5 小时
 const MAX_AI_TURNS = 10;
 
@@ -611,16 +611,12 @@ export default function ExamPage() {
 
         <div style={S.card}>
           <div style={{ fontSize: "15px", fontWeight: 600, marginBottom: "8px" }}>{t.title}</div>
-          <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7", marginBottom: "16px" }}>{t.description}</div>
-          <div style={{ fontSize: "12px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>挑战与冲突</div>
-          {t.conflicts.map((c, i) => (
-            <div key={i} style={{ fontSize: "13px", color: "#555", padding: "6px 0", borderTop: i > 0 ? "1px solid #f5f5f5" : "none" }}>· {c}</div>
-          ))}
+          <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7", marginBottom: t.deliverable ? "12px" : "0" }}>{t.description}</div>
           {t.deliverable && (
-            <>
-              <div style={{ fontSize: "12px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "16px", marginBottom: "8px" }}>产出目标</div>
-              <div style={{ fontSize: "13px", color: "#555", padding: "8px 12px", background: "#fffbeb", borderRadius: "6px", border: "1px solid #fde68a", lineHeight: "1.7" }}>{t.deliverable}</div>
-            </>
+            <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7", marginTop: "12px" }}>
+              <div style={{ fontWeight: 600, color: "#333", marginBottom: "4px" }}>产出目标：</div>
+              <div>{t.deliverable}</div>
+            </div>
           )}
         </div>
 
