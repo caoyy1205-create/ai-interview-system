@@ -1357,7 +1357,8 @@ export const collaborationTaskPool = [
       "最终方案的可行性与取舍说明",
       "是否主动与'需求方'（考官）确认优先级"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份需求分析文档：列出需求矛盾清单、各约束的优先级排序，以及你与AI协作得出的可行方案（含取舍说明）",
   },
   {
     id: "collab_002",
@@ -1371,7 +1372,8 @@ export const collaborationTaskPool = [
       "是否合理管理期望（'比 GPT 更智能'是否可达）",
       "沟通策略：如何向总监呈现澄清结果"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份可执行的需求澄清文档：包含5-8个关键澄清问题、对原需求的合理性评估，以及修正后的可落地目标描述",
   },
   {
     id: "collab_003",
@@ -1385,7 +1387,8 @@ export const collaborationTaskPool = [
       "是否补充了可验证的次级数据来源（论坛、评论等）",
       "报告框架的完整性和逻辑性"
     ],
-    timeLimitMinutes: 25
+    timeLimitMinutes: 25,
+    deliverable: "一份用户痛点研究报告：包含研究框架、主要发现（3-5条核心痛点）、局限性说明，以及后续真实验证建议",
   },
   {
     id: "collab_004",
@@ -1399,7 +1402,8 @@ export const collaborationTaskPool = [
       "是否有意义的差异化洞察（不只是罗列功能）",
       "时间分配是否合理（哪些让 AI 做，哪些自己做）"
     ],
-    timeLimitMinutes: 25
+    timeLimitMinutes: 25,
+    deliverable: "一份竞品分析报告：覆盖核心竞品的功能对比、定价策略、用户评价摘要，以及至少2条有价值的差异化建议",
   },
   {
     id: "collab_005",
@@ -1413,7 +1417,8 @@ export const collaborationTaskPool = [
       "是否包含了关键的边界情况和验收标准",
       "是否体现了对用户需求的真实理解（而非 AI 臆想）"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份PRD草稿：包含背景与目标、核心用户故事（3条以上）、主要功能列表，以及关键验收标准",
   },
   {
     id: "collab_006",
@@ -1427,7 +1432,8 @@ export const collaborationTaskPool = [
       "与业务方沟通时如何呈现可行性评估结果",
       "是否考虑分阶段实现：先实现核心价值，再优化性能"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份技术可行性评估报告：明确哪些要求可达、哪些不可达及原因，以及推荐的替代方案或分阶段实现路径",
   },
   {
     id: "collab_007",
@@ -1441,7 +1447,8 @@ export const collaborationTaskPool = [
       "是否考虑了申诉机制和人工复核",
       "方案的可落地性：是否考虑了运营成本"
     ],
-    timeLimitMinutes: 25
+    timeLimitMinutes: 25,
+    deliverable: "一份多方利益平衡方案：梳理三方诉求与底线，提出可落地的策略（含参数配置建议和申诉机制），并说明方案的取舍逻辑",
   },
   {
     id: "collab_008",
@@ -1455,7 +1462,8 @@ export const collaborationTaskPool = [
       "展示材料的说服力：是否有用户场景和数据支撑",
       "是否识别并规避了常见的 AI 产品设计误区"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份产品概念展示材料：包含产品定位、核心功能流程（3个以上）、关键界面描述，以及差异化价值点说明",
   },
   {
     id: "collab_009",
@@ -1469,7 +1477,8 @@ export const collaborationTaskPool = [
       "是否考虑了数据局限性（单一数据集，缺乏对比基准）",
       "是否提出了验证假设的方法（如何确认根因）"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份数据分析报告：指出关键问题数据、提出3-5条根因假设，并给出优先级排序的改进建议和验证方法",
   },
   {
     id: "collab_010",
@@ -1483,7 +1492,8 @@ export const collaborationTaskPool = [
       "是否考虑了不同受众（媒体、用户、投资人）的不同沟通策略",
       "AI 协作过程：是否有效利用 AI 加速而非完全依赖"
     ],
-    timeLimitMinutes: 25
+    timeLimitMinutes: 25,
+    deliverable: "一份对外公开声明草稿 + 内部应对方案摘要：声明需包含问题承认、原因说明、整改措施；内部方案需包含技术修复计划和用户补救措施",
   },
   {
     id: "collab_011",
@@ -1497,7 +1507,8 @@ export const collaborationTaskPool = [
       "是否提出了降低技术复杂度的替代方案",
       "沟通策略：如何在不伤害关系的前提下推动决策"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份跨部门沟通材料：包含对技术方顾虑的理解与回应、商业价值量化说明，以及至少1个折中方案（如分阶段实现）",
   },
   {
     id: "collab_012",
@@ -1511,7 +1522,8 @@ export const collaborationTaskPool = [
       "AI 生成的用户故事是否经过了有价值的筛选和修改",
       "优先级排序：哪些用户故事最值得优先实现"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "三类用户的用户故事集：每类用户至少2条（共6条以上），格式规范（As a...I want...So that...），并附优先级排序及理由",
   },
   {
     id: "collab_013",
@@ -1525,7 +1537,8 @@ export const collaborationTaskPool = [
       "是否用 AI 辅助了样本量计算和统计显著性",
       "测试结论的解读框架：什么结果算'赢'"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份A/B测试方案：包含实验假设、核心指标（主/次）、样本量估算、运行周期，以及判断测试结果的标准",
   },
   {
     id: "collab_014",
@@ -1539,7 +1552,8 @@ export const collaborationTaskPool = [
       "是否考虑了监管和伦理风险（AI帮中小学生写作文是否合规）",
       "与 AI 协作的质量：AI 辅助提升了哪些思考维度"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份关键假设验证清单：列出3-5个最关键假设、优先级排序逻辑，以及每个假设在30分钟office hour内的具体验证方法",
   },
   {
     id: "collab_015",
@@ -1553,7 +1567,8 @@ export const collaborationTaskPool = [
       "是否考虑了 Temperature 参数调整",
       "是否提出了自动化测试方案（批量测试多份简历）"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份优化后的Prompt方案：包含原问题诊断（为什么评分不稳定）、优化思路说明，以及修改后的Prompt文本",
   },
   {
     id: "collab_016",
@@ -1567,7 +1582,8 @@ export const collaborationTaskPool = [
       "AI 协作效率：如何引导 AI 生成多样化创意",
       "是否提出了如何测试哪个版本效果最好"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份AI融合路线图：明确哪些环节引入AI、AI的具体职责、预期收益，以及实施优先级和关键风险",
   },
   {
     id: "collab_017",
@@ -1581,7 +1597,8 @@ export const collaborationTaskPool = [
       "是否识别了这个案例对产品设计的影响（医疗类建议需要免责声明）",
       "AI 协作：如何用 AI 帮助起草既真诚又安全的回复"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份量化指标体系：包含核心指标（3-5个）、每个指标的计算方式和采集方法，以及指标之间的权衡关系说明",
   },
   {
     id: "collab_018",
@@ -1595,7 +1612,8 @@ export const collaborationTaskPool = [
       "是否用 AI 辅助了权重打分或评估",
       "是否考虑了不同功能之间的依赖关系"
     ],
-    timeLimitMinutes: 20
+    timeLimitMinutes: 20,
+    deliverable: "一份情绪分析错误案例集 + 改进建议：列举3-5类典型错误场景、分析根因，并提出可操作的优化方向",
   },
   {
     id: "collab_019",
@@ -1609,7 +1627,8 @@ export const collaborationTaskPool = [
       "是否识别了对方方案的潜在弱点（100种语言质量如何？）",
       "内部沟通策略：如何在会议上有效呈现分析"
     ],
-    timeLimitMinutes: 25
+    timeLimitMinutes: 25,
+    deliverable: "一份多模态需求文档：明确各模态（文字/图片/语音）的使用场景、数据要求和技术边界，以及优先实现的模态组合建议",
   },
   {
     id: "collab_020",
@@ -1623,7 +1642,8 @@ export const collaborationTaskPool = [
       "利益相关方分析：候选人、企业客户、公司自身的不同视角",
       "是否提出了减轻偏见的技术方案，而非'不上线'或'忽视'"
     ],
-    timeLimitMinutes: 25
+    timeLimitMinutes: 25,
+    deliverable: "一份冷启动策略方案：针对不同用户群体设计个性化推荐的冷启动路径，说明数据收集策略和效果评估方法",
   }
 ];
 

@@ -30,6 +30,7 @@ type Part2Task = {
   description: string;
   conflicts: string[];
   evaluationFocus: string[];
+  deliverable?: string;
 };
 
 type ExamSet = {
@@ -545,6 +546,14 @@ export default function ExamPage() {
             <span style={{ fontSize: "13px", color: "#15803d", fontWeight: 600 }}>✓ 已提交，可切换到第三部分</span>
           </div>
         )}
+        {/* 引导语 */}
+        <div style={{ ...S.card, background: "#f8faff", borderColor: "#dbeafe" }}>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: "#1d4ed8", marginBottom: "6px" }}>📌 本部分是开放协作任务，没有标准答案</div>
+          <div style={{ fontSize: "13px", color: "#374151", lineHeight: "1.8" }}>
+            你将借助系统内置 AI 助手完成以下任务。建议通过<strong>多轮对话</strong>来分析问题、拆解方案、反复打磨——<strong>我们关注你如何用 AI，而不只是最终写了什么。</strong>完成后将方案填写到下方「最终方案」区域并提交。
+          </div>
+        </div>
+
         <div style={S.card}>
           <div style={{ fontSize: "15px", fontWeight: 600, marginBottom: "8px" }}>{t.title}</div>
           <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7", marginBottom: "16px" }}>{t.description}</div>
@@ -552,6 +561,12 @@ export default function ExamPage() {
           {t.conflicts.map((c, i) => (
             <div key={i} style={{ fontSize: "13px", color: "#555", padding: "6px 0", borderTop: i > 0 ? "1px solid #f5f5f5" : "none" }}>· {c}</div>
           ))}
+          {t.deliverable && (
+            <>
+              <div style={{ fontSize: "12px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "16px", marginBottom: "8px" }}>产出目标</div>
+              <div style={{ fontSize: "13px", color: "#555", padding: "8px 12px", background: "#fffbeb", borderRadius: "6px", border: "1px solid #fde68a", lineHeight: "1.7" }}>{t.deliverable}</div>
+            </>
+          )}
         </div>
 
         {/* 对话区 */}
