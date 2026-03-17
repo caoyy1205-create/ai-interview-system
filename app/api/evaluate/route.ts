@@ -78,7 +78,18 @@ async function evaluatePart1(data: any, examSet: any, integrityEvents?: any[]) {
         });
       }
     } else if (q.type === "essay") {
-      essayAnswers.push(data.answers?.[q.id] || "");
+      // 新版本：从 essayStates 中提取完整对话记录
+      const essayState = data.essayStates?.[q.id];
+      if (essayState && essayState.conversation && essayState.conversation.length > 0) {
+        // 将对话格式化为可读文本
+        const conv = essayState.conversation
+          .map((m: any) => m.role === "candidate" ? `候选人：${m.content}` : `面试官追问：${m.content}`)
+          .join("\n");
+        essayAnswers.push(conv);
+      } else {
+        // 兼容旧版本：从 answers 读取
+        essayAnswers.push(data.answers?.[q.id] || "");
+      }
     }
   });
 
@@ -96,7 +107,7 @@ async function evaluatePart1(data: any, examSet: any, integrityEvents?: any[]) {
 - 8分回答：概念模糊，描述表面，无实质案例
 - 4分以下：回答严重偏题或字数极少
 
-${essayQuestions.map((q: any, i: number) => `题目${i + 1}：${q.question}\n候选人回答：${essayAnswers[i] || "（未作答）"}`).join("\n\n")}
+${essayQuestions.map((q: any, i: number) => `题目${i + 1}：${q.question}\n\n【完整对话（含AI追问）】\n${essayAnswers[i] || "（未作答）"}`).join("\n\n---\n\n")}
 
 【可信度信息（供参考，不强制扣分，但应体现在评语中）】
 粘贴次数：${(integrityEvents || []).filter((e: any) => e.type === "paste").length} 次

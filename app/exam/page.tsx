@@ -664,7 +664,7 @@ export default function ExamPage() {
       <div>
         <div style={S.sectionTitle}>第一部分：基础认知</div>
         <div style={S.sectionSub}>{part1.questions.length} 题 · 禁止使用 AI 工具</div>
-        {!part1Submitted && (
+        {!part1Submitted && !essayStarted && (
           <SectionTimer
             label="选择题剩余时间"
             limitSeconds={MC_LIMIT}
