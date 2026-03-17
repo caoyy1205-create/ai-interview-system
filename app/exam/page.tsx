@@ -675,6 +675,18 @@ export default function ExamPage() {
             mode="bar"
           />
         )}
+        {!part1Submitted && essayStarted && (
+          <SectionTimer
+            label="问答题剩余时间（2题共用）"
+            limitSeconds={ESSAY_LIMIT}
+            savedLeft={essayTimerLeft}
+            onExpire={handleEssayExpire}
+            onTick={handleEssayTick}
+            locked={essayLocked}
+            paused={essayTimerPaused}
+            mode="bar"
+          />
+        )}
         {part1Submitted && (
           <div style={{ ...S.card, background: "#f0fdf4", borderColor: "#bbf7d0" }}>
             <div style={{ fontSize: "13px", color: "#15803d", fontWeight: 600, marginBottom: tabCount + pasteCount + fastCount > 0 ? "12px" : "0" }}>✓ 已提交，可切换到第二部分</div>
@@ -726,33 +738,9 @@ export default function ExamPage() {
 
           currentEssayQId.current = q.id;
 
-          // 问答题计时器：在第1道问答题上方显示（共享计时）
-          const showEssayTimer = isFirst && !part1Submitted;
-          // 计时开始条件：essayStarted
-          // 暂停条件：第1题 done 且 !essay2Unlocked
-
           return (
             <div key={q.id}>
-              {showEssayTimer && (
-                <div style={{ marginBottom: "8px" }}>
-                  {essayStarted ? (
-                    <SectionTimer
-                      label="问答题剩余时间（2题共用）"
-                      limitSeconds={ESSAY_LIMIT}
-                      savedLeft={essayTimerLeft}
-                      onExpire={handleEssayExpire}
-                      onTick={handleEssayTick}
-                      locked={essayLocked}
-                      paused={essayTimerPaused}
-                      mode="bar"
-                    />
-                  ) : (
-                    <div style={{ padding: "12px 20px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", fontSize: "13px", color: "#888", marginBottom: "0" }}>
-                      ⏱ 问答题计时：<strong style={{ color: "#555" }}>开始作答时自动启动</strong>（2 题共 15 分钟）
-                    </div>
-                  )}
-                </div>
-              )}
+
               <div style={{ ...S.card }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                   <span style={S.badge("green")}>问答题 {essayIdx + 1}</span>
