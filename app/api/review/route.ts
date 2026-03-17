@@ -65,23 +65,52 @@ async function reviewEssay(part1Data: any, examSet: any) {
   if (questions.length === 0) return { items: [] };
 
   const items = await Promise.all(questions.map(async (q: any) => {
-    const candidateAnswer = part1Data?.answers?.[q.id] || "（未作答）";
-    const prompt = `请为以下 AI 产品经理面试问答题提供参考答案。
+    // 优先从 essayStates 读完整对话（新版本），兼容旧版本 answers
+    const essayState = part1Data?.essayStates?.[q.id];
+    let conversation: Array<{role: string; content: string}> = [];
+    let candidateAnswer = "（未作答）";
 
-题目：${q.question}
-候选人回答：${candidateAnswer}
+    if (essayState && essayState.conversation && essayState.conversation.length > 0) {
+      conversation = essayState.conversation;
+      // 提取候选人原始回答（第一条 candidate 消息）
+      const firstAnswer = conversation.find((m: any) => m.role === "candidate");
+      if (firstAnswer) candidateAnswer = firstAnswer.content;
+    } else {
+      // 兼容旧版本
+      candidateAnswer = part1Data?.answers?.[q.id] || "（未作答）";
+    }
+
+    // 格式化完整对话记录
+    const convText = conversation.length > 0
+      ? conversation.map((m: any) => m.role === "candidate" ? `候选人：${m.content}` : `面试官追问：${m.content}`).join("\n\n")
+      : candidateAnswer;
+
+    const hasConversation = conversation.length > 1; // 有追问说明有多轮
+
+    const prompt = `你是资深 AI 产品专家，请对以下面试问答题进行深度点评。
+
+【题目】${q.question}
+
+【候选人完整回答${hasConversation ? "（含追问环节）" : ""}】
+${convText}
 
 请提供：
-1. 标准参考答案（300字左右，有要点框架，体现深度）
-2. 对候选人回答的简短点评（100字以内）
+1. strengths：候选人回答中做得好的地方（2-3条，具体说明）
+2. weaknesses：回答中的不足或遗漏（2-3条，具体指出）  
+3. comment：综合点评（100字以内，直接告诉候选人可以怎么改进）
+4. referenceAnswer：标准参考答案（300字左右，要点清晰，有框架，体现深度思考）
 
-返回 JSON：{"referenceAnswer": "参考答案", "comment": "点评"}`;
+返回 JSON：{"strengths": ["亮点1", "亮点2"], "weaknesses": ["不足1", "不足2"], "comment": "综合点评", "referenceAnswer": "参考答案"}`;
+
     const result = await callQwen(prompt);
     return {
       question: q.question,
+      conversation, // 传给前端展示完整对话
       candidateAnswer,
-      referenceAnswer: result.referenceAnswer || "暂无参考答案",
+      strengths: result.strengths || [],
+      weaknesses: result.weaknesses || [],
       comment: result.comment || "",
+      referenceAnswer: result.referenceAnswer || "暂无参考答案",
     };
   }));
 

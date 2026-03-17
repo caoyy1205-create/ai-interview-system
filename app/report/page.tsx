@@ -74,20 +74,66 @@ function MCReview({ data }: { data: any }) {
 function EssayReview({ data }: { data: any }) {
   if (!data.items?.length) return <div style={{ padding: "16px 0", fontSize: "13px", color: "#aaa" }}>无数据</div>;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px", paddingTop: "16px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "28px", paddingTop: "16px" }}>
       {data.items.map((item: any, i: number) => (
-        <div key={i}>
-          <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "8px" }}>题目 {i + 1}：{item.question}</div>
-          {item.candidateAnswer && item.candidateAnswer !== "（未作答）" && (
-            <div style={{ fontSize: "12px", color: "#555", background: "#f5f5f5", borderRadius: "6px", padding: "10px 12px", marginBottom: "8px", lineHeight: "1.6" }}>
+        <div key={i} style={{ borderLeft: "3px solid #e5e7eb", paddingLeft: "16px" }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, marginBottom: "14px", color: "#111" }}>题目 {i + 1}：{item.question}</div>
+
+          {/* 完整对话记录 */}
+          {item.conversation && item.conversation.length > 0 ? (
+            <div style={{ marginBottom: "14px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 600, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>你的回答过程</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {item.conversation.map((msg: any, j: number) => (
+                  <div key={j} style={{ display: "flex", flexDirection: "column", alignItems: msg.role === "candidate" ? "flex-end" : "flex-start" }}>
+                    <div style={{ fontSize: "11px", color: "#ccc", marginBottom: "3px" }}>{msg.role === "candidate" ? "你" : "🎙 面试官追问"}</div>
+                    <div style={{ maxWidth: "85%", padding: "8px 12px", borderRadius: "8px", fontSize: "12px", lineHeight: "1.7", background: msg.role === "candidate" ? "#111" : "#f5f5f5", color: msg.role === "candidate" ? "#fff" : "#444", border: msg.role === "interviewer" ? "1px solid #ebebeb" : "none", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : item.candidateAnswer && item.candidateAnswer !== "（未作答）" ? (
+            <div style={{ marginBottom: "14px", fontSize: "12px", color: "#555", background: "#f5f5f5", borderRadius: "6px", padding: "10px 12px", lineHeight: "1.6" }}>
               <span style={{ color: "#888", fontWeight: 500 }}>你的回答：</span>{item.candidateAnswer}
             </div>
+          ) : (
+            <div style={{ marginBottom: "14px", fontSize: "12px", color: "#aaa", fontStyle: "italic" }}>（未作答）</div>
           )}
-          {item.comment && (
-            <div style={{ fontSize: "12px", color: "#1d4ed8", background: "#eff6ff", borderRadius: "6px", padding: "8px 12px", marginBottom: "8px", border: "1px solid #bfdbfe" }}>
-              📝 点评：{item.comment}
+
+          {/* 亮点 */}
+          {item.strengths && item.strengths.length > 0 && (
+            <div style={{ marginBottom: "10px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 600, color: "#15803d", marginBottom: "6px" }}>✅ 做得好的地方</div>
+              {item.strengths.map((s: string, j: number) => (
+                <div key={j} style={{ fontSize: "12px", color: "#166534", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "6px", padding: "6px 10px", marginBottom: "4px", lineHeight: "1.6" }}>
+                  · {s}
+                </div>
+              ))}
             </div>
           )}
+
+          {/* 不足 */}
+          {item.weaknesses && item.weaknesses.length > 0 && (
+            <div style={{ marginBottom: "10px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 600, color: "#b45309", marginBottom: "6px" }}>💡 可以更好的地方</div>
+              {item.weaknesses.map((w: string, j: number) => (
+                <div key={j} style={{ fontSize: "12px", color: "#92400e", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "6px", padding: "6px 10px", marginBottom: "4px", lineHeight: "1.6" }}>
+                  · {w}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 综合点评 */}
+          {item.comment && (
+            <div style={{ fontSize: "12px", color: "#1d4ed8", background: "#eff6ff", borderRadius: "6px", padding: "8px 12px", marginBottom: "10px", border: "1px solid #bfdbfe", lineHeight: "1.7" }}>
+              📝 {item.comment}
+            </div>
+          )}
+
+          {/* 参考答案 */}
           <div style={{ fontSize: "12px", color: "#333", background: "#f0fdf4", borderRadius: "6px", padding: "12px 14px", border: "1px solid #bbf7d0", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>
             <span style={{ color: "#15803d", fontWeight: 600 }}>✅ 参考答案：</span><br />{item.referenceAnswer}
           </div>
